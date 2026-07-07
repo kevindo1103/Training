@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Workshop: Tái cấu trúc mô hình kinh doanh — Dolphin Technology</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f5f4; --card: #ffffff; --card2: #f9f9f8;
+  --text: #1a1a1a; --text2: #555555; --text3: #999999;
+  --accent: #0D9488; --accent-light: #ccfbf1;
+  --success: #16A34A; --success-bg: #dcfce7;
+  --warning: #D97706; --warning-bg: #fef3c7;
+  --danger: #DC2626; --danger-bg: #fee2e2;
+  --border: #e5e5e5; --input-bg: #ffffff;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --radius: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a1a; --card: #262626; --card2: #1f1f1f;
+    --text: #e5e5e5; --text2: #aaaaaa; --text3: #777777;
+    --accent: #2DD4BF; --accent-light: #134e4a;
+    --success: #4ade80; --success-bg: #14532d;
+    --warning: #fbbf24; --warning-bg: #78350f;
+    --danger: #f87171; --danger-bg: #7f1d1d;
+    --border: #3a3a3a; --input-bg: #2a2a2a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+}
+
+html { font-size: 16px; }
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text);
+  line-height: 1.6; min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+  box-shadow: var(--shadow);
+}
+.header-title { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+.header-progress { font-size: 0.75rem; color: var(--text2); }
+
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: var(--success); color: #fff; padding: 8px 20px;
+  border-radius: 20px; font-size: 0.8rem; font-weight: 500;
+  opacity: 0; transition: opacity 0.3s; z-index: 200; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 16px 16px 120px; }
+
+.step { display: none; }
+.step.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow);
+}
+
+.intro-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; margin-bottom: 16px;
+  background: var(--accent-light); color: var(--accent);
+}
+.intro-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; line-height: 1.35; }
+.intro-subtitle { font-size: 0.9rem; color: var(--text2); margin-bottom: 20px; }
+
+.info-block { margin-bottom: 16px; }
+.info-block:last-child { margin-bottom: 0; }
+.info-block-label {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--accent); margin-bottom: 4px;
+}
+.info-block-text { font-size: 0.9rem; color: var(--text); }
+
+.field { margin-bottom: 20px; }
+.field:last-child { margin-bottom: 0; }
+.field-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; display: block; }
+.field-explain { font-size: 0.8rem; color: var(--text2); margin-bottom: 8px; }
+.field-helper { font-size: 0.75rem; color: var(--text3); margin-top: 6px; font-style: italic; }
+
+input[type="text"], input[type="number"], textarea {
+  width: 100%; padding: 12px 14px; font-size: 0.95rem;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  background: var(--input-bg); color: var(--text);
+  font-family: inherit; line-height: 1.5;
+  transition: border-color 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+input:focus, textarea:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
+}
+textarea { min-height: 100px; resize: vertical; }
+input::placeholder, textarea::placeholder { color: var(--text3); }
+
+.pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill {
+  min-width: 44px; min-height: 44px; border-radius: 10px;
+  border: 2px solid var(--border); background: var(--card);
+  color: var(--text); font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex: 1; transition: all 0.15s;
+  -webkit-user-select: none; user-select: none;
+}
+.pill:active { transform: scale(0.95); }
+.pill.selected {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px; padding: 12px 24px; border-radius: 12px;
+  font-size: 0.95rem; font-weight: 600; border: none; cursor: pointer;
+  font-family: inherit; transition: all 0.15s;
+  -webkit-user-select: none; user-select: none;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-secondary { background: var(--card2); color: var(--text); border: 1.5px solid var(--border); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-full { width: 100%; }
+
+.nav-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--card); border-top: 1px solid var(--border);
+  padding: 12px 16px; display: flex; gap: 12px; justify-content: space-between;
+  z-index: 100; box-shadow: 0 -1px 4px rgba(0,0,0,0.06);
+}
+.nav-bar .btn { flex: 1; }
+
+.score-box {
+  border-radius: var(--radius); padding: 16px; text-align: center;
+  margin-top: 24px;
+}
+.score-value { font-size: 2rem; font-weight: 800; }
+.score-label { font-size: 0.85rem; margin-top: 4px; }
+.score-green { background: var(--success-bg); color: var(--success); }
+.score-amber { background: var(--warning-bg); color: var(--warning); }
+.score-red { background: var(--danger-bg); color: var(--danger); }
+
+.question-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow);
+}
+.question-num { font-size: 0.7rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.question-text { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+.question-helper { font-size: 0.75rem; color: var(--text3); margin-bottom: 10px; font-style: italic; }
+
+details { margin-bottom: 12px; }
+details summary {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; background: var(--card); border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; font-size: 0.95rem;
+  list-style: none; box-shadow: var(--shadow); min-height: 48px;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::after { content: '+'; font-size: 1.2rem; color: var(--text3); transition: transform 0.2s; }
+details[open] summary::after { content: '\2212'; }
+details[open] summary { border-radius: var(--radius) var(--radius) 0 0; }
+details .detail-content {
+  background: var(--card); padding: 16px;
+  border-radius: 0 0 var(--radius) var(--radius);
+  border-top: 1px solid var(--border);
+}
+
+.decision-group { display: flex; gap: 8px; margin-top: 12px; }
+.decision-btn {
+  flex: 1; min-height: 48px; border-radius: 10px; border: 2px solid var(--border);
+  background: var(--card); color: var(--text); font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px 4px; gap: 2px;
+}
+.decision-btn:active { transform: scale(0.95); }
+.decision-btn.invest-sel { background: var(--success); color: #fff; border-color: var(--success); }
+.decision-btn.watch-sel { background: var(--warning); color: #fff; border-color: var(--warning); }
+.decision-btn.kill-sel { background: var(--danger); color: #fff; border-color: var(--danger); }
+.decision-emoji { font-size: 1.2rem; }
+
+.checklist { list-style: none; margin-top: 12px; }
+.checklist li {
+  padding: 10px 0; font-size: 0.85rem; display: flex; align-items: flex-start; gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.checklist li:last-child { border-bottom: none; }
+.check-box {
+  width: 20px; height: 20px; border-radius: 5px; border: 2px solid var(--border);
+  flex-shrink: 0; margin-top: 1px; background: var(--card);
+}
+
+.rank-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.85rem; }
+.rank-table th, .rank-table td { padding: 10px 8px; text-align: left; }
+.rank-table th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); border-bottom: 2px solid var(--border); }
+.rank-table td { border-bottom: 1px solid var(--border); }
+.rank-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; font-weight: 700; font-size: 0.75rem;
+  background: var(--accent-light); color: var(--accent);
+}
+
+.computed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.computed-item {
+  background: var(--card2); border-radius: 10px; padding: 14px; text-align: center;
+}
+.computed-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.3px; }
+.computed-value { font-size: 1.3rem; font-weight: 700; color: var(--accent); margin-top: 4px; }
+
+.summary-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.summary-item:last-child { border-bottom: none; }
+.summary-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.summary-value { font-size: 0.95rem; font-weight: 600; }
+
+.warning-banner {
+  background: var(--warning-bg); color: var(--warning);
+  padding: 14px 16px; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 500; margin-top: 12px;
+}
+
+.alloc-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 0.85rem; }
+.alloc-label { width: 56px; font-weight: 600; flex-shrink: 0; font-size: 0.8rem; }
+.alloc-bar { flex: 1; height: 28px; border-radius: 6px; overflow: hidden; display: flex; }
+.alloc-service { background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; }
+.alloc-product { background: var(--warning); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; }
+
+.context-box {
+  background: var(--accent-light); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 16px; border-left: 4px solid var(--accent);
+}
+.context-box p { font-size: 0.85rem; color: var(--text); }
+
+.section-divider {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--accent); margin: 24px 0 12px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--accent);
+}
+
+@media (max-width: 400px) {
+  .pill { min-width: 40px; font-size: 0.85rem; }
+  .computed-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header" id="header">
+  <div class="header-title">Dolphin Workshop</div>
+  <div class="header-progress" id="headerProgress"></div>
+</div>
+
+<div class="toast" id="toast">&#10003; &#272;&#227; l&#432;u</div>
+
+<div class="container" id="app">
+
+<!-- STEP 0: Welcome -->
+<div class="step" id="step0">
+  <div class="card">
+    <div class="intro-icon">&#128736;</div>
+    <h1 class="intro-title">Workshop: T&#225;i c&#7845;u tr&#250;c m&#244; h&#236;nh kinh doanh</h1>
+    <p class="intro-subtitle">Module 1 &#8212; Dolphin Technology</p>
+  </div>
+
+  <div class="card">
+    <div class="info-block">
+      <div class="info-block-label">B&#7889;i c&#7843;nh</div>
+      <div class="info-block-text">Dolphin Technology &#273;ang chu&#7849;n b&#7883; chuy&#7875;n &#273;&#7893;i m&#244; h&#236;nh kinh doanh &#8212; t&#7915; &#8220;x&#432;&#7903;ng code theo &#273;&#417;n &#273;&#7863;t h&#224;ng&#8221; sang c&#244;ng ty c&#243; s&#7843;n ph&#7849;m ri&#234;ng. Tr&#432;&#7899;c bu&#7893;i workshop, ch&#250;ng t&#244;i c&#7847;n thu th&#7853;p g&#243;c nh&#236;n &#273;&#7897;c l&#7853;p c&#7911;a t&#7915;ng th&#224;nh vi&#234;n leadership.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">T&#7841;i sao b&#7841;n?</div>
+      <div class="info-block-text">C&#226;u tr&#7843; l&#7901;i c&#7911;a b&#7841;n s&#7869; &#273;&#432;&#7907;c so s&#225;nh v&#7899;i c&#225;c th&#224;nh vi&#234;n kh&#225;c &#273;&#7875; t&#236;m &#273;i&#7875;m &#273;&#7891;ng thu&#7853;n v&#224; b&#7845;t &#273;&#7891;ng &#8212; &#273;&#226;y l&#224; c&#417; s&#7903; cho th&#7843;o lu&#7853;n trong workshop.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">Cam k&#7871;t</div>
+      <div class="info-block-text">Kh&#244;ng c&#243; &#273;&#225;p &#225;n &#273;&#250;ng/sai. C&#226;u tr&#7843; l&#7901;i &#273;&#432;&#7907;c t&#7893;ng h&#7907;p &#7849;n danh (tr&#7915; khi b&#7841;n ch&#7885;n ghi t&#234;n). C&#243; th&#7875; tho&#225;t v&#224; quay l&#7841;i &#8212; d&#7919; li&#7879;u t&#7921; &#273;&#7897;ng l&#432;u.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">Th&#7901;i gian</div>
+      <div class="info-block-text">6 ph&#7847;n &middot; kho&#7843;ng 25&#8211;30 ph&#250;t</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <label class="field-label" for="userName">T&#234;n c&#7911;a b&#7841;n (kh&#244;ng b&#7855;t bu&#7897;c)</label>
+      <input type="text" id="userName" data-key="userName" placeholder="&#272;&#7875; tr&#7889;ng = &#7849;n danh">
+    </div>
+    <div class="field">
+      <label class="field-label" for="userRole">Vai tr&#242;</label>
+      <input type="text" id="userRole" data-key="userRole" placeholder="VD: CEO, CTO, PM, BD Manager...">
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1: Activity 1 Intro -->
+<div class="step" id="step1">
+  <div class="card">
+    <div class="intro-icon">&#128202;</div>
+    <h2 class="intro-title">Ph&#7847;n 1: Ch&#7849;n &#273;o&#225;n m&#244; h&#236;nh hi&#7879;n t&#7841;i</h2>
+    <p class="intro-subtitle">Diagnostic &#8212; 10 c&#226;u h&#7887;i</p>
+  </div>
+  <div class="card">
+    <div class="info-block">
+      <div class="info-block-label">M&#7909;c &#273;&#237;ch</div>
+      <div class="info-block-text">&#272;&#225;nh gi&#225; xem Dolphin &#273;ang g&#7863;p bao nhi&#234;u th&#225;ch th&#7913;c ph&#7893; bi&#7871;n c&#7911;a m&#244; h&#236;nh &#8220;l&#224;m ph&#7847;n m&#7873;m theo &#273;&#417;n &#273;&#7863;t h&#224;ng&#8221;. K&#7871;t qu&#7843; gi&#250;p x&#225;c &#273;&#7883;nh m&#7913;c &#273;&#7897; c&#7845;p thi&#7871;t c&#7911;a vi&#7879;c chuy&#7875;n &#273;&#7893;i.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">C&#225;ch l&#224;m</div>
+      <div class="info-block-text">10 ph&#225;t bi&#7875;u m&#244; t&#7843; c&#225;c v&#7845;n &#273;&#7873; th&#432;&#7901;ng g&#7863;p. Ch&#7845;m t&#7915; 1 (ho&#224;n to&#224;n kh&#244;ng &#273;&#250;ng v&#7899;i Dolphin) &#273;&#7871;n 5 (r&#7845;t &#273;&#250;ng, &#273;ang x&#7843;y ra r&#245; r&#224;ng).</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">V&#237; d&#7909;</div>
+      <div class="info-block-text">&#8220;Doanh thu ph&#7909; thu&#7897;c v&#224;o CEO t&#236;m deal&#8221; &#8212; n&#7871;u ~80% deal do CEO mang v&#7873; &#8594; ch&#7845;m 4 ho&#7863;c 5. N&#7871;u team BD t&#7921; t&#236;m &#273;&#432;&#7907;c 50%+ &#8594; ch&#7845;m 2 ho&#7863;c 3.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">Th&#7901;i gian</div>
+      <div class="info-block-text">~3 ph&#250;t</div>
+    </div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="goTo(2)">B&#7855;t &#273;&#7847;u ch&#7849;n &#273;o&#225;n &#8594;</button>
+</div>
+
+<!-- STEP 2: Activity 1 Do -->
+<div class="step" id="step2">
+  <div id="diagnosticQuestions"></div>
+  <div id="scoreBox" class="score-box" style="display:none;">
+    <div class="score-value" id="scoreValue">0 / 50</div>
+    <div class="score-label" id="scoreLabel"></div>
+  </div>
+</div>
+
+<!-- STEP 3: Activity 2 Intro -->
+<div class="step" id="step3">
+  <div class="card">
+    <div class="intro-icon">&#128466;</div>
+    <h2 class="intro-title">Ph&#7847;n 2: M&#244; h&#236;nh kinh doanh hi&#7879;n t&#7841;i</h2>
+    <p class="intro-subtitle">Business Model Canvas &#8212; 9 &#244; + 4 c&#226;u h&#7887;i</p>
+  </div>
+  <div class="card">
+    <div class="info-block">
+      <div class="info-block-label">M&#7909;c &#273;&#237;ch</div>
+      <div class="info-block-text">M&#244; t&#7843; c&#225;ch Dolphin &#273;ang v&#7853;n h&#224;nh &#8212; ki&#7871;m ti&#7873;n t&#7915; &#273;&#226;u, ph&#7909;c v&#7909; ai, b&#7857;ng ngu&#7891;n l&#7921;c g&#236;. &#272;i&#7873;n theo TH&#7920;C T&#7870; hi&#7879;n t&#7841;i, kh&#244;ng ph&#7843;i mong mu&#7889;n.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">C&#225;ch l&#224;m</div>
+      <div class="info-block-text">9 &#244; canvas + 4 c&#226;u h&#7887;i th&#7843;o lu&#7853;n. M&#7895;i &#244; c&#243; g&#7907;i &#253; c&#7909; th&#7875; cho Dolphin &#8212; b&#7841;n c&#243; th&#7875; d&#249;ng g&#7907;i &#253; ho&#7863;c vi&#7871;t theo &#253; m&#236;nh.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">V&#237; d&#7909;</div>
+      <div class="info-block-text">&#212; &#8220;Value Proposition&#8221; &#8212; hi&#7879;n t&#7841;i Dolphin &#273;ang b&#225;n g&#236;? VD: &#8220;Build ph&#7847;n m&#7873;m theo y&#234;u c&#7847;u kh&#225;ch h&#224;ng, gi&#225; c&#7841;nh tranh so v&#7899;i outsource n&#432;&#7899;c ngo&#224;i, team linh ho&#7841;t.&#8221;</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">Th&#7901;i gian</div>
+      <div class="info-block-text">~5 ph&#250;t</div>
+    </div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="goTo(4)">B&#7855;t &#273;&#7847;u &#273;i&#7873;n Canvas &#8594;</button>
+</div>
+
+<!-- STEP 4: Activity 2 Do -->
+<div class="step" id="step4">
+  <div class="section-divider">Business Model Canvas &#8212; Hi&#7879;n t&#7841;i</div>
+  <div id="bmcCurrentFields"></div>
+  <div class="section-divider" style="margin-top:32px;">C&#226;u h&#7887;i th&#7843;o lu&#7853;n</div>
+  <div id="bmcDiscussion"></div>
+</div>
+
+<!-- STEP 5: Activity 3 Intro -->
+<div class="step" id="step5">
+  <div class="card">
+    <div class="intro-icon">&#127919;</div>
+    <h2 class="intro-title">Ph&#7847;n 3: M&#244; h&#236;nh m&#7909;c ti&#234;u &#8212; Year 3</h2>
+    <p class="intro-subtitle">Target Business Model Canvas</p>
+  </div>
+  <div class="card">
+    <div class="info-block">
+      <div class="info-block-label">M&#7909;c &#273;&#237;ch</div>
+      <div class="info-block-text">B&#226;y gi&#7901; h&#227;y t&#432;&#7903;ng t&#432;&#7907;ng Dolphin sau 3 n&#259;m chuy&#7875;n &#273;&#7893;i th&#224;nh c&#244;ng. M&#244; h&#236;nh m&#7899;i g&#7885;i l&#224; &#8220;Service-Funded Product Company&#8221; &#8212; gi&#7919; service arm ki&#7871;m ti&#7873;n, &#273;&#7891;ng th&#7901;i build s&#7843;n ph&#7849;m ri&#234;ng.</div>
+    </div>
+  </div>
+  <div class="context-box">
+    <p><strong>M&#244; h&#236;nh Hybrid:</strong> Service Arm (cash engine) funds Product Arm (growth engine).</p>
+    <p style="margin-top:8px;">Year 1: Service 85% / Product 15% &#8594; Year 3: Service 50% / Product 50%.</p>
+  </div>
+  <div class="card">
+    <div class="info-block">
+      <div class="info-block-label">C&#225;ch l&#224;m</div>
+      <div class="info-block-text">&#272;i&#7873;n canvas theo MONG MU&#7888;N &#8212; Dolphin n&#234;n tr&#244;ng th&#7871; n&#224;o sau 3 n&#259;m?</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">Th&#7901;i gian</div>
+      <div class="info-block-text">~5 ph&#250;t</div>
+    </div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="goTo(6)">B&#7855;t &#273;&#7847;u &#273;i&#7873;n Target Canvas &#8594;</button>
+</div>
+
+<!-- STEP 6: Activity 3 Do -->
+<div class="step" id="step6">
+  <div class="section-divider">Business Model Canvas &#8212; M&#7909;c ti&#234;u Year 3</div>
+  <div id="bmcTargetFields"></div>
+  <div class="card" style="margin-top:24px;">
+    <div class="field-label" style="margin-bottom:12px;">Resource Allocation Roadmap</div>
+    <div class="alloc-row">
+      <span class="alloc-label">Year 1</span>
+      <div class="alloc-bar"><div class="alloc-service" style="width:85%">Service 85%</div><div class="alloc-product" style="width:15%">15%</div></div>
+    </div>
+    <div class="alloc-row">
+      <span class="alloc-label">Year 2</span>
+      <div class="alloc-bar"><div class="alloc-service" style="width:70%">Service 70%</div><div class="alloc-product" style="width:30%">30%</div></div>
+    </div>
+    <div class="alloc-row">
+      <span class="alloc-label">Year 3</span>
+      <div class="alloc-bar"><div class="alloc-service" style="width:50%">Service 50%</div><div class="alloc-product" style="width:50%">50%</div></div>
+    </div>
+    <p style="font-size:0.8rem;color:var(--text3);margin-top:8px;">Revenue target Year 3: Product revenue &#8805; 30% t&#7893;ng</p>
+  </div>
+</div>
+
+<!-- STEP 7: Activity 4 Intro -->
+<div class="step" id="step7">
+  <div class="card">
+    <div class="intro-icon">&#9878;</div>
+    <h2 class="intro-title">Ph&#7847;n 4: &#272;&#225;nh gi&#225; s&#7843;n ph&#7849;m ti&#7873;m n&#259;ng</h2>
+    <p class="intro-subtitle">Product Scoring Matrix &#8212; 4 s&#7843;n ph&#7849;m &times; 7 ti&#234;u ch&#237;</p>
+  </div>
+  <div class="card">
+    <div class="info-block">
+      <div class="info-block-label">M&#7909;c &#273;&#237;ch</div>
+      <div class="info-block-text">Dolphin &#273;&#227; t&#7915;ng build 4 s&#7843;n ph&#7849;m cho kh&#225;ch. S&#7843;n ph&#7849;m n&#224;o c&#243; ti&#7873;m n&#259;ng spin-off th&#224;nh s&#7843;n ph&#7849;m ri&#234;ng? &#272;&#225;nh gi&#225; b&#7857;ng 7 ti&#234;u ch&#237; c&#243; tr&#7885;ng s&#7889;.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">C&#225;ch l&#224;m</div>
+      <div class="info-block-text">M&#7895;i s&#7843;n ph&#7849;m &times; 7 ti&#234;u ch&#237; &#8594; ch&#7845;m 1&#8211;5. H&#7879; th&#7889;ng t&#7921; t&#237;nh &#273;i&#7875;m weighted v&#224; x&#7871;p h&#7841;ng.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">V&#237; d&#7909;</div>
+      <div class="info-block-text">&#8220;IPTV Kh&#225;ch s&#7841;n&#8221; &#8212; Market size: c&#243; ~3,000 kh&#225;ch s&#7841;n 3&#8211;5 sao &#7903; VN &#8594; ch&#7845;m 4. Recurring: kh&#225;ch s&#7841;n tr&#7843; subscription h&#224;ng th&#225;ng &#8594; ch&#7845;m 5.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">Th&#7901;i gian</div>
+      <div class="info-block-text">~5 ph&#250;t</div>
+    </div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="goTo(8)">B&#7855;t &#273;&#7847;u &#273;&#225;nh gi&#225; &#8594;</button>
+</div>
+
+<!-- STEP 8: Activity 4 Do -->
+<div class="step" id="step8">
+  <div id="productScoring"></div>
+  <div id="productRanking" class="card" style="display:none; margin-top:24px;">
+    <div class="field-label">X&#7871;p h&#7841;ng s&#7843;n ph&#7849;m</div>
+    <table class="rank-table" id="rankTable">
+      <thead><tr><th>#</th><th>S&#7843;n ph&#7849;m</th><th>&#272;i&#7875;m</th></tr></thead>
+      <tbody id="rankBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- STEP 9: Activity 5 Intro -->
+<div class="step" id="step9">
+  <div class="card">
+    <div class="intro-icon">&#128640;</div>
+    <h2 class="intro-title">Ph&#7847;n 5: Quy&#7871;t &#273;&#7883;nh Invest / Watch / Kill</h2>
+    <p class="intro-subtitle">Portfolio Decision</p>
+  </div>
+  <div class="card">
+    <div class="info-block">
+      <div class="info-block-label">M&#7909;c &#273;&#237;ch</div>
+      <div class="info-block-text">D&#7921;a tr&#234;n k&#7871;t qu&#7843; &#273;&#225;nh gi&#225;, ph&#226;n lo&#7841;i m&#7895;i s&#7843;n ph&#7849;m v&#224;o 1 trong 3 nh&#243;m. Dolphin ch&#7881; &#273;&#7911; resource &#273;&#7875; INVEST v&#224;o 1 s&#7843;n ph&#7849;m t&#7841;i 1 th&#7901;i &#273;i&#7875;m.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">3 l&#7921;a ch&#7885;n</div>
+      <div class="info-block-text">
+        <p style="margin-bottom:8px;"><strong>&#128640; INVEST</strong> &#8212; &#272;&#7847;u t&#432; 15&#8211;20% resource, build MVP trong 3 th&#225;ng, t&#236;m product-market fit. Ch&#7881; ch&#7885;n 1.</p>
+        <p style="margin-bottom:8px;"><strong>&#128065; WATCH</strong> &#8212; Ti&#7873;m n&#259;ng nh&#432;ng ch&#432;a &#273;&#7911; r&#245;. Theo d&#245;i th&#234;m, pilot nh&#7887; n&#7871;u c&#243; c&#417; h&#7897;i.</p>
+        <p><strong>&#10060; KILL</strong> &#8212; Kh&#244;ng theo &#273;u&#7893;i. Th&#7883; tr&#432;&#7901;ng qu&#225; nh&#7887;, c&#7841;nh tranh qu&#225; m&#7841;nh, ho&#7863;c kh&#244;ng ph&#249; h&#7907;p.</p>
+      </div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">L&#432;u &#253;</div>
+      <div class="info-block-text">Tr&#432;&#7899;c khi ch&#7885;n INVEST, h&#227;y ki&#7875;m tra 4 ti&#234;u ch&#237; t&#7889;i thi&#7875;u (hi&#7875;n th&#7883; trong b&#224;i).</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">Th&#7901;i gian</div>
+      <div class="info-block-text">~2 ph&#250;t</div>
+    </div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="goTo(10)">B&#7855;t &#273;&#7847;u ph&#226;n lo&#7841;i &#8594;</button>
+</div>
+
+<!-- STEP 10: Activity 5 Do -->
+<div class="step" id="step10">
+  <div id="decisions"></div>
+  <div id="investWarning" class="warning-banner" style="display:none;">
+    &#9888; B&#7841;n &#273;ang ch&#7885;n INVEST cho nhi&#7873;u h&#417;n 1 s&#7843;n ph&#7849;m. Dolphin ch&#7881; &#273;&#7911; resource &#273;&#7875; INVEST v&#224;o 1 s&#7843;n ph&#7849;m t&#7841;i 1 th&#7901;i &#273;i&#7875;m.
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <div class="field-label">Checklist cho l&#7921;a ch&#7885;n INVEST</div>
+    <p class="field-explain">S&#7843;n ph&#7849;m &#273;&#432;&#7907;c ch&#7885;n INVEST ph&#7843;i &#273;&#7841;t &#237;t nh&#7845;t 4 ti&#234;u ch&#237; n&#224;y:</p>
+    <ul class="checklist">
+      <li><span class="check-box"></span>&#8805; 20 kh&#225;ch h&#224;ng ti&#7873;m n&#259;ng &#7903; VN?</li>
+      <li><span class="check-box"></span>Pain point &#273;&#7911; l&#7899;n &#273;&#7875; kh&#225;ch tr&#7843; ti&#7873;n h&#224;ng th&#225;ng/n&#259;m?</li>
+      <li><span class="check-box"></span>MVP build &#273;&#432;&#7907;c trong &#8804; 3 th&#225;ng v&#7899;i 3&#8211;5 ng&#432;&#7901;i?</li>
+      <li><span class="check-box"></span>B&#225;n &#273;&#432;&#7907;c m&#224; kh&#244;ng c&#7847;n CEO g&#7863;p t&#7915;ng kh&#225;ch?</li>
+    </ul>
+  </div>
+</div>
+
+<!-- STEP 11: Activity 6 Intro -->
+<div class="step" id="step11">
+  <div class="card">
+    <div class="intro-icon">&#128176;</div>
+    <h2 class="intro-title">Ph&#7847;n 6: Financial Model</h2>
+    <p class="intro-subtitle">&#431;&#7899;c t&#237;nh t&#224;i ch&#237;nh</p>
+  </div>
+  <div class="card">
+    <div class="info-block">
+      <div class="info-block-label">M&#7909;c &#273;&#237;ch</div>
+      <div class="info-block-text">&#431;&#7899;c t&#237;nh t&#224;i ch&#237;nh gi&#250;p t&#237;nh to&#225;n: Dolphin c&#243; &#273;&#7911; runway &#273;&#7875; fund product team kh&#244;ng? C&#7847;n bao l&#226;u &#273;&#7875; product t&#7921; sustain?</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">C&#225;ch l&#224;m</div>
+      <div class="info-block-text">&#272;i&#7873;n s&#7889; li&#7879;u hi&#7879;n t&#7841;i + target Year 1 v&#224; Year 3. H&#7879; th&#7889;ng t&#7921; t&#237;nh profit, product budget, v&#224; runway.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">L&#432;u &#253;</div>
+      <div class="info-block-text">Kh&#244;ng c&#7847;n ch&#237;nh x&#225;c tuy&#7879;t &#273;&#7889;i &#8212; &#432;&#7899;c t&#237;nh h&#7907;p l&#253; l&#224; &#273;&#7911;. N&#7871;u kh&#244;ng bi&#7871;t, h&#7887;i k&#7871; to&#225;n ho&#7863;c b&#7887; qua.</div>
+    </div>
+    <div class="info-block">
+      <div class="info-block-label">Th&#7901;i gian</div>
+      <div class="info-block-text">~3 ph&#250;t</div>
+    </div>
+  </div>
+  <button class="btn btn-primary btn-full" onclick="goTo(12)">B&#7855;t &#273;&#7847;u t&#237;nh to&#225;n &#8594;</button>
+</div>
+
+<!-- STEP 12: Activity 6 Do -->
+<div class="step" id="step12">
+  <div id="financialFields"></div>
+  <div id="computedSection" class="card" style="display:none; margin-top:24px;">
+    <div class="field-label">T&#7921; &#273;&#7897;ng t&#237;nh to&#225;n</div>
+    <div class="computed-grid" id="computedGrid"></div>
+  </div>
+</div>
+
+<!-- STEP 13: Summary -->
+<div class="step" id="step13">
+  <div class="card">
+    <div class="intro-icon">&#9989;</div>
+    <h2 class="intro-title">T&#7893;ng k&#7871;t</h2>
+    <p class="intro-subtitle">K&#7871;t qu&#7843; c&#7911;a b&#7841;n</p>
+  </div>
+  <div class="card" id="summaryContent"></div>
+  <div class="card" style="margin-top:8px;">
+    <p style="font-size:0.85rem; color:var(--text2);">Nh&#7845;n <strong>G&#7917;i k&#7871;t qu&#7843;</strong> &#273;&#7875; ho&#224;n t&#7845;t. Facilitator s&#7869; t&#7893;ng h&#7907;p v&#224; so s&#225;nh k&#7871;t qu&#7843;.</p>
+    <button class="btn btn-success btn-full" style="margin-top:16px;" onclick="submitResults()">G&#7917;i k&#7871;t qu&#7843;</button>
+  </div>
+</div>
+
+</div>
+
+<div class="nav-bar" id="navBar">
+  <button class="btn btn-secondary" id="btnBack" onclick="goBack()">&#8592; Quay l&#7841;i</button>
+  <button class="btn btn-primary" id="btnNext" onclick="goNext()">Ti&#7871;p theo &#8594;</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ===== DATA =====
+var DIAG = [
+  {t:"Doanh thu phụ thuộc vào khả năng tìm deal của CEO", h:"Nghĩ về 12 tháng qua: bao nhiêu % deal mới là do CEO trực tiếp tìm hoặc giới thiệu? Nếu >70% → chấm 4-5."},
+  {t:"Mất CEO = mất phần lớn pipeline", h:"Nếu CEO nghỉ 6 tháng, bao nhiêu % pipeline sẽ biến mất? >70% → chấm 4-5."},
+  {t:"Team rảnh khi giữa 2 project (bench time cao)", h:"Trung bình có bao nhiêu người không có project tại một thời điểm? >20% team → chấm 4-5."},
+  {t:"Mỗi project mới phải learn domain mới từ đầu", h:"Trong 5 project gần nhất, mấy project thuộc domain hoàn toàn mới với team? ≥4/5 → chấm 4-5."},
+  {t:"Khó estimate giá vì mỗi project khác nhau hoàn toàn", h:"Tỷ lệ project bị overrun budget/timeline? >50% → chấm 4-5. Có template estimate không?"},
+  {t:"Không có sản phẩm nào generate revenue sau khi bàn giao", h:"Sau khi bàn giao cho khách, Dolphin có còn nhận được tiền hàng tháng/năm không? Nếu không → chấm 5."},
+  {t:"Khách hàng ít quay lại (one-time project)", h:"Trong 5 năm qua, bao nhiêu % khách hàng quay lại đặt project mới? <20% → chấm 4-5."},
+  {t:"Khó tuyển vì không có brand trong ngành nào cụ thể", h:"Khi tuyển, ứng viên có biết Dolphin làm gì / chuyên về gì không? Nếu phải giải thích từ đầu → chấm 4-5."},
+  {t:"Margin bị ép vì không có leverage (IP, platform)", h:"Gross margin hiện tại bao nhiêu? <25% → chấm 4-5. Có component/platform nào tái sử dụng được không?"},
+  {t:"Revenue không dự đoán được quá 3-6 tháng", h:"Nhìn vào pipeline hiện tại, bạn tự tin dự đoán revenue bao xa? <6 tháng → chấm 4-5."}
+];
+
+var BMC_C = [
+  {k:"bmc_partners", l:"Key Partners (Đối tác chính)", e:"Những ai bên ngoài giúp Dolphin vận hành? Nghĩ về: ai giới thiệu khách, ai cung cấp công nghệ, ai hỗ trợ triển khai.", p:"VD: Khách hàng cũ giới thiệu deal mới, đối tác cloud (AWS/Azure), freelancer bổ sung khi thiếu người...", hp:"Liệt kê 3-5 đối tác quan trọng nhất. Nếu mất họ, Dolphin bị ảnh hưởng thế nào?"},
+  {k:"bmc_activities", l:"Key Activities (Hoạt động chính)", e:"Dolphin làm gì hàng ngày để tạo ra giá trị? Từ lúc nhận deal đến lúc bàn giao.", p:"VD: Phân tích yêu cầu, thiết kế giải pháp, lập trình, test, bàn giao, maintain...", hp:"Ghi cả hoạt động sales/BD, không chỉ delivery. CEO dành thời gian cho hoạt động gì nhiều nhất?"},
+  {k:"bmc_value", l:"Value Proposition (Giá trị cung cấp)", e:"Tại sao khách hàng chọn Dolphin thay vì đối thủ hoặc tự làm?", p:"VD: Build phần mềm theo ý khách, giá hợp lý hơn outsource nước ngoài, team VN linh hoạt...", hp:"Thử trả lời: ‘Khách hàng thuê Dolphin vì ___’. Nếu khó trả lời → đây là vấn đề cần giải quyết."},
+  {k:"bmc_resources", l:"Key Resources (Nguồn lực chính)", e:"Dolphin CẦN gì để vận hành? Người, công nghệ, tài sản, quan hệ.", p:"VD: ~50 engineer, mối quan hệ cá nhân của CEO, source code từ project cũ, kinh nghiệm nhiều domain...", hp:"Đâu là nguồn lực KHÔNG THỂ THAY THẾ? (VD: nếu CEO nghỉ, network mất → đây là nguồn lực rủi ro cao)"},
+  {k:"bmc_relationships", l:"Customer Relationships (Quan hệ khách hàng)", e:"Dolphin duy trì quan hệ với khách hàng như thế nào? Trước, trong, và sau project.", p:"VD: CEO gặp trực tiếp, quan hệ cá nhân, project-based (kết thúc sau bàn giao)...", hp:"Sau khi bàn giao, Dolphin có liên hệ lại khách không? Có QBR (quarterly review) không? Có ai chăm khách ngoài CEO?"},
+  {k:"bmc_segments", l:"Customer Segments (Phân khúc khách hàng)", e:"Dolphin phục vụ AI? Liệt kê theo ngành/loại khách hàng.", p:"VD: Vietlot (xổ số), khách sạn 3-5 sao, đơn vị tổ chức sự kiện, tòa soạn báo chí...", hp:"Có khách hàng nào chiếm >30% revenue không? (Nếu có → rủi ro tập trung cao)"},
+  {k:"bmc_channels", l:"Channels (Kênh tiếp cận)", e:"Khách hàng TÌM ĐẾN Dolphin bằng cách nào?", p:"VD: CEO giới thiệu trực tiếp, khách cũ referral, chưa có website/marketing...", hp:"Nếu tất cả kênh đều qua CEO → single point of failure. Có kênh nào tự chạy mà không cần CEO không?"},
+  {k:"bmc_costs", l:"Cost Structure (Cơ cấu chi phí)", e:"Tiền đi đâu? Liệt kê các khoản chi lớn nhất.", p:"VD: Lương chiếm 70-80%, văn phòng, cloud/infra, sales gần như = thời gian CEO...", hp:"Ước tính % cho mỗi khoản. Lương >75% tổng chi phí là phổ biến nhưng rủi ro cao khi revenue giảm."},
+  {k:"bmc_revenue", l:"Revenue Streams (Nguồn doanh thu)", e:"Tiền từ đâu về? Chia theo loại (project fee, maintenance, license...).", p:"VD: Project fees (T&M hoặc fixed price) ~90%, maintenance contracts ~10%, recurring gần = 0...", hp:"Bao nhiêu % là one-time (project fee) vs recurring (maintenance/subscription)? Recurring <10% → rất phụ thuộc vào deal mới."}
+];
+
+var BMC_DISC = [
+  {k:"disc_ceo", t:"Nếu CEO nghỉ 6 tháng, công ty có tìm được deal mới không?", h:"Trả lời thẳng: Có/Không. Rồi giải thích tại sao."},
+  {k:"disc_return", t:"Trong 5 năm qua, bao nhiêu khách hàng quay lại đặt project mới?", h:"Ước tính con số hoặc %. VD: ‘3/20 khách quay lại = 15%’. Lý do khách không quay lại?"},
+  {k:"disc_passive", t:"Có sản phẩm nào đang generate revenue mà không cần Dolphin tiếp tục develop?", h:"Revenue ‘tự chảy’ = license fee, subscription, maintenance contract mà không cần dev thêm. Nếu không có → ghi ‘Không’."},
+  {k:"disc_maint", t:"Revenue từ maintenance/support chiếm bao nhiêu % tổng?", h:"Ước tính %. Maintenance tốt = nguồn recurring revenue + cơ hội upsell."}
+];
+
+var BMC_T = [
+  {k:"bmc_t_partners", l:"Key Partners (mục tiêu)", e:"Sau 3 năm, Dolphin cần đối tác nào MỚI để vận hành cả service + product?", p:"VD: Channel partner bán product, industry partners trong domain chọn, tech partners (cloud, API)..."},
+  {k:"bmc_t_activities", l:"Key Activities (mục tiêu)", e:"Dolphin sẽ làm gì KHÁC so với hiện tại?", p:"VD: SERVICE: custom dev trong domain chọn. PRODUCT: build & scale sản phẩm riêng, marketing..."},
+  {k:"bmc_t_value", l:"Value Proposition (mục tiêu)", e:"Khách hàng sẽ chọn Dolphin vì lý do gì MỚI?", p:"VD: SERVICE: ‘đối tác tech hiểu sâu [domain]’. PRODUCT: ‘giải pháp [domain] sẵn dùng, đã proven’..."},
+  {k:"bmc_t_resources", l:"Key Resources (mục tiêu)", e:"Cần nguồn lực gì MỚI mà hiện tại chưa có?", p:"VD: Domain experts, product IP/platform, sales team riêng (không chỉ CEO), marketing capability..."},
+  {k:"bmc_t_relationships", l:"Customer Relationships (mục tiêu)", e:"Quan hệ khách hàng sẽ thay đổi thế nào?", p:"VD: SERVICE: long-term partner. PRODUCT: self-serve + support, community/user group..."},
+  {k:"bmc_t_segments", l:"Customer Segments (mục tiêu)", e:"Phục vụ AI sau 3 năm? Service và Product có thể khác nhau.", p:"VD: SERVICE: khách trong domain focus. PRODUCT: SMB cần giải pháp sẵn trong domain đó..."},
+  {k:"bmc_t_channels", l:"Channels (mục tiêu)", e:"Khách hàng sẽ tìm đến Dolphin bằng cách nào MỚI?", p:"VD: BD team tự tìm deal, website + inbound marketing, partner channel, product tự bán online..."},
+  {k:"bmc_t_costs", l:"Cost Structure (mục tiêu)", e:"Chi phí sẽ thay đổi thế nào khi có cả service + product?", p:"VD: Lương giảm tỷ trọng xuống 60%, R&D investment 15-20%, sales & marketing 10-15%..."},
+  {k:"bmc_t_revenue", l:"Revenue Streams (mục tiêu)", e:"Tiền về từ đâu sau 3 năm? Tỷ lệ service vs product?", p:"VD: Service fees ~50% (giảm tỷ trọng), product SaaS ~30%, maintenance & support ~20%..."}
+];
+
+var PRODUCTS = ["VB Điện tử (Vietlot)", "IPTV Khách sạn", "Event/Ticket", "CMS/Tòa soạn"];
+
+var CRITERIA = [
+  {k:"market", l:"Market size", w:0.20, h:"Bao nhiêu tổ chức/DN ở VN có thể là khách hàng? <50 → chấm 1-2, >500 → chấm 4-5."},
+  {k:"recurring", l:"Recurring potential", w:0.20, h:"Khách hàng có trả tiền hàng tháng/năm sau khi deploy? Subscription model khả thi không?"},
+  {k:"reuse", l:"Reusability", w:0.15, h:"Bao nhiêu % code từ project cũ có thể dùng lại cho khách mới? <30% → chấm 1-2, >70% → chấm 4-5."},
+  {k:"compete", l:"Competitive gap", w:0.15, h:"Đối thủ hiện tại mạnh không? Nhiều đối thủ lớn → chấm 1-2. Ít/yếu → chấm 4-5."},
+  {k:"domain", l:"Domain expertise", w:0.10, h:"Team Dolphin hiểu domain này tới đâu? Có cần learn lại từ đầu không?"},
+  {k:"sales", l:"Sales không qua CEO", w:0.10, h:"Có thể bán sản phẩm này qua website, partner, hoặc sales team mà không cần CEO gặp từng khách?"},
+  {k:"margin", l:"Margin potential", w:0.10, h:"Khách sẵn sàng trả bao nhiêu? So với chi phí develop & maintain, margin có >50% không?"}
+];
+
+var FIN_SECTIONS = [
+  {title:"HIỆN TẠI", fields:[
+    {k:"fin_rev", l:"Revenue năm gần nhất", u:"tỷ VND", h:"Tổng doanh thu 12 tháng gần nhất. Nếu không rõ chính xác, ước tính: VD team 50 người × 25tr/người/tháng ≈ 15 tỷ/năm."},
+    {k:"fin_margin", l:"Gross margin", u:"%", h:"= (Revenue - Cost of delivery) / Revenue × 100. Cost of delivery = lương team + cloud + tools. Phổ biến ở VN: 20-35%."},
+    {k:"fin_team", l:"Tổng số người", u:"người", h:"Tất cả nhân sự: dev, QA, PM, BA, design, admin, sales. Full-time equivalent."},
+    {k:"fin_recurring", l:"Tỷ lệ recurring revenue", u:"%", h:"% revenue đến từ hợp đồng dài hạn (maintenance, support, subscription) — không phải project one-time. Phổ biến: 5-15%."}
+  ]},
+  {title:"YEAR 1 TARGET", fields:[
+    {k:"fin_y1_srev", l:"Service revenue target", u:"tỷ", h:"Mục tiêu doanh thu service arm. Nên ≥ hiện tại — service vẫn là ưu tiên cash flow."},
+    {k:"fin_y1_pinv", l:"Product investment", u:"tỷ", h:"Bao nhiêu tiền dành cho product team trong năm 1. Nguyên tắc: KHÔNG vượt quá monthly profit của service. VD: 5 người × 25tr × 1.3 × 12 ≈ 1.95 tỷ/năm."},
+    {k:"fin_y1_prev", l:"Product revenue target", u:"triệu VND", h:"Year 1 product revenue thường rất nhỏ (vài chục đến vài trăm triệu). Đừng kỳ vọng quá cao — đang tìm PMF."}
+  ]},
+  {title:"YEAR 3 TARGET", fields:[
+    {k:"fin_y3_srev", l:"Service revenue", u:"tỷ", h:"Service có thể giảm tỷ trọng nhưng nên giữ hoặc tăng giá trị tuyệt đối."},
+    {k:"fin_y3_prev", l:"Product revenue target", u:"tỷ", h:"Mục tiêu: product ≥ 30% tổng revenue Year 3. VD: nếu tổng = 20 tỷ → product ≥ 6 tỷ."},
+    {k:"fin_y3_margin", l:"Blended margin target", u:"%", h:"Margin kết hợp cả service + product. Product thường margin cao hơn service → blended margin nên tăng. Target: +10pp so với hiện tại."}
+  ]}
+];
+
+// ===== STATE =====
+var SK = "dolphin_m1_data";
+var state = {};
+var currentStep = 0;
+var saveTimer = null;
+
+function init() {
+  loadState();
+  buildDiagnostic();
+  buildBMCCurrent();
+  buildBMCDiscussion();
+  buildBMCTarget();
+  buildProductScoring();
+  buildDecisions();
+  buildFinancial();
+  showStep(state._step || 0);
+  bindAutoSave();
+}
+
+function loadState() {
+  try { var r = localStorage.getItem(SK); if (r) state = JSON.parse(r); } catch(e) { state = {}; }
+}
+
+function saveState() {
+  state._step = currentStep;
+  try { localStorage.setItem(SK, JSON.stringify(state)); } catch(e) {}
+  showToast();
+}
+
+function debouncedSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveState, 500);
+}
+
+function showToast() {
+  var t = document.getElementById("toast");
+  t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); }, 1500);
+}
+
+function bindAutoSave() {
+  var els = document.querySelectorAll("input[data-key], textarea[data-key]");
+  for (var i = 0; i < els.length; i++) {
+    (function(el){
+      el.addEventListener("input", function() {
+        state[el.dataset.key] = el.value;
+        debouncedSave();
+      });
+      if (state[el.dataset.key] !== undefined) el.value = state[el.dataset.key];
+    })(els[i]);
+  }
+}
+
+// ===== NAVIGATION =====
+var STEP_PART = [null,1,1,2,2,3,3,4,4,5,5,6,6,null];
+var PART_MIN = {1:3, 2:5, 3:5, 4:5, 5:2, 6:3};
+
+function showStep(n) {
+  currentStep = n;
+  var steps = document.querySelectorAll(".step");
+  for (var i = 0; i < steps.length; i++) steps[i].classList.remove("active");
+  var el = document.getElementById("step" + n);
+  if (el) el.classList.add("active");
+  updateNav(); updateHeader();
+  window.scrollTo(0, 0);
+  if (n === 2) updateScore();
+  if (n === 8) updateRanking();
+  if (n === 10) updateDecisionScores();
+  if (n === 12) updateComputed();
+  if (n === 13) buildSummary();
+}
+
+window.goTo = function(n) { showStep(n); debouncedSave(); };
+window.goBack = function() { if (currentStep > 0) goTo(currentStep - 1); };
+window.goNext = function() { if (currentStep < 13) goTo(currentStep + 1); };
+
+function updateNav() {
+  var back = document.getElementById("btnBack");
+  var next = document.getElementById("btnNext");
+  back.style.display = currentStep === 0 ? "none" : "";
+  if (currentStep === 13) {
+    next.style.display = "none";
+  } else {
+    next.style.display = "";
+    next.innerHTML = currentStep === 0 ? "Bắt đầu →" : "Tiếp theo →";
+  }
+}
+
+function updateHeader() {
+  var prog = document.getElementById("headerProgress");
+  var part = STEP_PART[currentStep];
+  if (part === null && currentStep === 0) { prog.textContent = ""; return; }
+  if (part === null && currentStep === 13) { prog.textContent = "Hoàn thành"; return; }
+  if (part) {
+    var rem = 0;
+    for (var p = part; p <= 6; p++) rem += (PART_MIN[p] || 0);
+    prog.textContent = "Phần " + part + "/6 · còn ~" + rem + " phút";
+  }
+}
+
+// ===== DIAGNOSTIC =====
+function buildDiagnostic() {
+  var c = document.getElementById("diagnosticQuestions");
+  for (var i = 0; i < DIAG.length; i++) {
+    var q = DIAG[i];
+    var d = document.createElement("div");
+    d.className = "question-card";
+    var pills = "";
+    for (var v = 1; v <= 5; v++) {
+      var sel = state["diag_"+i] == v ? " selected" : "";
+      pills += '<div class="pill' + sel + '" data-val="' + v + '" onclick="selectDiag(' + i + ',' + v + ',this)">' + v + '</div>';
+    }
+    d.innerHTML = '<div class="question-num">Câu ' + (i+1) + '/10</div>'
+      + '<div class="question-text">' + q.t + '</div>'
+      + '<div class="question-helper">' + q.h + '</div>'
+      + '<div class="pills">' + pills + '</div>';
+    c.appendChild(d);
+  }
+}
+
+window.selectDiag = function(qi, val, el) {
+  var parent = el.parentElement;
+  var pills = parent.querySelectorAll(".pill");
+  for (var j = 0; j < pills.length; j++) pills[j].classList.remove("selected");
+  el.classList.add("selected");
+  state["diag_" + qi] = val;
+  debouncedSave(); updateScore();
+};
+
+function getDiagScore() {
+  var total = 0, count = 0;
+  for (var i = 0; i < 10; i++) {
+    var v = state["diag_" + i];
+    if (v) { total += parseInt(v); count++; }
+  }
+  return {total: total, count: count};
+}
+
+function updateScore() {
+  var s = getDiagScore();
+  var box = document.getElementById("scoreBox");
+  var valEl = document.getElementById("scoreValue");
+  var labEl = document.getElementById("scoreLabel");
+  if (s.count === 0) { box.style.display = "none"; return; }
+  box.style.display = "";
+  valEl.textContent = s.total + " / 50";
+  box.className = "score-box";
+  if (s.total <= 15) {
+    box.classList.add("score-green");
+    labEl.textContent = "Mô hình hiện tại tương đối ổn — có thể optimize thay vì thay đổi lớn";
+  } else if (s.total <= 30) {
+    box.classList.add("score-amber");
+    labEl.textContent = "Cần chuyển đổi có kế hoạch trong 1-2 năm";
+  } else {
+    box.classList.add("score-red");
+    labEl.textContent = "Cần chuyển đổi khẩn cấp — mô hình hiện tại không bền vững";
+  }
+}
+
+// ===== BMC =====
+function makeTAField(f) {
+  var d = document.createElement("div");
+  d.className = "card";
+  d.innerHTML = '<div class="field">'
+    + '<label class="field-label">' + f.l + '</label>'
+    + '<div class="field-explain">' + f.e + '</div>'
+    + '<textarea data-key="' + f.k + '" placeholder="' + f.p + '"></textarea>'
+    + (f.hp ? '<div class="field-helper">' + f.hp + '</div>' : '')
+    + '</div>';
+  return d;
+}
+
+function buildBMCCurrent() {
+  var c = document.getElementById("bmcCurrentFields");
+  for (var i = 0; i < BMC_C.length; i++) c.appendChild(makeTAField(BMC_C[i]));
+}
+
+function buildBMCDiscussion() {
+  var c = document.getElementById("bmcDiscussion");
+  for (var i = 0; i < BMC_DISC.length; i++) {
+    var q = BMC_DISC[i];
+    var d = document.createElement("div");
+    d.className = "card";
+    d.innerHTML = '<div class="field">'
+      + '<label class="field-label">' + (i+1) + '. ' + q.t + '</label>'
+      + '<div class="field-helper" style="margin-bottom:8px;margin-top:0;">' + q.h + '</div>'
+      + '<textarea data-key="' + q.k + '" placeholder="Trả lời ở đây..."></textarea>'
+      + '</div>';
+    c.appendChild(d);
+  }
+}
+
+function buildBMCTarget() {
+  var c = document.getElementById("bmcTargetFields");
+  for (var i = 0; i < BMC_T.length; i++) c.appendChild(makeTAField(BMC_T[i]));
+}
+
+// ===== PRODUCT SCORING =====
+function buildProductScoring() {
+  var c = document.getElementById("productScoring");
+  for (var pi = 0; pi < PRODUCTS.length; pi++) {
+    var det = document.createElement("details");
+    if (pi === 0) det.open = true;
+    var sum = document.createElement("summary");
+    sum.textContent = PRODUCTS[pi];
+    det.appendChild(sum);
+    var content = document.createElement("div");
+    content.className = "detail-content";
+    for (var ci = 0; ci < CRITERIA.length; ci++) {
+      var cr = CRITERIA[ci];
+      var sk = "ps_" + pi + "_" + ci;
+      var qd = document.createElement("div");
+      qd.style.marginBottom = "14px";
+      var pills = "";
+      for (var v = 1; v <= 5; v++) {
+        var sel = state[sk] == v ? " selected" : "";
+        pills += '<div class="pill' + sel + '" data-val="' + v + '" onclick="selectPS(' + pi + ',' + ci + ',' + v + ',this)">' + v + '</div>';
+      }
+      qd.innerHTML = '<div class="question-num">' + cr.l + ' (' + Math.round(cr.w * 100) + '%)</div>'
+        + '<div class="question-helper">' + cr.h + '</div>'
+        + '<div class="pills">' + pills + '</div>';
+      content.appendChild(qd);
+    }
+    det.appendChild(content);
+    c.appendChild(det);
+  }
+}
+
+window.selectPS = function(pi, ci, val, el) {
+  var parent = el.parentElement;
+  var pills = parent.querySelectorAll(".pill");
+  for (var j = 0; j < pills.length; j++) pills[j].classList.remove("selected");
+  el.classList.add("selected");
+  state["ps_" + pi + "_" + ci] = val;
+  debouncedSave(); updateRanking();
+};
+
+function getProductScore(pi) {
+  var weighted = 0, filled = 0;
+  for (var ci = 0; ci < CRITERIA.length; ci++) {
+    var v = state["ps_" + pi + "_" + ci];
+    if (v) { weighted += parseInt(v) * CRITERIA[ci].w; filled++; }
+  }
+  return filled === 7 ? weighted : null;
+}
+
+function updateRanking() {
+  var scores = [];
+  for (var i = 0; i < PRODUCTS.length; i++) {
+    scores.push({name: PRODUCTS[i], score: getProductScore(i), idx: i});
+  }
+  var complete = scores.filter(function(s){ return s.score !== null; });
+  var box = document.getElementById("productRanking");
+  if (complete.length < 2) { box.style.display = "none"; return; }
+  box.style.display = "";
+  complete.sort(function(a, b){ return b.score - a.score; });
+  var tbody = document.getElementById("rankBody");
+  tbody.innerHTML = "";
+  for (var j = 0; j < complete.length; j++) {
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td><span class="rank-badge">' + (j+1) + '</span></td>'
+      + '<td>' + complete[j].name + '</td>'
+      + '<td><strong>' + complete[j].score.toFixed(1) + '</strong> / 5.0</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+// ===== DECISIONS =====
+function buildDecisions() {
+  var c = document.getElementById("decisions");
+  for (var pi = 0; pi < PRODUCTS.length; pi++) {
+    var d = document.createElement("div");
+    d.className = "card"; d.id = "decision_" + pi;
+    var score = getProductScore(pi);
+    var scoreText = score !== null ? "Điểm: " + score.toFixed(1) + "/5.0" : "";
+    var iSel = state["dec_" + pi] === "invest" ? " invest-sel" : "";
+    var wSel = state["dec_" + pi] === "watch" ? " watch-sel" : "";
+    var kSel = state["dec_" + pi] === "kill" ? " kill-sel" : "";
+    d.innerHTML = '<div class="field-label">' + PRODUCTS[pi] + '</div>'
+      + '<div class="field-explain" id="decScore_' + pi + '">' + scoreText + '</div>'
+      + '<div class="decision-group">'
+      + '<button class="decision-btn' + iSel + '" onclick="setDecision(' + pi + ',\'invest\',this)"><span class="decision-emoji">&#128640;</span>INVEST</button>'
+      + '<button class="decision-btn' + wSel + '" onclick="setDecision(' + pi + ',\'watch\',this)"><span class="decision-emoji">&#128065;</span>WATCH</button>'
+      + '<button class="decision-btn' + kSel + '" onclick="setDecision(' + pi + ',\'kill\',this)"><span class="decision-emoji">&#10060;</span>KILL</button>'
+      + '</div>';
+    c.appendChild(d);
+  }
+  checkInvestWarning();
+}
+
+window.setDecision = function(pi, choice, el) {
+  var group = el.parentElement;
+  var btns = group.querySelectorAll(".decision-btn");
+  for (var j = 0; j < btns.length; j++) {
+    btns[j].classList.remove("invest-sel", "watch-sel", "kill-sel");
+  }
+  el.classList.add(choice + "-sel");
+  state["dec_" + pi] = choice;
+  debouncedSave(); checkInvestWarning();
+};
+
+function updateDecisionScores() {
+  for (var pi = 0; pi < PRODUCTS.length; pi++) {
+    var score = getProductScore(pi);
+    var el = document.getElementById("decScore_" + pi);
+    if (el) el.textContent = score !== null ? "Điểm: " + score.toFixed(1) + "/5.0" : "";
+  }
+}
+
+function checkInvestWarning() {
+  var cnt = 0;
+  for (var pi = 0; pi < PRODUCTS.length; pi++) {
+    if (state["dec_" + pi] === "invest") cnt++;
+  }
+  var w = document.getElementById("investWarning");
+  if (w) w.style.display = cnt > 1 ? "" : "none";
+}
+
+// ===== FINANCIAL =====
+function buildFinancial() {
+  var c = document.getElementById("financialFields");
+  for (var s = 0; s < FIN_SECTIONS.length; s++) {
+    var sec = FIN_SECTIONS[s];
+    var wrap = document.createElement("div");
+    wrap.innerHTML = '<div class="section-divider">' + sec.title + '</div>';
+    for (var f = 0; f < sec.fields.length; f++) {
+      var fi = sec.fields[f];
+      var card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = '<div class="field">'
+        + '<label class="field-label">' + fi.l + '</label>'
+        + '<div style="display:flex;align-items:center;gap:8px;">'
+        + '<input type="number" data-key="' + fi.k + '" placeholder="0" style="flex:1;" step="any" inputmode="decimal">'
+        + '<span style="font-size:0.85rem;color:var(--text3);white-space:nowrap;">' + fi.u + '</span>'
+        + '</div>'
+        + '<div class="field-helper">' + fi.h + '</div>'
+        + '</div>';
+      wrap.appendChild(card);
+    }
+    c.appendChild(wrap);
+  }
+}
+
+function updateComputed() {
+  var rev = parseFloat(state.fin_rev);
+  var margin = parseFloat(state.fin_margin);
+  var team = parseFloat(state.fin_team);
+  var box = document.getElementById("computedSection");
+  var grid = document.getElementById("computedGrid");
+  if (!rev || !margin || !team || isNaN(rev) || isNaN(margin) || isNaN(team)) {
+    box.style.display = "none"; return;
+  }
+  box.style.display = "";
+  var revPP = (rev * 1000) / team / 12;
+  var profitM = (rev * 1000 * margin / 100) / 12;
+  var pBudget = profitM * 0.15;
+  var teamCost = 5 * 25 * 1.3; // 162.5
+  var runway = pBudget > 0 ? (pBudget / teamCost) * 12 : 0;
+  grid.innerHTML = '<div class="computed-item"><div class="computed-label">Revenue / người / tháng</div><div class="computed-value">' + revPP.toFixed(0) + 'tr</div></div>'
+    + '<div class="computed-item"><div class="computed-label">Profit / tháng</div><div class="computed-value">' + profitM.toFixed(0) + 'tr</div></div>'
+    + '<div class="computed-item"><div class="computed-label">Product budget (15% profit)</div><div class="computed-value">' + pBudget.toFixed(0) + 'tr/tháng</div></div>'
+    + '<div class="computed-item"><div class="computed-label">Runway 5-người team</div><div class="computed-value">' + runway.toFixed(1) + ' tháng</div></div>';
+}
+
+// ===== SUMMARY =====
+function buildSummary() {
+  var c = document.getElementById("summaryContent");
+  var html = "";
+  var name = state.userName || "Ẩn danh";
+  var role = state.userRole || "—";
+  html += '<div class="summary-item"><div class="summary-label">Người trả lời</div><div class="summary-value">' + esc(name) + ' · ' + esc(role) + '</div></div>';
+
+  var ds = getDiagScore();
+  if (ds.count > 0) {
+    var color = "var(--success)", interp = "Ổn định";
+    if (ds.total > 30) { color = "var(--danger)"; interp = "Cần chuyển đổi khẩn cấp"; }
+    else if (ds.total > 15) { color = "var(--warning)"; interp = "Cần chuyển đổi có kế hoạch"; }
+    html += '<div class="summary-item"><div class="summary-label">Chẩn đoán mô hình</div><div class="summary-value" style="color:' + color + ';">' + ds.total + '/50 — ' + interp + '</div></div>';
+  }
+
+  var scores = [];
+  for (var i = 0; i < PRODUCTS.length; i++) {
+    var sc = getProductScore(i);
+    if (sc !== null) scores.push({name: PRODUCTS[i], score: sc});
+  }
+  if (scores.length > 0) {
+    scores.sort(function(a, b){ return b.score - a.score; });
+    var rankHtml = "";
+    for (var j = 0; j < scores.length; j++) rankHtml += (j+1) + ". " + scores[j].name + " (" + scores[j].score.toFixed(1) + ")<br>";
+    html += '<div class="summary-item"><div class="summary-label">Xếp hạng sản phẩm</div><div class="summary-value">' + rankHtml + '</div></div>';
+  }
+
+  var invested = [], decisions = [];
+  for (var pi = 0; pi < PRODUCTS.length; pi++) {
+    var d = state["dec_" + pi];
+    if (d === "invest") invested.push(PRODUCTS[pi]);
+    if (d) decisions.push(PRODUCTS[pi] + ": " + d.toUpperCase());
+  }
+  if (invested.length > 0) {
+    html += '<div class="summary-item"><div class="summary-label">Sản phẩm INVEST</div><div class="summary-value">' + invested.join(", ") + '</div></div>';
+  }
+  if (decisions.length > 0) {
+    html += '<div class="summary-item"><div class="summary-label">Portfolio quyết định</div><div class="summary-value">' + decisions.join("<br>") + '</div></div>';
+  }
+
+  var rev = parseFloat(state.fin_rev);
+  var margin = parseFloat(state.fin_margin);
+  var team = parseFloat(state.fin_team);
+  if (rev && margin && team) {
+    html += '<div class="summary-item"><div class="summary-label">Tài chính hiện tại</div><div class="summary-value">Revenue: ' + rev + ' tỷ · Margin: ' + margin + '% · Team: ' + team + ' người</div></div>';
+    var profitM = (rev * 1000 * margin / 100) / 12;
+    var pBudget = profitM * 0.15;
+    html += '<div class="summary-item"><div class="summary-label">Product budget (15% profit)</div><div class="summary-value">' + pBudget.toFixed(0) + ' triệu/tháng</div></div>';
+  }
+
+  c.innerHTML = html || '<div class="summary-item"><div class="summary-value">Chưa có dữ liệu</div></div>';
+}
+
+function esc(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+window.submitResults = function() {
+  alert("Demo mode: Kết quả đã được lưu tại localStorage.\nTrong phiên bản chính thức, dữ liệu sẽ được gửi đến facilitator.");
+};
+
+document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>

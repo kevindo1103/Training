@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#9ad1cb",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#121e1c",
+                    "on-tertiary-fixed-variant": "#3d4947",
+                    "inverse-primary": "#6bd8cb",
+                    "surface": "#fcf9f8",
+                    "on-primary": "#ffffff",
+                    "accent-teal-soft": "#CCFBF1",
+                    "on-secondary-fixed": "#00201e",
+                    "primary-fixed": "#89f5e7",
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "error-ruby": "#DC2626",
+                    "on-surface-variant": "#3d4947",
+                    "on-surface": "#1c1b1b",
+                    "inverse-on-surface": "#f3f0ef",
+                    "primary-container": "#008378",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#313030",
+                    "on-secondary-fixed-variant": "#144f4b",
+                    "surface-tint": "#006a61",
+                    "on-secondary": "#ffffff",
+                    "surface-container": "#f0eded",
+                    "primary": "#00685f",
+                    "on-tertiary-container": "#f3fffc",
+                    "on-secondary-container": "#376d69",
+                    "surface-container-highest": "#e5e2e1",
+                    "success-emerald": "#16A34A",
+                    "on-tertiary": "#ffffff",
+                    "secondary": "#316763",
+                    "surface-container-low": "#f6f3f2",
+                    "surface-variant": "#e5e2e1",
+                    "outline": "#6d7a77",
+                    "secondary-container": "#b5ede7",
+                    "outline-variant": "#bcc9c6",
+                    "primary-fixed-dim": "#6bd8cb",
+                    "on-primary-container": "#f4fffc",
+                    "on-background": "#1c1b1b",
+                    "tertiary-fixed-dim": "#bcc9c6",
+                    "surface-taupe": "#F5F5F4",
+                    "secondary-fixed": "#b5ede7",
+                    "tertiary": "#525e5c",
+                    "tertiary-container": "#6b7775",
+                    "on-primary-fixed": "#00201d",
+                    "on-primary-fixed-variant": "#005049",
+                    "tertiary-fixed": "#d8e5e2",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#dcd9d9",
+                    "surface-container-high": "#eae7e7",
+                    "surface-bright": "#fcf9f8",
+                    "background": "#fcf9f8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "64px",
+                    "margin-mobile": "20px",
+                    "margin-desktop": "48px",
+                    "element-gap": "24px",
+                    "container-max": "1100px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Hanken Grotesk"],
+                    "headline-md": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-sm": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "label-sm": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["30px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-lg": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .decision-card.active-invest { border-left: 4px solid #0D9488; }
+        .decision-card.active-watch { border-left: 4px solid #316763; }
+        .decision-card.active-kill { border-left: 4px solid #ba1a1a; }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-surface-taupe font-body-md text-on-surface antialiased">
+<!-- Top Navigation -->
+<nav class="bg-surface-bright dark:bg-surface-dim shadow-sm fixed top-0 left-0 w-full z-50">
+<div class="flex justify-between items-center px-margin-desktop h-20 w-full max-w-container-max mx-auto">
+<div class="font-headline-md text-headline-md font-extrabold text-primary dark:text-primary-fixed-dim">Dolphin Technology</div>
+<div class="hidden md:flex items-center gap-8">
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer hover:text-primary transition-colors">Module 1-4</span>
+<span class="font-label-caps text-label-caps text-primary border-b-2 border-primary cursor-pointer">Phase 5: Culture</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant cursor-pointer hover:text-primary transition-colors">Phase 6: Final Review</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer">notifications</span>
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional corporate headshot of a high-level executive participant for a premium training portal. The lighting is soft and cinematic, with a minimalist office background in neutral tones. The overall aesthetic is clean, luxury-oriented, and commands authority with high-contrast sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaoYWFd2ad0rACSXqldF3VId_-bPLrRKrELJ_oKqGKs5-cJDIpEvClDrKTayLEn0t2bw_jITHfr2ILL-KRRRngYzIzyk4PxGwMYAUzgFUrzrsaBpMXQ1U5zLcjgHaHvPP0hpy4KjEb9vvUcZ8EhGfdPB2Bd-5dJrzcoiNxR8MGc6jAG0WFrWHtpTSwBmIZP_nAi7Ls0iLAW0LVSxh1t38tmE2YIIRWVkn9xoM38ay7l0a6gYzIVbSQ"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- Side Navigation (Mobile/Desktop Toggle Logic) -->
+<aside class="fixed left-0 top-20 h-screen w-80 bg-surface-taupe hidden xl:flex flex-col py-8 gap-y-4">
+<div class="px-8 mb-6">
+<h2 class="font-headline-sm text-headline-sm text-primary">Restructuring Training</h2>
+<p class="text-label-sm font-label-sm text-on-surface-variant">6 Modules</p>
+</div>
+<div class="flex flex-col">
+<div class="text-on-surface-variant font-label-caps text-label-caps pl-4 py-3 hover:bg-accent-teal-soft cursor-pointer transition-all">Phase 1: Diagnosis</div>
+<div class="text-on-surface-variant font-label-caps text-label-caps pl-4 py-3 hover:bg-accent-teal-soft cursor-pointer transition-all">Phase 2: Strategy</div>
+<div class="text-on-surface-variant font-label-caps text-label-caps pl-4 py-3 hover:bg-accent-teal-soft cursor-pointer transition-all">Phase 3: Legal Framework</div>
+<div class="text-on-surface-variant font-label-caps text-label-caps pl-4 py-3 hover:bg-accent-teal-soft cursor-pointer transition-all">Phase 4: Operations</div>
+<div class="text-primary font-bold border-l-4 border-primary pl-4 py-3 bg-white/50 font-label-caps text-label-caps">Phase 5: Culture &amp; Decisions</div>
+<div class="text-on-surface-variant font-label-caps text-label-caps pl-4 py-3 hover:bg-accent-teal-soft cursor-pointer transition-all">Phase 6: Final Review</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="xl:ml-80 pt-32 pb-32 px-margin-mobile md:px-margin-desktop">
+<div class="max-w-container-max mx-auto">
+<!-- Header Section -->
+<header class="mb-section-gap">
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-label-caps text-label-caps">MODULE 5 &amp; 6</span>
+<span class="text-outline-variant">/</span>
+<span class="text-on-surface-variant font-label-caps text-label-caps uppercase tracking-widest">Portfolio Optimization</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-4">Portfolio Decision &amp; Financial Model</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl">Lấy quyết định chiến lược cho danh mục sản phẩm của bạn và mô phỏng các tác động tài chính trong 3 năm tới.</p>
+</header>
+<!-- Decision Warning (Hidden by default) -->
+<div class="hidden mb-8 p-4 bg-error-container text-on-error-container rounded-lg flex items-center gap-3 animate-pulse" id="invest-warning">
+<span class="material-symbols-outlined">warning</span>
+<p class="font-label-sm">Cảnh báo: Bạn chỉ nên chọn tối đa 1 sản phẩm để INVEST để tối ưu nguồn lực tập trung.</p>
+</div>
+<!-- Portfolio Decision Section -->
+<section class="mb-section-gap">
+<h2 class="font-headline-md text-headline-md mb-element-gap">1. Quyết định Danh mục</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-element-gap">
+<!-- Product Card 1 -->
+<div class="bg-white p-8 rounded-xl shadow-sm border border-outline-variant/30 decision-card group transition-all duration-300" data-product="A">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Product Alpha</h3>
+<p class="text-label-sm text-on-surface-variant">Core Infrastructure</p>
+</div>
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-secondary">deployed_code</span>
+</div>
+</div>
+<div class="space-y-3">
+<button class="decision-btn w-full flex items-center justify-center gap-3 py-3 border-1.5 border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-accent-teal-soft transition-all" data-type="invest" onclick="makeDecision('A', 'invest')">
+<span class="material-symbols-outlined text-primary">rocket_launch</span> INVEST
+                            </button>
+<button class="decision-btn w-full flex items-center justify-center gap-3 py-3 border-1.5 border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-surface-container transition-all" data-type="watch" onclick="makeDecision('A', 'watch')">
+<span class="material-symbols-outlined text-secondary">visibility</span> WATCH
+                            </button>
+<button class="decision-btn w-full flex items-center justify-center gap-3 py-3 border-1.5 border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-error-container/30 transition-all" data-type="kill" onclick="makeDecision('A', 'kill')">
+<span class="material-symbols-outlined text-error">close</span> KILL
+                            </button>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-white p-8 rounded-xl shadow-sm border border-outline-variant/30 decision-card group transition-all duration-300" data-product="B">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Product Beta</h3>
+<p class="text-label-sm text-on-surface-variant">Consumer SaaS</p>
+</div>
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-secondary">hub</span>
+</div>
+</div>
+<div class="space-y-3">
+<button class="decision-btn w-full flex items-center justify-center gap-3 py-3 border-1.5 border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-accent-teal-soft transition-all" data-type="invest" onclick="makeDecision('B', 'invest')">
+<span class="material-symbols-outlined text-primary">rocket_launch</span> INVEST
+                            </button>
+<button class="decision-btn w-full flex items-center justify-center gap-3 py-3 border-1.5 border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-surface-container transition-all" data-type="watch" onclick="makeDecision('B', 'watch')">
+<span class="material-symbols-outlined text-secondary">visibility</span> WATCH
+                            </button>
+<button class="decision-btn w-full flex items-center justify-center gap-3 py-3 border-1.5 border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-error-container/30 transition-all" data-type="kill" onclick="makeDecision('B', 'kill')">
+<span class="material-symbols-outlined text-error">close</span> KILL
+                            </button>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-white p-8 rounded-xl shadow-sm border border-outline-variant/30 decision-card group transition-all duration-300" data-product="C">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Product Gamma</h3>
+<p class="text-label-sm text-on-surface-variant">Experimental R&amp;D</p>
+</div>
+<div class="w-12 h-12 bg-surface-container flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-secondary">experiment</span>
+</div>
+</div>
+<div class="space-y-3">
+<button class="decision-btn w-full flex items-center justify-center gap-3 py-3 border-1.5 border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-accent-teal-soft transition-all" data-type="invest" onclick="makeDecision('C', 'invest')">
+<span class="material-symbols-outlined text-primary">rocket_launch</span> INVEST
+                            </button>
+<button class="decision-btn w-full flex items-center justify-center gap-3 py-3 border-1.5 border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-surface-container transition-all" data-type="watch" onclick="makeDecision('C', 'watch')">
+<span class="material-symbols-outlined text-secondary">visibility</span> WATCH
+                            </button>
+<button class="decision-btn w-full flex items-center justify-center gap-3 py-3 border-1.5 border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-error-container/30 transition-all" data-type="kill" onclick="makeDecision('C', 'kill')">
+<span class="material-symbols-outlined text-error">close</span> KILL
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Financial Model Section -->
+<section class="mb-section-gap">
+<h2 class="font-headline-md text-headline-md mb-element-gap">2. Mô hình Tài chính (Financial Model)</h2>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-element-gap items-start">
+<!-- Inputs Table Card -->
+<div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-8 border border-outline-variant/20 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<h3 class="font-headline-sm text-headline-sm mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">analytics</span>
+                            Nhập liệu Tham số
+                        </h3>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead>
+<tr class="text-left border-b border-outline-variant/30">
+<th class="pb-4 font-label-caps text-label-caps text-on-surface-variant">Tham số tài chính</th>
+<th class="pb-4 font-label-caps text-label-caps text-on-surface-variant text-center">Hiện tại</th>
+<th class="pb-4 font-label-caps text-label-caps text-on-surface-variant text-center">Năm 1</th>
+<th class="pb-4 font-label-caps text-label-caps text-on-surface-variant text-center">Năm 3</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr class="group">
+<td class="py-6 font-body-md text-on-surface">Doanh thu tổng ($k)</td>
+<td class="py-4 px-2"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg text-center font-bold focus:ring-2 focus:ring-primary/20" id="rev-now" onchange="calculateFinancials()" type="number" value="1200"/></td>
+<td class="py-4 px-2"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg text-center font-bold focus:ring-2 focus:ring-primary/20" id="rev-y1" onchange="calculateFinancials()" type="number" value="1800"/></td>
+<td class="py-4 px-2"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg text-center font-bold focus:ring-2 focus:ring-primary/20" id="rev-y3" onchange="calculateFinancials()" type="number" value="3500"/></td>
+</tr>
+<tr>
+<td class="py-6 font-body-md text-on-surface">Nhân sự (FTEs)</td>
+<td class="py-4 px-2"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg text-center font-bold focus:ring-2 focus:ring-primary/20" id="fte-now" onchange="calculateFinancials()" type="number" value="12"/></td>
+<td class="py-4 px-2"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg text-center font-bold focus:ring-2 focus:ring-primary/20" id="fte-y1" onchange="calculateFinancials()" type="number" value="15"/></td>
+<td class="py-4 px-2"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg text-center font-bold focus:ring-2 focus:ring-primary/20" id="fte-y3" onchange="calculateFinancials()" type="number" value="25"/></td>
+</tr>
+<tr>
+<td class="py-6 font-body-md text-on-surface">Chi phí vận hành ($k)</td>
+<td class="py-4 px-2"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg text-center font-bold focus:ring-2 focus:ring-primary/20" id="op-now" onchange="calculateFinancials()" type="number" value="950"/></td>
+<td class="py-4 px-2"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg text-center font-bold focus:ring-2 focus:ring-primary/20" id="op-y1" onchange="calculateFinancials()" type="number" value="1400"/></td>
+<td class="py-4 px-2"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg text-center font-bold focus:ring-2 focus:ring-primary/20" id="op-y3" onchange="calculateFinancials()" type="number" value="2400"/></td>
+</tr>
+<tr>
+<td class="py-6 font-body-md text-on-surface">Tiền mặt hiện có ($k)</td>
+<td class="py-4 px-2" colspan="3"><input class="fin-input w-full bg-surface-taupe border-none rounded-lg px-4 font-bold focus:ring-2 focus:ring-primary/20" id="cash-reserve" onchange="calculateFinancials()" type="number" value="500"/></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Computed Results Card -->
+<div class="bg-primary-container text-on-primary-container rounded-xl shadow-lg p-8 h-full flex flex-col">
+<h3 class="font-headline-sm text-headline-sm mb-8 flex items-center gap-2">
+<span class="material-symbols-outlined">calculate</span>
+                            Computed Values
+                        </h3>
+<div class="grid grid-cols-2 gap-y-10 gap-x-6">
+<!-- Metric 1 -->
+<div>
+<p class="text-label-caps font-label-caps opacity-70 mb-2">REV / FTE</p>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-bold" id="res-rev-fte">100</span>
+<span class="text-label-sm">$k</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div>
+<p class="text-label-caps font-label-caps opacity-70 mb-2">NET PROFIT</p>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-bold" id="res-profit">250</span>
+<span class="text-label-sm">$k</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div>
+<p class="text-label-caps font-label-caps opacity-70 mb-2">RUNWAY</p>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-bold" id="res-runway">6.3</span>
+<span class="text-label-sm">mth</span>
+</div>
+</div>
+<!-- Metric 4 -->
+<div>
+<p class="text-label-caps font-label-caps opacity-70 mb-2">EFFICIENCY</p>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-bold" id="res-eff">1.26</span>
+<span class="text-label-sm">x</span>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-8 border-t border-white/10">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-caps font-label-caps">CASH BURN RISK</span>
+<span class="bg-success-emerald text-white px-2 py-0.5 rounded text-[10px] font-bold" id="risk-badge">LOW</span>
+</div>
+<div class="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-white transition-all duration-700" id="risk-bar" style="width: 25%"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Action Button Area -->
+<div class="flex justify-end pt-8 border-t border-outline-variant/30">
+<button class="bg-primary text-on-primary font-headline-sm text-headline-sm px-10 py-4 rounded-xl shadow-md hover:bg-primary-container active:scale-95 transition-all flex items-center gap-3">
+                    Gửi kết quả
+                    <span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Bottom Nav (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 bg-surface-bright shadow-md">
+<button class="bg-transparent border-1.5 border-secondary text-secondary rounded-lg px-6 py-2 flex items-center gap-2 font-label-caps text-label-caps active:scale-95 duration-200">
+<span class="material-symbols-outlined">arrow_back</span> Back
+        </button>
+<button class="bg-primary text-on-primary rounded-lg px-6 py-2 flex items-center gap-2 font-label-caps text-label-caps active:scale-95 duration-200">
+            Next <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</nav>
+<script>
+        let decisions = { 'A': null, 'B': null, 'C': null };
+
+        function makeDecision(productId, type) {
+            decisions[productId] = type;
+
+            // Update UI for the specific card
+            const card = document.querySelector(`[data-product="${productId}"]`);
+            card.classList.remove('active-invest', 'active-watch', 'active-kill');
+            card.classList.add(`active-${type}`);
+
+            // Highlight specific button
+            const btns = card.querySelectorAll('.decision-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-on-primary', 'bg-secondary', 'text-on-secondary', 'bg-error', 'text-on-error');
+                if(btn.dataset.type === type) {
+                    if(type === 'invest') btn.classList.add('bg-primary', 'text-on-primary');
+                    if(type === 'watch') btn.classList.add('bg-secondary', 'text-on-secondary');
+                    if(type === 'kill') btn.classList.add('bg-error', 'text-on-error');
+                }
+            });
+
+            // Check for multiple Invests
+            const investCount = Object.values(decisions).filter(v => v === 'invest').length;
+            const warning = document.getElementById('invest-warning');
+            if (investCount > 1) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+
+            calculateFinancials();
+        }
+
+        function calculateFinancials() {
+            const rev = parseFloat(document.getElementById('rev-now').value) || 0;
+            const fte = parseFloat(document.getElementById('fte-now').value) || 1;
+            const op = parseFloat(document.getElementById('op-now').value) || 0;
+            const cash = parseFloat(document.getElementById('cash-reserve').value) || 0;
+
+            // Simple mock logic for calculations
+            const revFte = (rev / fte).toFixed(1);
+            const profit = rev - op;
+            const monthlyBurn = op / 12;
+            const runway = monthlyBurn > 0 ? (cash / monthlyBurn).toFixed(1) : "Inf";
+            const efficiency = op > 0 ? (rev / op).toFixed(2) : 0;
+
+            document.getElementById('res-rev-fte').textContent = revFte;
+            document.getElementById('res-profit').textContent = profit;
+            document.getElementById('res-runway').textContent = runway;
+            document.getElementById('res-eff').textContent = efficiency;
+
+            // Risk indicator logic
+            const riskBar = document.getElementById('risk-bar');
+            const riskBadge = document.getElementById('risk-badge');
+
+            if (runway < 3) {
+                riskBar.style.width = '90%';
+                riskBar.className = "h-full bg-error-ruby transition-all duration-700";
+                riskBadge.textContent = "CRITICAL";
+                riskBadge.className = "bg-error-ruby text-white px-2 py-0.5 rounded text-[10px] font-bold";
+            } else if (runway < 6) {
+                riskBar.style.width = '60%';
+                riskBar.className = "h-full bg-orange-400 transition-all duration-700";
+                riskBadge.textContent = "MEDIUM";
+                riskBadge.className = "bg-orange-400 text-white px-2 py-0.5 rounded text-[10px] font-bold";
+            } else {
+                riskBar.style.width = '25%';
+                riskBar.className = "h-full bg-white transition-all duration-700";
+                riskBadge.textContent = "LOW";
+                riskBadge.className = "bg-success-emerald text-white px-2 py-0.5 rounded text-[10px] font-bold";
+            }
+        }
+
+        // Initialize calculations
+        window.onload = calculateFinancials;
+    </script>
+</body></html>

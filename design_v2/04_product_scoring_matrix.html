@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Product Scoring Matrix - Dolphin Technology</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Config Verbatim -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#9ad1cb",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#121e1c",
+                    "on-tertiary-fixed-variant": "#3d4947",
+                    "inverse-primary": "#6bd8cb",
+                    "surface": "#fcf9f8",
+                    "on-primary": "#ffffff",
+                    "accent-teal-soft": "#CCFBF1",
+                    "on-secondary-fixed": "#00201e",
+                    "primary-fixed": "#89f5e7",
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "error-ruby": "#DC2626",
+                    "on-surface-variant": "#3d4947",
+                    "on-surface": "#1c1b1b",
+                    "inverse-on-surface": "#f3f0ef",
+                    "primary-container": "#008378",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#313030",
+                    "on-secondary-fixed-variant": "#144f4b",
+                    "surface-tint": "#006a61",
+                    "on-secondary": "#ffffff",
+                    "surface-container": "#f0eded",
+                    "primary": "#00685f",
+                    "on-tertiary-container": "#f3fffc",
+                    "on-secondary-container": "#376d69",
+                    "surface-container-highest": "#e5e2e1",
+                    "success-emerald": "#16A34A",
+                    "on-tertiary": "#ffffff",
+                    "secondary": "#316763",
+                    "surface-container-low": "#f6f3f2",
+                    "surface-variant": "#e5e2e1",
+                    "outline": "#6d7a77",
+                    "secondary-container": "#b5ede7",
+                    "outline-variant": "#bcc9c6",
+                    "primary-fixed-dim": "#6bd8cb",
+                    "on-primary-container": "#f4fffc",
+                    "on-background": "#1c1b1b",
+                    "tertiary-fixed-dim": "#bcc9c6",
+                    "surface-taupe": "#F5F5F4",
+                    "secondary-fixed": "#b5ede7",
+                    "tertiary": "#525e5c",
+                    "tertiary-container": "#6b7775",
+                    "on-primary-fixed": "#00201d",
+                    "on-primary-fixed-variant": "#005049",
+                    "tertiary-fixed": "#d8e5e2",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#dcd9d9",
+                    "surface-container-high": "#eae7e7",
+                    "surface-bright": "#fcf9f8",
+                    "background": "#fcf9f8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "64px",
+                    "margin-mobile": "20px",
+                    "margin-desktop": "48px",
+                    "element-gap": "24px",
+                    "container-max": "1100px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Hanken Grotesk"],
+                    "headline-md": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-sm": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "label-sm": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["30px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-lg": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Hanken Grotesk', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .scoring-pill:hover { transform: scale(1.1); transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .active-pill { background-color: #00685f !important; color: white !important; }
+        .accordion-content { transition: max-height 0.3s ease-out, opacity 0.2s ease-out; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #F5F5F4; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #bcc9c6; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface-taupe text-on-surface overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface-bright dark:bg-surface-dim shadow-sm fixed top-0 left-0 w-full z-50 h-20">
+<div class="flex justify-between items-center px-margin-desktop h-full w-full max-w-container-max mx-auto">
+<div class="font-headline-md text-headline-md font-extrabold text-primary">Dolphin Technology</div>
+<div class="flex items-center gap-8">
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label-caps text-label-caps" href="#">Dashboard</a>
+<a class="text-primary border-b-2 border-primary transition-colors duration-200 font-label-caps text-label-caps" href="#">Workshop</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label-caps text-label-caps" href="#">Insights</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer active:opacity-80">notifications</span>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a high-end corporate executive participant, wearing a tailored navy blazer, with a clean minimalist background. The lighting is soft and cinematic, emphasizing a modern corporate leadership aesthetic with high-contrast clarity and professional polish." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyyeQbddor6QvZGgC5ORTxaup7QpCn6fsuH84LSL1s2l3fcGxoD48SOc6gz0wzzMqk6wx6oGR-Egb_UwKtTquG-CfpGjR59dy6Ot0n9OZNdcJ3WopRZVRJKtgbSA7vr9EfuwYQnXrrcN_XdtGnngrRu__YgjbttEN0ns3qC6w7Mhpkg4d_Z9FLTcZvMIQmRm5T-oI6-AfZAozsEhW4S5gafHOmYpQ3zfzwak0_gLBugrdFNLbPtA11"/>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-20 h-[calc(100vh-80px)] w-80 bg-surface-taupe dark:bg-inverse-surface hidden md:flex flex-col py-8 gap-y-4">
+<div class="px-8 mb-6">
+<h2 class="font-headline-sm text-headline-sm text-primary">Restructuring Training</h2>
+<p class="text-label-sm text-on-surface-variant">6 Modules</p>
+</div>
+<nav class="flex flex-col">
+<a class="flex items-center gap-4 py-3 pl-8 text-on-surface-variant hover:bg-accent-teal-soft transition-all duration-300" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Phase 1: Diagnosis</span>
+</a>
+<a class="flex items-center gap-4 py-3 pl-8 text-on-surface-variant hover:bg-accent-teal-soft transition-all duration-300" href="#">
+<span class="material-symbols-outlined">architecture</span>
+<span class="font-label-caps text-label-caps">Phase 2: Strategy</span>
+</a>
+<a class="flex items-center gap-4 py-3 pl-8 text-on-surface-variant hover:bg-accent-teal-soft transition-all duration-300" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-label-caps text-label-caps">Phase 3: Legal Framework</span>
+</a>
+<a class="flex items-center gap-4 py-3 text-primary font-bold border-l-4 border-primary pl-8 bg-accent-teal-soft transition-all duration-300" href="#">
+<span class="material-symbols-outlined">settings_suggest</span>
+<span class="font-label-caps text-label-caps">Phase 4: Operations</span>
+</a>
+<a class="flex items-center gap-4 py-3 pl-8 text-on-surface-variant hover:bg-accent-teal-soft transition-all duration-300" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-caps text-label-caps">Phase 5: Culture</span>
+</a>
+<a class="flex items-center gap-4 py-3 pl-8 text-on-surface-variant hover:bg-accent-teal-soft transition-all duration-300" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-caps text-label-caps">Phase 6: Final Review</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-80 pt-28 pb-32 px-margin-mobile md:px-margin-desktop min-h-screen">
+<div class="max-w-container-max mx-auto">
+<!-- Header Section -->
+<section class="mb-section-gap">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="max-w-2xl">
+<span class="text-primary font-label-caps text-label-caps mb-2 block tracking-widest">MODULE 04 • STRATEGIC ASSESSMENT</span>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-4">Product Scoring Matrix</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Analyze your product portfolio using the strategic scoring framework. Evaluate each candidate across 7 key performance indicators to identify high-margin growth opportunities.</p>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-6 py-3 border-1.5 border-secondary text-secondary rounded-lg font-label-caps text-label-caps hover:bg-accent-teal-soft transition-all duration-200 active:scale-95">
+<span class="material-symbols-outlined text-[20px]">download</span> EXPORT REPORT
+                        </button>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-element-gap items-start">
+<!-- Assessment Column -->
+<div class="lg:col-span-8 space-y-6">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">Candidate Products</h3>
+<!-- Accordion Item 1 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden border-l-4 border-primary group">
+<div class="p-6 cursor-pointer flex justify-between items-center bg-white hover:bg-surface-container-low transition-colors" onclick="toggleAccordion('product-1')">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm">VB Điện tử</h4>
+<p class="text-label-sm text-on-surface-variant uppercase tracking-tighter">Enterprise SaaS • Doc Management</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline transition-transform duration-300" id="icon-product-1">expand_more</span>
+</div>
+<div class="accordion-content bg-white p-8 border-t border-surface-container overflow-hidden max-h-0 opacity-0" id="product-1">
+<div class="space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface">Market Size</label>
+<span class="text-primary font-bold">4.0</span>
+</div>
+<div class="flex justify-between gap-2">
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">1</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">2</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">3</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border-primary bg-primary text-white font-bold text-sm active-pill">4</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">5</button>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface">Recurring Potential</label>
+<span class="text-primary font-bold">5.0</span>
+</div>
+<div class="flex justify-between gap-2">
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">1</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">2</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">3</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">4</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border-primary bg-primary text-white font-bold text-sm active-pill">5</button>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface">Reusability</label>
+<span class="text-primary font-bold">3.0</span>
+</div>
+<div class="flex justify-between gap-2">
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">1</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">2</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border-primary bg-primary text-white font-bold text-sm active-pill">3</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">4</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">5</button>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface">Margin Potential</label>
+<span class="text-primary font-bold">4.0</span>
+</div>
+<div class="flex justify-between gap-2">
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">1</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">2</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">3</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border-primary bg-primary text-white font-bold text-sm active-pill">4</button>
+<button class="scoring-pill flex-1 h-10 rounded-full border border-outline-variant bg-surface text-on-surface-variant font-bold text-sm">5</button>
+</div>
+</div>
+</div>
+<div class="pt-6 border-t border-surface-container flex justify-end">
+<button class="px-8 py-2.5 bg-primary text-white rounded-lg font-label-caps text-label-caps hover:bg-primary-container transition-all">SAVE EVALUATION</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Accordion Item 2 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden border-l-4 border-outline-variant">
+<div class="p-6 cursor-pointer flex justify-between items-center bg-white hover:bg-surface-container-low transition-colors" onclick="toggleAccordion('product-2')">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined">hotel</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm">IPTV Khách sạn</h4>
+<p class="text-label-sm text-on-surface-variant uppercase tracking-tighter">Hospitality Tech • Media</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline transition-transform duration-300" id="icon-product-2">expand_more</span>
+</div>
+<div class="accordion-content bg-white p-8 border-t border-surface-container overflow-hidden max-h-0 opacity-0" id="product-2">
+<!-- Duplicate content structure for brevity but different values -->
+<p class="text-on-surface-variant font-body-md">Scoring interface for IPTV...</p>
+</div>
+</div>
+<!-- Accordion Item 3 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden border-l-4 border-outline-variant">
+<div class="p-6 cursor-pointer flex justify-between items-center bg-white hover:bg-surface-container-low transition-colors" onclick="toggleAccordion('product-3')">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined">confirmation_number</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm">Event/Ticket</h4>
+<p class="text-label-sm text-on-surface-variant uppercase tracking-tighter">Entertainment • Transactional</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline transition-transform duration-300" id="icon-product-3">expand_more</span>
+</div>
+<div class="accordion-content bg-white p-8 border-t border-surface-container overflow-hidden max-h-0 opacity-0" id="product-3">
+<p class="text-on-surface-variant font-body-md">Scoring interface for Event/Ticket...</p>
+</div>
+</div>
+<!-- Accordion Item 4 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden border-l-4 border-outline-variant">
+<div class="p-6 cursor-pointer flex justify-between items-center bg-white hover:bg-surface-container-low transition-colors" onclick="toggleAccordion('product-4')">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-secondary-fixed-dim flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined">newspaper</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm">CMS/Tòa soạn</h4>
+<p class="text-label-sm text-on-surface-variant uppercase tracking-tighter">Media Tech • Publishing</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline transition-transform duration-300" id="icon-product-4">expand_more</span>
+</div>
+<div class="accordion-content bg-white p-8 border-t border-surface-container overflow-hidden max-h-0 opacity-0" id="product-4">
+<p class="text-on-surface-variant font-body-md">Scoring interface for CMS...</p>
+</div>
+</div>
+</div>
+<!-- Ranking Table Column -->
+<div class="lg:col-span-4 sticky top-28">
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_40px_rgba(0,0,0,0.06)] border border-outline-variant overflow-hidden">
+<div class="p-6 bg-primary text-on-primary">
+<h3 class="font-headline-sm text-headline-sm">Weighted Ranking</h3>
+<p class="text-label-sm opacity-80">Calculated Real-time</p>
+</div>
+<div class="p-6 space-y-6">
+<!-- Ranking Item 1 -->
+<div class="flex items-center gap-4 p-4 rounded-lg bg-accent-teal-soft border border-primary/20">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold">1</div>
+<div class="flex-1">
+<h5 class="font-headline-sm text-sm">VB Điện tử</h5>
+<p class="text-xs text-on-surface-variant">SaaS Enterprise</p>
+</div>
+<div class="text-right">
+<div class="text-lg font-extrabold text-primary">4.2</div>
+<div class="text-[10px] text-primary/70 font-bold">SCORE</div>
+</div>
+</div>
+<!-- Ranking Item 2 -->
+<div class="flex items-center gap-4 p-4 rounded-lg bg-surface border border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-outline-variant text-on-surface flex items-center justify-center font-bold">2</div>
+<div class="flex-1">
+<h5 class="font-headline-sm text-sm">IPTV Khách sạn</h5>
+<p class="text-xs text-on-surface-variant">Hospitality</p>
+</div>
+<div class="text-right">
+<div class="text-lg font-bold text-on-surface">3.8</div>
+<div class="text-[10px] text-on-surface-variant font-bold">SCORE</div>
+</div>
+</div>
+<!-- Ranking Item 3 -->
+<div class="flex items-center gap-4 p-4 rounded-lg bg-surface border border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-outline-variant text-on-surface flex items-center justify-center font-bold">3</div>
+<div class="flex-1">
+<h5 class="font-headline-sm text-sm">CMS/Tòa soạn</h5>
+<p class="text-xs text-on-surface-variant">Media Publishing</p>
+</div>
+<div class="text-right">
+<div class="text-lg font-bold text-on-surface">3.5</div>
+<div class="text-[10px] text-on-surface-variant font-bold">SCORE</div>
+</div>
+</div>
+<!-- Ranking Item 4 -->
+<div class="flex items-center gap-4 p-4 rounded-lg bg-surface border border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-outline-variant text-on-surface flex items-center justify-center font-bold">4</div>
+<div class="flex-1">
+<h5 class="font-headline-sm text-sm">Event/Ticket</h5>
+<p class="text-xs text-on-surface-variant">Transactional</p>
+</div>
+<div class="text-right">
+<div class="text-lg font-bold text-on-surface">2.9</div>
+<div class="text-[10px] text-on-surface-variant font-bold">SCORE</div>
+</div>
+</div>
+<div class="pt-4 mt-2">
+<div class="p-4 bg-surface-taupe rounded-lg">
+<h6 class="font-label-caps text-[11px] mb-2 text-on-surface-variant">DECISION RECOMMENDATION</h6>
+<p class="text-label-sm text-on-surface leading-relaxed">Prioritize <span class="font-bold text-primary">VB Điện tử</span> for immediate investment due to high recurring potential and scalability.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Navigation Anchors) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 bg-surface-bright dark:bg-surface-dim shadow-md border-t border-outline-variant">
+<button class="bg-transparent border-1.5 border-secondary text-secondary rounded-lg px-8 py-3 flex items-center gap-2 font-label-caps text-label-caps hover:bg-primary-container/10 active:scale-95 duration-200 transition-all">
+<span class="material-symbols-outlined">arrow_back</span> Back
+        </button>
+<div class="hidden md:block">
+<div class="flex items-center gap-1">
+<div class="w-12 h-1.5 rounded-full bg-primary"></div>
+<div class="w-12 h-1.5 rounded-full bg-primary"></div>
+<div class="w-12 h-1.5 rounded-full bg-primary"></div>
+<div class="w-12 h-1.5 rounded-full bg-primary"></div>
+<div class="w-12 h-1.5 rounded-full bg-outline-variant"></div>
+<div class="w-12 h-1.5 rounded-full bg-outline-variant"></div>
+</div>
+</div>
+<button class="bg-primary text-on-primary rounded-lg px-8 py-3 flex items-center gap-2 font-label-caps text-label-caps hover:bg-primary-container active:scale-95 duration-200 transition-all">
+            Next <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</footer>
+<script>
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+
+            // Close all others
+            const allContent = document.querySelectorAll('.accordion-content');
+            const allIcons = document.querySelectorAll('.material-symbols-outlined[id^="icon-product-"]');
+
+            allContent.forEach(item => {
+                if(item.id !== id) {
+                    item.style.maxHeight = '0';
+                    item.style.opacity = '0';
+                }
+            });
+            allIcons.forEach(item => {
+                if(item.id !== 'icon-' + id) {
+                    item.style.transform = 'rotate(0deg)';
+                }
+            });
+
+            // Toggle current
+            if (content.style.maxHeight === '1000px') {
+                content.style.maxHeight = '0';
+                content.style.opacity = '0';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.maxHeight = '1000px';
+                content.style.opacity = '1';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // Initialize first accordion
+        window.onload = () => {
+            toggleAccordion('product-1');
+        };
+
+        // Micro-interactions for pills
+        document.querySelectorAll('.scoring-pill').forEach(pill => {
+            pill.addEventListener('click', function() {
+                const parent = this.parentElement;
+                parent.querySelectorAll('.scoring-pill').forEach(p => {
+                    p.classList.remove('active-pill');
+                    p.classList.remove('border-primary');
+                    p.classList.remove('bg-primary');
+                    p.classList.remove('text-white');
+                    p.classList.add('border-outline-variant');
+                    p.classList.add('bg-surface');
+                    p.classList.add('text-on-surface-variant');
+                });
+                this.classList.add('active-pill');
+                this.classList.remove('border-outline-variant');
+                this.classList.remove('bg-surface');
+                this.classList.remove('text-on-surface-variant');
+                this.classList.add('border-primary');
+                this.classList.add('bg-primary');
+                this.classList.add('text-white');
+            });
+        });
+    </script>
+</body></html>

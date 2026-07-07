@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Diagnostic Assessment | Dolphin Technology</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pill-selected {
+            background-color: #00685f !important;
+            color: #ffffff !important;
+        }
+        .learning-column {
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        /* Custom scrollbar for refined UI */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F5F5F4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #bcc9c6;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6d7a77;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#fcf9f8",
+                        "primary-fixed-dim": "#6bd8cb",
+                        "surface-taupe": "#F5F5F4",
+                        "primary": "#00685f",
+                        "surface-variant": "#e5e2e1",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#144f4b",
+                        "secondary-fixed-dim": "#9ad1cb",
+                        "secondary": "#316763",
+                        "surface-container-low": "#f6f3f2",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e5e2e1",
+                        "tertiary": "#525e5c",
+                        "on-primary-fixed": "#00201d",
+                        "on-surface": "#1c1b1b",
+                        "surface-dim": "#dcd9d9",
+                        "inverse-on-surface": "#f3f0ef",
+                        "on-primary-fixed-variant": "#005049",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#006a61",
+                        "background": "#fcf9f8",
+                        "primary-container": "#008378",
+                        "surface-container-high": "#eae7e7",
+                        "secondary-container": "#b5ede7",
+                        "inverse-primary": "#6bd8cb",
+                        "on-tertiary-fixed": "#121e1c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#376d69",
+                        "inverse-surface": "#313030",
+                        "surface": "#fcf9f8",
+                        "primary-fixed": "#89f5e7",
+                        "tertiary-fixed": "#d8e5e2",
+                        "on-secondary-fixed": "#00201e",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#6b7775",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#f4fffc",
+                        "tertiary-fixed-dim": "#bcc9c6",
+                        "on-tertiary-fixed-variant": "#3d4947",
+                        "surface-container": "#f0eded",
+                        "error-ruby": "#DC2626",
+                        "on-background": "#1c1b1b",
+                        "on-surface-variant": "#3d4947",
+                        "on-tertiary-container": "#f3fffc",
+                        "accent-teal-soft": "#CCFBF1",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#b5ede7",
+                        "outline-variant": "#bcc9c6",
+                        "outline": "#6d7a77",
+                        "success-emerald": "#16A34A"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1100px",
+                        "section-gap": "64px",
+                        "element-gap": "24px",
+                        "base": "4px",
+                        "margin-desktop": "48px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Manrope"],
+                        "label-caps": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-md": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "body-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-lg": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "label-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["30px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface-taupe font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-surface-bright dark:bg-surface-dim shadow-sm fixed top-0 w-full z-50 h-20 flex justify-between items-center px-margin-desktop">
+<div class="font-headline-md text-headline-md font-extrabold text-primary">Dolphin Technology</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-200 uppercase" href="#">Dashboard</a>
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary transition-colors duration-200 uppercase" href="#">Training</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-200 uppercase" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer">notifications</button>
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a corporate executive in a crisp white shirt, softly lit with high-key lighting to emphasize a clean and authoritative persona. The background is a minimalist neutral grey, maintaining the sophisticated and premium corporate aesthetic of Dolphin Technology's design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAR8nxPPXhRSMfD1t-BQf7V6cllycHPT2BeGr8-aJvNSCOmlAVuPzIeEu9xQytBoIY7dDk5sbdoeEAy-5BMZBRjMkIXOYja0S1HAE6gBshUwh4Tas3OirhgDbJV-K3MgGGTbwMTKjNq8ClwMIuEthWqpeqma-4wsxv237goKg-CkFoSxn3RYuSIwjEQIIuP82p0CY2GYpoaZdPXvZqSZg5zYPdGblxlNRpbgrRsZAEwFA5G2m-lvsM7"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex pt-20">
+<!-- SideNavBar -->
+<aside class="hidden md:flex fixed left-0 top-20 h-screen w-80 bg-surface-taupe flex-col py-8 gap-y-4">
+<div class="px-8 mb-4">
+<h2 class="font-headline-sm text-headline-sm text-primary">Restructuring Training</h2>
+<p class="text-label-sm font-label-sm text-tertiary">6 Modules</p>
+</div>
+<nav class="flex flex-col">
+<div class="text-primary font-bold border-l-4 border-primary pl-4 py-3 flex items-center gap-3 bg-accent-teal-soft transition-all duration-300">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps uppercase">Phase 1: Diagnosis</span>
+</div>
+<div class="text-on-surface-variant pl-4 py-3 flex items-center gap-3 hover:bg-accent-teal-soft transition-all cursor-pointer">
+<span class="material-symbols-outlined">architecture</span>
+<span class="font-label-caps text-label-caps uppercase">Phase 2: Strategy</span>
+</div>
+<div class="text-on-surface-variant pl-4 py-3 flex items-center gap-3 hover:bg-accent-teal-soft transition-all cursor-pointer">
+<span class="material-symbols-outlined">gavel</span>
+<span class="font-label-caps text-label-caps uppercase">Phase 3: Legal Framework</span>
+</div>
+<div class="text-on-surface-variant pl-4 py-3 flex items-center gap-3 hover:bg-accent-teal-soft transition-all cursor-pointer">
+<span class="material-symbols-outlined">settings_suggest</span>
+<span class="font-label-caps text-label-caps uppercase">Phase 4: Operations</span>
+</div>
+<div class="text-on-surface-variant pl-4 py-3 flex items-center gap-3 hover:bg-accent-teal-soft transition-all cursor-pointer">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-caps text-label-caps uppercase">Phase 5: Culture</span>
+</div>
+<div class="text-on-surface-variant pl-4 py-3 flex items-center gap-3 hover:bg-accent-teal-soft transition-all cursor-pointer">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-caps text-label-caps uppercase">Phase 6: Final Review</span>
+</div>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-80 pb-32">
+<div class="learning-column px-margin-mobile md:px-margin-desktop py-section-gap">
+<!-- Header Section -->
+<section class="mb-12">
+<div class="flex items-center gap-2 mb-2">
+<span class="font-label-caps text-label-caps text-primary uppercase">Module 01</span>
+<div class="h-px w-12 bg-outline-variant"></div>
+</div>
+<h1 class="font-headline-lg text-headline-lg mb-4">Organizational Health Diagnosis</h1>
+<p class="font-body-lg text-body-lg text-tertiary max-w-3xl">This initial assessment evaluates the current structural integrity and operational efficiency of your department. Be candid; these results establish the baseline for your restructuring strategy.</p>
+</section>
+<!-- Questions Container -->
+<div class="space-y-element-gap" id="assessment-container">
+<!-- Questions will be injected here by JS, but we'll skeleton one for layout -->
+<!-- Question Template -->
+<script id="question-template" type="text/template">
+                        <div class="question-card bg-surface-container-lowest p-8 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all duration-300 border-l-4 border-transparent hover:border-primary">
+                            <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                                <div class="max-w-xl">
+                                    <h3 class="font-headline-sm text-headline-sm mb-2 text-on-surface">[[QUESTION_TEXT]]</h3>
+                                    <p class="font-body-md text-body-md text-tertiary">[[HELPER_TEXT]]</p>
+                                </div>
+                                <div class="flex items-center gap-2 mt-4 md:mt-0">
+                                    <span class="font-label-caps text-[10px] text-tertiary mr-2 uppercase">Disagree</span>
+                                    <div class="flex gap-2 rating-pills" data-question-id="[[ID]]">
+                                        <button onclick="selectScore([[ID]], 1)" class="w-10 h-10 rounded-full border-1.5 border-outline-variant text-on-surface hover:border-primary hover:bg-accent-teal-soft transition-all font-label-caps flex items-center justify-center">1</button>
+                                        <button onclick="selectScore([[ID]], 2)" class="w-10 h-10 rounded-full border-1.5 border-outline-variant text-on-surface hover:border-primary hover:bg-accent-teal-soft transition-all font-label-caps flex items-center justify-center">2</button>
+                                        <button onclick="selectScore([[ID]], 3)" class="w-10 h-10 rounded-full border-1.5 border-outline-variant text-on-surface hover:border-primary hover:bg-accent-teal-soft transition-all font-label-caps flex items-center justify-center">3</button>
+                                        <button onclick="selectScore([[ID]], 4)" class="w-10 h-10 rounded-full border-1.5 border-outline-variant text-on-surface hover:border-primary hover:bg-accent-teal-soft transition-all font-label-caps flex items-center justify-center">4</button>
+                                        <button onclick="selectScore([[ID]], 5)" class="w-10 h-10 rounded-full border-1.5 border-outline-variant text-on-surface hover:border-primary hover:bg-accent-teal-soft transition-all font-label-caps flex items-center justify-center">5</button>
+                                    </div>
+                                    <span class="font-label-caps text-[10px] text-tertiary ml-2 uppercase">Agree</span>
+                                </div>
+                            </div>
+                        </div>
+                    </script>
+</div>
+<!-- Score Box Section -->
+<div class="mt-16 bg-primary-container p-10 rounded-xl text-on-primary-container flex flex-col md:flex-row items-center justify-between gap-8 shadow-md">
+<div class="space-y-2">
+<div class="font-label-caps text-label-caps text-on-primary-container/80 uppercase">Current Diagnosis Progress</div>
+<h2 class="font-headline-md text-headline-md">Your Assessment Score</h2>
+<p class="font-body-md text-body-md text-on-primary-container/90">Based on your selections, we'll determine the primary focus for Phase 2.</p>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-center">
+<div class="font-label-caps text-label-caps uppercase mb-2" id="completion-label">0/10 Answered</div>
+<div class="w-48 h-2 bg-on-primary-container/20 rounded-full overflow-hidden">
+<div class="h-full bg-white w-0 transition-all duration-500" id="progress-bar"></div>
+</div>
+</div>
+<div class="bg-white/10 backdrop-blur-sm p-6 rounded-lg text-center min-w-[120px]">
+<div class="font-headline-lg text-headline-lg leading-none" id="total-score">0</div>
+<div class="font-label-caps text-label-caps uppercase mt-2">Aggregate</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 bg-surface-bright dark:bg-surface-dim shadow-md border-t border-outline-variant">
+<button class="bg-transparent border-1.5 border-secondary text-secondary rounded-lg px-8 py-3 flex items-center gap-2 hover:bg-primary-container hover:text-white transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="font-label-caps text-label-caps uppercase">Back</span>
+</button>
+<button class="bg-primary text-on-primary rounded-lg px-8 py-3 flex items-center gap-2 hover:bg-primary-container transition-all active:scale-95 duration-200">
+<span class="font-label-caps text-label-caps uppercase">Next</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</footer>
+<script>
+        const questions = [
+            { id: 1, text: "Role Clarity", helper: "Team members have a precise understanding of their individual KPIs and accountability structures." },
+            { id: 2, text: "Decision Latency", helper: "Strategic decisions are made within a timeframe that prevents operational bottlenecks." },
+            { id: 3, text: "Communication Flow", helper: "Information moves vertically and horizontally across the organization without distortion." },
+            { id: 4, text: "Resource Allocation", helper: "Capital and human resources are aligned with current strategic priorities." },
+            { id: 5, text: "Adaptability", helper: "The department can pivot in response to market shifts without complete structural collapse." },
+            { id: 6, text: "Talent Density", helper: "We currently have the technical expertise required for our next growth phase." },
+            { id: 7, text: "Operational Waste", helper: "Redundancy in workflows is minimal; we are not duplicating efforts across teams." },
+            { id: 8, text: "Culture Alignment", helper: "The internal culture supports the performance-based goals of the restructuring." },
+            { id: 9, text: "Tech Stack Efficiency", helper: "Our current digital tools accelerate productivity rather than hindering it." },
+            { id: 10, text: "Leadership Trust", helper: "There is high confidence in leadership's ability to steer the upcoming changes." }
+        ];
+
+        let userScores = {};
+
+        function initAssessment() {
+            const container = document.getElementById('assessment-container');
+            const template = document.getElementById('question-template').innerHTML;
+
+            questions.forEach(q => {
+                let html = template
+                    .replace(/\[\[ID\]\]/g, q.id)
+                    .replace('[[QUESTION_TEXT]]', q.text)
+                    .replace('[[HELPER_TEXT]]', q.helper);
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function selectScore(questionId, score) {
+            userScores[questionId] = score;
+
+            // UI Feedback: Update Pill Styles
+            const parent = document.querySelector(`.rating-pills[data-question-id="${questionId}"]`);
+            const buttons = parent.querySelectorAll('button');
+            buttons.forEach((btn, index) => {
+                if (index + 1 === score) {
+                    btn.classList.add('pill-selected');
+                } else {
+                    btn.classList.remove('pill-selected');
+                }
+            });
+
+            // Card highlight
+            const card = parent.closest('.question-card');
+            card.classList.add('border-primary');
+
+            updateScoreBox();
+        }
+
+        function updateScoreBox() {
+            const answeredCount = Object.keys(userScores).length;
+            const totalScore = Object.values(userScores).reduce((a, b) => a + b, 0);
+
+            document.getElementById('completion-label').textContent = `${answeredCount}/10 Answered`;
+            document.getElementById('total-score').textContent = totalScore;
+
+            const progress = (answeredCount / 10) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        document.addEventListener('DOMContentLoaded', initAssessment);
+    </script>
+</body></html>
