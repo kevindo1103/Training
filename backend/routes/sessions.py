@@ -58,10 +58,16 @@ def facilitator_auth(session_id: str, body: FacilitatorAuth, db: Session = Depen
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    facilitator = Participant(session_id=session_id, name="Facilitator", role="facilitator")
-    db.add(facilitator)
-    db.commit()
-    db.refresh(facilitator)
+    facilitator = (
+        db.query(Participant)
+        .filter(Participant.session_id == session_id, Participant.role == "facilitator")
+        .first()
+    )
+    if not facilitator:
+        facilitator = Participant(session_id=session_id, name="Facilitator", role="facilitator")
+        db.add(facilitator)
+        db.commit()
+        db.refresh(facilitator)
 
     token = create_token(facilitator.id, session_id, "facilitator")
     return JoinResponse(participant_id=facilitator.id, session_id=session_id, token=token)
