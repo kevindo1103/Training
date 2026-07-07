@@ -3,552 +3,567 @@
 ## Bối Cảnh Dolphin Technology
 
 **Thực trạng hiện tại:**
-- Công ty phần mềm ~50 người, thị trường nội địa Việt Nam
-- Làm custom software theo đặt hàng khách hàng, mỗi dự án là một sản phẩm riêng biệt
-- Sản phẩm đã làm rải rác nhiều lĩnh vực: quản lý văn bản điện tử (Vietlot), hệ thống giải trí khách sạn (IPTV), phần mềm event/ticket, tòa soạn điện tử/CMS...
-- Bán hàng phụ thuộc chủ yếu vào network cá nhân của CEO
-- Không tích lũy được: mỗi sản phẩm quá đặc thù, khó nhân rộng
+
+Dolphin Technology là công ty phần mềm quy mô khoảng 50 nhân sự, hoạt động tại thị trường nội địa Việt Nam. Mô hình kinh doanh hiện tại là phát triển phần mềm theo đơn đặt hàng của khách hàng — mỗi dự án là một sản phẩm riêng biệt, phục vụ một khách hàng cụ thể.
+
+Các sản phẩm Dolphin đã triển khai trải rộng nhiều lĩnh vực: quản lý văn bản điện tử (Vietlot), hệ thống giải trí khách sạn (IPTV), phần mềm quản lý sự kiện/vé (Event/Ticket), tòa soạn điện tử/CMS. Hoạt động kinh doanh phụ thuộc chủ yếu vào mạng lưới quan hệ cá nhân của CEO, và các sản phẩm đã làm hầu như không tái sử dụng được cho khách hàng khác.
 
 **Mong muốn của CEO:**
-- KHÔNG muốn phát triển theo hướng IT Outsourcing thuần
-- Muốn từ các sản phẩm đã làm (hoặc sẽ làm) → thử nghiệm → spin off sản phẩm tiềm năng thành BU chạy độc lập
-- Hướng tới trở thành **công ty product**, nhưng vẫn giữ service làm nguồn cash flow
 
-**Bài toán cốt lõi:** Làm sao chuyển đổi từ "xưởng code theo đơn đặt hàng" sang "công ty có sản phẩm riêng có thể scale" mà không chết vì hết tiền trong quá trình chuyển đổi?
+CEO không muốn phát triển theo hướng IT Outsourcing thuần túy. Định hướng là từ các sản phẩm đã triển khai (hoặc sẽ triển khai), chọn lọc sản phẩm tiềm năng để thử nghiệm và tách thành đơn vị kinh doanh (BU) vận hành độc lập. Mục tiêu dài hạn là trở thành **công ty sản phẩm**, đồng thời vẫn duy trì mảng dịch vụ làm nguồn cash flow ổn định.
+
+**Bài toán cốt lõi:** Làm thế nào chuyển đổi từ mô hình phát triển phần mềm theo đơn đặt hàng sang công ty có sản phẩm riêng có khả năng mở rộng — mà vẫn đảm bảo tài chính trong suốt quá trình chuyển đổi?
 
 ---
 
 ## Phần 1: Chẩn Đoán — Dolphin Đang Ở Đâu?
 
-### 1.1 Mô Hình Hiện Tại: "Custom Software Studio"
+### 1.1 Mô Hình Hiện Tại: Custom Software Studio
 
-Dolphin hiện tại hoạt động theo mô hình **Software Studio** — nhận đơn đặt hàng, build sản phẩm theo yêu cầu khách hàng, bàn giao, và (có thể) maintain.
+Dolphin hiện hoạt động theo mô hình **Software Studio** — nhận yêu cầu từ khách hàng, phát triển phần mềm theo đặc tả, bàn giao sản phẩm, và bảo trì nếu có hợp đồng.
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │              MÔ HÌNH HIỆN TẠI CỦA DOLPHIN          │
 │                                                      │
-│   CEO network → Khách hàng đặt hàng                │
+│   Quan hệ CEO → Khách hàng đặt hàng                │
 │        ↓                                             │
-│   Dolphin build sản phẩm theo spec                  │
+│   Dolphin phát triển phần mềm theo yêu cầu         │
 │        ↓                                             │
-│   Bàn giao → (Maintain nếu có hợp đồng)            │
+│   Bàn giao → Bảo trì (nếu có hợp đồng)            │
 │        ↓                                             │
 │   Tìm khách mới → Lặp lại                          │
 │                                                      │
 │   Kết quả:                                           │
-│   • Doanh thu = f(số project CEO tìm được)          │
+│   • Doanh thu phụ thuộc vào số dự án CEO tìm được   │
 │   • Sản phẩm không tái sử dụng được                │
-│   • Không có recurring revenue                      │
-│   • Mỗi project bắt đầu từ gần như zero            │
+│   • Không có doanh thu định kỳ (recurring revenue)  │
+│   • Mỗi dự án bắt đầu lại từ đầu                   │
 └─────────────────────────────────────────────────────┘
 ```
 
 ### 1.2 Hệ Quả Của Mô Hình Này
 
-**Workshop Activity 1:** CEO và leadership tự đánh giá — Dolphin đang gặp bao nhiêu trong số các vấn đề dưới đây?
+**Workshop Activity 1:** CEO và ban lãnh đạo tự đánh giá — Dolphin đang gặp bao nhiêu trong số các vấn đề dưới đây?
 
 | # | Vấn đề | Có/Không | Mức độ (1-5) |
 |---|--------|----------|-------------|
-| 1 | Doanh thu phụ thuộc vào khả năng tìm deal của CEO | | |
-| 2 | Mất CEO = mất phần lớn pipeline | | |
-| 3 | Team rảnh khi giữa 2 project (bench time cao) | | |
-| 4 | Mỗi project mới phải learn domain mới từ đầu | | |
-| 5 | Khó estimate giá vì mỗi project khác nhau hoàn toàn | | |
-| 6 | Không có sản phẩm nào generate revenue sau khi bàn giao | | |
-| 7 | Khách hàng ít quay lại (one-time project) | | |
-| 8 | Khó tuyển vì không có brand trong ngành nào cụ thể | | |
-| 9 | Margin bị ép vì không có leverage (IP, platform) | | |
-| 10 | Revenue không thể dự đoán được quá 3-6 tháng | | |
+| 1 | Doanh thu phụ thuộc vào khả năng tìm thương vụ của CEO | | |
+| 2 | Nếu CEO vắng mặt, phần lớn pipeline bán hàng bị đình trệ | | |
+| 3 | Đội ngũ nhàn rỗi trong khoảng trống giữa hai dự án (bench time cao) | | |
+| 4 | Mỗi dự án mới phải tìm hiểu lĩnh vực mới từ đầu | | |
+| 5 | Khó định giá vì mỗi dự án hoàn toàn khác nhau | | |
+| 6 | Không có sản phẩm nào tiếp tục tạo doanh thu sau khi bàn giao | | |
+| 7 | Khách hàng ít quay lại (dự án chỉ thực hiện một lần) | | |
+| 8 | Khó tuyển dụng vì không có thương hiệu chuyên sâu trong ngành nào cụ thể | | |
+| 9 | Biên lợi nhuận bị ép vì không có đòn bẩy (tài sản trí tuệ, nền tảng tái sử dụng) | | |
+| 10 | Doanh thu không thể dự báo quá 3–6 tháng | | |
 
-**Scoring:**
-- 0-15 điểm: Tình hình chưa nghiêm trọng, optimize mô hình hiện tại
-- 16-30 điểm: Cần chuyển đổi có kế hoạch trong 1-2 năm
-- 31-50 điểm: Cần chuyển đổi khẩn cấp, mô hình hiện tại không bền vững
+**Thang đánh giá:**
+- 0–15 điểm: Tình hình chưa nghiêm trọng — tối ưu hóa mô hình hiện tại
+- 16–30 điểm: Cần chuyển đổi có kế hoạch trong 1–2 năm tới
+- 31–50 điểm: Cần chuyển đổi khẩn cấp — mô hình hiện tại không bền vững
 
 ### 1.3 Business Model Canvas — Dolphin Hiện Tại
 
-**Workshop Activity 2:** Điền canvas này cùng leadership team
+**Workshop Activity 2:** Điền canvas này cùng ban lãnh đạo
 
 ```
 ┌──────────────────┬──────────────────┬──────────────────┐
-│ KEY PARTNERS     │ KEY ACTIVITIES   │ VALUE PROPOSITION│
-│                  │                  │                  │
-│ • Khách hàng giới│ • Phân tích yêu  │ • "Chúng tôi    │
-│   thiệu bởi CEO │   cầu khách hàng │   build phần mềm│
-│ • Đối tác tech?  │ • Custom software│   theo ý bạn"   │
-│ • Cloud provider?│   development    │ • Giá cạnh tranh │
-│                  │ • Bàn giao &     │ • Team Việt Nam  │
-│                  │   maintain       │   linh hoạt      │
-│                  │                  │                  │
+│ ĐỐI TÁC          │ HOẠT ĐỘNG        │ GIÁ TRỊ          │
+│ CHÍNH             │ CHÍNH            │ CUNG CẤP         │
+│                   │                  │                  │
+│ • Khách hàng giới │ • Phân tích yêu  │ • "Chúng tôi    │
+│   thiệu qua CEO  │   cầu khách hàng │   phát triển phần│
+│ • Đối tác công    │ • Phát triển phần│   mềm theo yêu  │
+│   nghệ?           │   mềm theo đơn  │   cầu của quý    │
+│ • Nhà cung cấp    │ • Bàn giao &     │   khách"         │
+│   cloud?          │   bảo trì        │ • Giá cạnh tranh │
+│                   │                  │ • Đội ngũ VN     │
+│                   │                  │   linh hoạt      │
+│                   │                  │                  │
 ├──────────────────┼──────────────────┼──────────────────┤
-│ KEY RESOURCES    │                  │ CUSTOMER         │
-│                  │                  │ RELATIONSHIPS    │
-│ • ~50 engineers  │                  │                  │
-│ • CEO's network  │                  │ • Quan hệ cá    │
-│ • Kinh nghiệm    │                  │   nhân CEO      │
-│   nhiều domain   │                  │ • Project-based  │
-│ • Code/source    │                  │   (đa số kết    │
-│   từ các project │                  │   thúc sau       │
-│   cũ             │                  │   bàn giao)     │
-│                  │                  │                  │
+│ NGUỒN LỰC        │                  │ QUAN HỆ          │
+│ CHÍNH             │                  │ KHÁCH HÀNG       │
+│                   │                  │                  │
+│ • ~50 kỹ sư       │                  │ • Quan hệ cá    │
+│ • Mạng lưới quan  │                  │   nhân của CEO  │
+│   hệ của CEO      │                  │ • Theo dự án    │
+│ • Kinh nghiệm     │                  │   (đa số kết    │
+│   nhiều lĩnh vực  │                  │   thúc sau       │
+│ • Mã nguồn từ     │                  │   bàn giao)     │
+│   các dự án cũ    │                  │                  │
+│                   │                  │                  │
 ├──────────────────┴──────────────────┼──────────────────┤
-│ COST STRUCTURE                      │ REVENUE STREAMS  │
-│                                     │                  │
-│ • Lương (~70-80% chi phí)          │ • Project fees   │
-│ • Office                            │   (fixed/T&M)   │
-│ • Infra/Cloud                       │ • Maintenance    │
-│ • Sales = CEO time                  │   contracts?     │
-│                                     │ • Recurring = ?% │
-└─────────────────────────────────────┴──────────────────┘
+│ CƠ CẤU CHI PHÍ                      │ NGUỒN DOANH THU  │
+│                                      │                  │
+│ • Lương (~70-80% tổng chi phí)      │ • Phí dự án      │
+│ • Văn phòng                          │   (fixed/T&M)   │
+│ • Hạ tầng/Cloud                      │ • Hợp đồng bảo  │
+│ • Thời gian bán hàng của CEO         │   trì?           │
+│                                      │ • Doanh thu định │
+│                                      │   kỳ = ?%        │
+└──────────────────────────────────────┴──────────────────┘
 
-CUSTOMER SEGMENTS:
+PHÂN KHÚC KHÁCH HÀNG:
 • Vietlot (xổ số)
 • Khách sạn (hospitality)
-• Event/Entertainment
+• Sự kiện/Giải trí (Event/Entertainment)
 • Báo chí/Truyền thông
 • Khác: ___________
 
-CHANNELS:
-• CEO personal network (chính)
-• Referral từ khách cũ
+KÊNH PHÂN PHỐI:
+• Mạng lưới quan hệ cá nhân của CEO (chính)
+• Giới thiệu từ khách cũ
 • Khác: ___________
 ```
 
 **Câu hỏi thảo luận sau khi điền:**
-1. Nếu CEO nghỉ 6 tháng, công ty có tìm được deal mới không?
-2. Trong 5 năm qua, có bao nhiêu khách hàng quay lại?
-3. Có sản phẩm nào đang generate revenue mà không cần Dolphin tiếp tục develop?
-4. Revenue từ maintenance/support chiếm bao nhiêu %?
+1. Nếu CEO nghỉ 6 tháng, công ty có tìm được thương vụ mới không?
+2. Trong 5 năm qua, có bao nhiêu khách hàng quay lại hợp tác?
+3. Có sản phẩm nào đang tạo doanh thu mà không cần Dolphin tiếp tục phát triển thêm?
+4. Doanh thu từ bảo trì/hỗ trợ kỹ thuật chiếm bao nhiêu phần trăm tổng doanh thu?
 
 ---
 
-## Phần 2: Mô Hình Mục Tiêu — "Service-Funded Product Company"
+## Phần 2: Mô Hình Mục Tiêu — Service-Funded Product Company
 
-### 2.1 Tại Sao Không Thể Nhảy Thẳng Sang Product?
+### 2.1 Tại Sao Không Thể Chuyển Thẳng Sang Mô Hình Sản Phẩm?
 
-Với quy mô ~50 người và thị trường nội địa, Dolphin không thể:
-- Dừng nhận project để tập trung làm product (hết tiền trong 3-6 tháng)
-- Gọi vốn VC kiểu startup (chưa có product-market fit)
-- Tuyển thêm team product riêng lớn (cash không đủ)
+Với quy mô khoảng 50 người và tập trung tại thị trường nội địa, Dolphin chưa có điều kiện để chuyển đổi trực tiếp:
 
-→ Cần **mô hình hybrid** có lộ trình rõ ràng.
+- Dừng nhận dự án dịch vụ để tập trung làm sản phẩm: nguy cơ cạn kiệt tài chính trong 3–6 tháng.
+- Gọi vốn đầu tư mạo hiểm: chưa có sản phẩm đạt Product-Market Fit để thuyết phục nhà đầu tư.
+- Tuyển riêng đội ngũ sản phẩm lớn: nguồn tài chính chưa cho phép.
 
-### 2.2 Mô Hình "Service-Funded Product Company"
+Do đó, Dolphin cần một **mô hình kết hợp** với lộ trình chuyển đổi rõ ràng.
+
+### 2.2 Mô Hình Service-Funded Product Company
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │         MÔ HÌNH MỤC TIÊU: SERVICE-FUNDED PRODUCT       │
 │                                                          │
 │  ┌─────────────────┐     ┌─────────────────────────┐   │
-│  │  SERVICE ARM     │     │  PRODUCT ARM             │   │
-│  │  (Cash Engine)   │────▶│  (Growth Engine)         │   │
-│  │                  │funds│                           │   │
-│  │  • Custom dev    │     │  • Spin-off products     │   │
-│  │  • Nhưng CHỌN    │     │  • SaaS/Platform         │   │
-│  │    LỌC domain    │     │  • Recurring revenue     │   │
-│  │  • Build IP      │     │  • Scalable              │   │
-│  │    trong quá     │     │                           │   │
-│  │    trình làm     │     │  Bắt đầu: 1 sản phẩm    │   │
-│  │    service       │     │  Mục tiêu: BU độc lập    │   │
+│  │  MẢNG DỊCH VỤ   │     │  MẢNG SẢN PHẨM          │   │
+│  │  (Nguồn tiền)   │────▶│  (Động lực tăng trưởng)  │   │
+│  │                  │ tài │                           │   │
+│  │  • Phát triển    │ trợ │  • Sản phẩm spin-off     │   │
+│  │    phần mềm     │     │  • SaaS/Platform          │   │
+│  │    theo đơn      │     │  • Doanh thu định kỳ     │   │
+│  │  • CHỌN LỌC     │     │  • Có khả năng mở rộng   │   │
+│  │    lĩnh vực     │     │                           │   │
+│  │  • Tích lũy tài  │     │  Khởi đầu: 1 sản phẩm   │   │
+│  │    sản trí tuệ  │     │  Mục tiêu: BU độc lập    │   │
 │  └─────────────────┘     └─────────────────────────┘   │
 │                                                          │
-│  Tỷ lệ phân bổ resource:                               │
-│  Year 1: Service 85% / Product 15%                      │
-│  Year 2: Service 70% / Product 30%                      │
-│  Year 3: Service 50% / Product 50%                      │
+│  Tỷ lệ phân bổ nguồn lực:                              │
+│  Năm 1: Dịch vụ 85% / Sản phẩm 15%                    │
+│  Năm 2: Dịch vụ 70% / Sản phẩm 30%                    │
+│  Năm 3: Dịch vụ 50% / Sản phẩm 50%                    │
 │                                                          │
-│  Revenue target:                                         │
-│  Year 3: Product revenue ≥ 30% tổng revenue            │
+│  Mục tiêu doanh thu:                                    │
+│  Năm 3: Doanh thu sản phẩm ≥ 30% tổng doanh thu       │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### 2.3 Nguyên Tắc Vận Hành Hybrid
+### 2.3 Nguyên Tắc Vận Hành Mô Hình Kết Hợp
 
-**7 nguyên tắc sống còn:**
+**7 nguyên tắc cốt yếu:**
 
-1. **Service vẫn là ưu tiên cash flow** — không bao giờ để product arm ảnh hưởng đến khả năng deliver service
-2. **Chọn lọc project service** — chỉ nhận project trong domain mà Dolphin muốn build product (không nhận mọi thứ)
-3. **Harvest IP từ mọi service project** — mỗi project phải để lại reusable component, domain knowledge, hoặc product idea
-4. **1 product bet tại 1 thời điểm** — không spread thin, focus
-5. **Kill fast** — nếu product không có traction sau 6 tháng pilot, dừng và chọn bet mới
-6. **Tách team rõ ràng** — người làm product không bị pull vào service project (trừ emergency)
-7. **CEO phải chuyển focus** — từ bán service sang build product vision, hire sales cho service arm
+1. **Dịch vụ vẫn là ưu tiên về cash flow** — mảng sản phẩm không được ảnh hưởng đến khả năng giao hàng của mảng dịch vụ.
+2. **Chọn lọc dự án dịch vụ** — chỉ nhận dự án trong lĩnh vực mà Dolphin muốn phát triển sản phẩm. Không nhận mọi thứ.
+3. **Khai thác tài sản trí tuệ từ mọi dự án dịch vụ** — mỗi dự án phải để lại thành phần tái sử dụng được, kiến thức chuyên ngành, hoặc ý tưởng sản phẩm.
+4. **Chỉ đầu tư vào 1 sản phẩm tại một thời điểm** — không dàn trải nguồn lực, tập trung toàn lực.
+5. **Dừng sớm nếu không khả thi** — nếu sản phẩm không có sức hút thị trường sau 6 tháng thử nghiệm, dừng lại và chọn hướng mới.
+6. **Tách đội ngũ rõ ràng** — nhân sự làm sản phẩm không bị điều chuyển sang dự án dịch vụ (trừ tình huống khẩn cấp).
+7. **CEO phải chuyển trọng tâm** — từ trực tiếp bán hàng dịch vụ sang xây dựng tầm nhìn sản phẩm, đồng thời tuyển người phụ trách kinh doanh cho mảng dịch vụ.
 
-### 2.4 Business Model Canvas — Mục Tiêu (Year 3)
+### 2.4 Business Model Canvas — Mục Tiêu Năm 3
 
 **Workshop Activity 3:** Cùng thiết kế canvas mục tiêu
 
 ```
 ┌──────────────────┬──────────────────┬──────────────────┐
-│ KEY PARTNERS     │ KEY ACTIVITIES   │ VALUE PROPOSITION│
-│                  │                  │                  │
-│ • Channel partner│ • SERVICE: Custom│ • SERVICE: "Đối │
-│   bán product    │   dev trong      │   tác tech hiểu │
-│ • Industry       │   domain chọn   │   sâu [domain]" │
-│   partners trong │ • PRODUCT: Build │                  │
-│   domain chọn   │   & scale sản    │ • PRODUCT: "Giải │
-│ • Tech partners  │   phẩm riêng    │   pháp [domain]  │
-│   (cloud, API)   │ • Sales & Mktg   │   sẵn dùng,     │
-│                  │   cho cả 2 arm  │   proven"        │
-│                  │                  │                  │
+│ ĐỐI TÁC          │ HOẠT ĐỘNG        │ GIÁ TRỊ          │
+│ CHÍNH             │ CHÍNH            │ CUNG CẤP         │
+│                   │                  │                  │
+│ • Đối tác phân   │ • DỊCH VỤ: Phát │ • DỊCH VỤ: "Đối │
+│   phối sản phẩm  │   triển phần mềm│   tác công nghệ  │
+│ • Đối tác trong  │   trong lĩnh vực│   hiểu sâu       │
+│   lĩnh vực mục   │   mục tiêu      │   [lĩnh vực]"   │
+│   tiêu           │ • SẢN PHẨM:     │                  │
+│ • Đối tác công   │   Phát triển &   │ • SẢN PHẨM:     │
+│   nghệ           │   mở rộng sản   │   "Giải pháp     │
+│   (cloud, API)   │   phẩm riêng    │   [lĩnh vực]     │
+│                   │ • Kinh doanh &   │   sẵn dùng,      │
+│                   │   tiếp thị cho  │   đã kiểm chứng" │
+│                   │   cả 2 mảng     │                  │
+│                   │                  │                  │
 ├──────────────────┼──────────────────┼──────────────────┤
-│ KEY RESOURCES    │                  │ CUSTOMER         │
-│                  │                  │ RELATIONSHIPS    │
-│ • Domain experts │                  │                  │
-│ • Product IP     │                  │ • SERVICE: Long- │
-│ • Reusable       │                  │   term partner   │
-│   platform/      │                  │ • PRODUCT: Self- │
-│   components    │                  │   serve + support│
-│ • Sales team     │                  │ • Community /    │
-│   (không chỉ    │                  │   user group     │
-│   CEO)          │                  │                  │
-│                  │                  │                  │
+│ NGUỒN LỰC        │                  │ QUAN HỆ          │
+│ CHÍNH             │                  │ KHÁCH HÀNG       │
+│                   │                  │                  │
+│ • Chuyên gia      │                  │ • DỊCH VỤ: Đối  │
+│   lĩnh vực       │                  │   tác dài hạn   │
+│ • Tài sản trí    │                  │ • SẢN PHẨM: Tự  │
+│   tuệ (IP)       │                  │   phục vụ +      │
+│ • Nền tảng/thành │                  │   hỗ trợ kỹ     │
+│   phần tái sử    │                  │   thuật          │
+│   dụng           │                  │ • Cộng đồng      │
+│ • Đội ngũ kinh   │                  │   người dùng     │
+│   doanh (không   │                  │                  │
+│   chỉ CEO)       │                  │                  │
+│                   │                  │                  │
 ├──────────────────┴──────────────────┼──────────────────┤
-│ COST STRUCTURE                      │ REVENUE STREAMS  │
-│                                     │                  │
-│ • Lương (giảm tỷ trọng xuống 60%) │ • Service fees   │
-│ • R&D investment (15-20%)          │   (~70% → 50%)  │
-│ • Sales & Marketing (10-15%)       │ • Product license│
-│ • Cloud/Infra cho product           │   / SaaS (~30%) │
-│                                     │ • Maintenance &  │
-│                                     │   support (20%)  │
-└─────────────────────────────────────┴──────────────────┘
+│ CƠ CẤU CHI PHÍ                      │ NGUỒN DOANH THU  │
+│                                      │                  │
+│ • Lương (giảm tỷ trọng xuống 60%)  │ • Phí dịch vụ    │
+│ • Đầu tư R&D (15-20%)              │   (~70% → 50%)  │
+│ • Kinh doanh & Tiếp thị (10-15%)   │ • Bản quyền sản  │
+│ • Hạ tầng cloud cho sản phẩm        │   phẩm/SaaS     │
+│                                      │   (~30%)         │
+│                                      │ • Bảo trì &      │
+│                                      │   hỗ trợ (20%)  │
+└──────────────────────────────────────┴──────────────────┘
 ```
 
 ---
 
-## Phần 3: Đánh Giá Sản Phẩm — Chọn "Product Bet" Đầu Tiên
+## Phần 3: Đánh Giá Sản Phẩm — Chọn Sản Phẩm Đầu Tư Đầu Tiên
 
-### 3.1 Product Spin-off Potential Assessment
+### 3.1 Đánh Giá Tiềm Năng Spin-off
 
-**Workshop Activity 4:** Đánh giá từng sản phẩm đã làm
+**Workshop Activity 4:** Chấm điểm từng sản phẩm đã triển khai
 
-Điểm mỗi tiêu chí từ 1 (thấp) đến 5 (cao):
+Mỗi tiêu chí chấm từ 1 (thấp) đến 5 (cao):
 
 | Tiêu chí | Trọng số | VB Điện tử (Vietlot) | IPTV Khách sạn | Event/Ticket | CMS/Tòa soạn | [Khác] |
 |----------|---------|----------------------|-----------------|-------------|-------------|--------|
-| **Market size** — bao nhiêu KH tiềm năng ở VN? | 20% | | | | | |
-| **Recurring potential** — KH có trả tiền hàng tháng/năm? | 20% | | | | | |
-| **Reusability** — bao nhiêu % code dùng lại cho KH khác? | 15% | | | | | |
-| **Competitive gap** — đối thủ hiện tại mạnh không? | 15% | | | | | |
-| **Domain expertise** — Dolphin hiểu domain này tới đâu? | 10% | | | | | |
-| **Sales channel** — có thể bán mà không qua CEO? | 10% | | | | | |
-| **Margin potential** — khách sẵn sàng trả bao nhiêu? | 10% | | | | | |
-| **Tổng điểm (weighted)** | 100% | | | | | |
+| **Market size** — số lượng khách hàng tiềm năng tại VN | 20% | | | | | |
+| **Recurring potential** — khách hàng có trả phí định kỳ hàng tháng/năm không? | 20% | | | | | |
+| **Reusability** — bao nhiêu phần trăm mã nguồn có thể dùng lại cho khách hàng khác? | 15% | | | | | |
+| **Competitive gap** — mức độ cạnh tranh trên thị trường hiện tại | 15% | | | | | |
+| **Domain expertise** — mức độ hiểu biết chuyên sâu của Dolphin trong lĩnh vực này | 10% | | | | | |
+| **Sales channel** — khả năng bán hàng mà không phụ thuộc vào CEO | 10% | | | | | |
+| **Margin potential** — mức giá khách hàng sẵn sàng chi trả | 10% | | | | | |
+| **Tổng điểm (có trọng số)** | 100% | | | | | |
 
-### 3.2 Tiêu Chí Pass/Fail
+### 3.2 Tiêu Chí Loại Trước (Pass/Fail)
 
-Trước khi chấm điểm, loại bỏ sản phẩm nào KHÔNG đạt các điều kiện tối thiểu:
+Trước khi chấm điểm chi tiết, loại bỏ sản phẩm nào không đạt các điều kiện tối thiểu:
 
 ```
-□ Có ít nhất 20 khách hàng tiềm năng ở Việt Nam?
-  → Nếu thị trường quá niche (ví dụ: chỉ Vietlot cần), không spin off được
+□ Có ít nhất 20 khách hàng tiềm năng tại Việt Nam?
+  Nếu thị trường quá hẹp (ví dụ: chỉ Vietlot cần), không đủ cơ sở để spin off.
 
-□ Khách hàng có pain point đủ lớn để trả tiền hàng tháng/năm?
-  → Nếu khách chỉ cần build 1 lần rồi thôi, không thành product được
+□ Khách hàng có nhu cầu cấp thiết đủ lớn để trả phí định kỳ hàng tháng/năm?
+  Nếu khách hàng chỉ cần triển khai một lần rồi không dùng thêm, không thể chuyển thành sản phẩm.
 
-□ Dolphin có thể build MVP trong ≤ 3 tháng với 3-5 người?
-  → Nếu cần đầu tư quá lớn ban đầu, rủi ro cao cho công ty nhỏ
+□ Dolphin có thể phát triển MVP trong vòng 3 tháng với 3–5 người?
+  Nếu yêu cầu đầu tư ban đầu quá lớn, rủi ro cao đối với quy mô công ty hiện tại.
 
-□ Có thể bán mà không cần CEO đi gặp từng khách?
-  → Nếu vẫn phải rely on relationship selling, chưa phải product
+□ Có thể bán hàng mà không cần CEO trực tiếp gặp từng khách?
+  Nếu vẫn phụ thuộc vào bán hàng qua quan hệ cá nhân, chưa đủ điều kiện thành sản phẩm.
 ```
 
 ### 3.3 Phân Tích Sơ Bộ Từng Sản Phẩm
 
-**Quản lý văn bản điện tử (kiểu Vietlot):**
+**Quản lý văn bản điện tử (dạng Vietlot):**
 ```
-Potential: ★★★☆☆
-+ Nhiều tổ chức/doanh nghiệp VN cần (eOffice, document management)
-+ Xu hướng chuyển đổi số chính phủ & DN
+Tiềm năng: ★★★☆☆
++ Nhiều tổ chức/doanh nghiệp VN có nhu cầu (eOffice, quản lý văn bản)
++ Phù hợp xu hướng chuyển đổi số của khối nhà nước và doanh nghiệp
 - Thị trường đã có nhiều đối thủ (VNPT, Viettel Solutions, Base.vn...)
-- Cần customize nhiều theo từng tổ chức
-? Có thể standardize thành SaaS không?
+- Mỗi tổ chức yêu cầu tùy chỉnh riêng, khó chuẩn hóa
+? Có thể chuẩn hóa thành mô hình SaaS không?
 ```
 
 **Hệ thống giải trí khách sạn (IPTV):**
 ```
-Potential: ★★★★☆
-+ Thị trường hospitality VN đang tăng mạnh
-+ Recurring revenue rõ ràng (monthly subscription per room)
-+ Khách sạn ít khi tự build, sẵn sàng mua giải pháp
-+ Có thể scale: bán thêm khách sạn mới không cần custom nhiều
-- Cần hardware/infra investment
-- Đối thủ quốc tế có thể vào (nhưng giá cao hơn)
-? Có bao nhiêu khách sạn 3-5 sao ở VN? Bao nhiêu chưa có hệ thống?
+Tiềm năng: ★★★★☆
++ Ngành hospitality Việt Nam đang tăng trưởng mạnh
++ Mô hình doanh thu định kỳ rõ ràng (phí thuê bao hàng tháng theo phòng)
++ Khách sạn hiếm khi tự phát triển hệ thống, sẵn sàng mua giải pháp có sẵn
++ Khả năng mở rộng tốt: triển khai thêm cho khách sạn mới mà không cần tùy chỉnh nhiều
+- Đòi hỏi đầu tư phần cứng/hạ tầng ban đầu
+- Đối thủ quốc tế có thể tham gia (nhưng mức giá thường cao hơn)
+? Có bao nhiêu khách sạn 3–5 sao tại VN? Bao nhiêu chưa có hệ thống?
 ```
 
 **Event/Ticket:**
 ```
-Potential: ★★★☆☆
-+ Thị trường event VN phát triển
-+ Có thể SaaS hóa (self-serve platform)
-- Nhiều đối thủ mạnh (Ticketbox, Eventbrite...)
-- Seasonal, revenue không đều
-? Có niche nào chưa ai phục vụ tốt?
+Tiềm năng: ★★★☆☆
++ Thị trường sự kiện tại VN đang phát triển
++ Có thể chuyển thành nền tảng SaaS (tự phục vụ)
+- Nhiều đối thủ mạnh đã có mặt (Ticketbox, Eventbrite...)
+- Doanh thu theo mùa, không ổn định
+? Có phân khúc nào chưa được phục vụ tốt?
 ```
 
 **CMS/Tòa soạn điện tử:**
 ```
-Potential: ★★☆☆☆
-+ Hiểu domain báo chí
-- Thị trường nhỏ (bao nhiêu tòa soạn ở VN?)
-- Nhiều CMS miễn phí/giá rẻ (WordPress, Contentful)
-- Khó scale ngoài VN
-? Có yếu tố nào unique không?
+Tiềm năng: ★★☆☆☆
++ Dolphin có kiến thức chuyên sâu về lĩnh vực báo chí
+- Quy mô thị trường nhỏ (số lượng tòa soạn tại VN có hạn)
+- Nhiều CMS miễn phí hoặc giá thấp trên thị trường (WordPress, Contentful)
+- Khó mở rộng ra ngoài Việt Nam
+? Có yếu tố khác biệt nào đáng kể không?
 ```
 
-⚠️ **Lưu ý:** Đây chỉ là đánh giá sơ bộ dựa trên thông tin hiện có. CEO và team cần validate bằng data thực tế.
+⚠️ **Lưu ý:** Đây là đánh giá sơ bộ dựa trên thông tin hiện có. CEO và ban lãnh đạo cần kiểm chứng bằng dữ liệu thực tế trước khi đưa ra quyết định.
 
-### 3.4 Decision Framework: "Invest / Watch / Kill"
+### 3.4 Khung Quyết Định: Invest / Watch / Kill
 
-**Workshop Activity 5:** Sau khi scoring, plot lên ma trận quyết định
+**Workshop Activity 5:** Sau khi chấm điểm, phân loại từng sản phẩm theo ma trận quyết định
 
 ```
-    Product-Market Fit Potential (High)
+    Tiềm năng Product-Market Fit (Cao)
          │
   WATCH  │  INVEST
-  (Pilot │  (Đầu tư 15-20%
-   nhỏ,  │   resource,
-   test   │   build MVP,
-   thêm) │   find PMF)
+  (Thử   │  (Đầu tư 15-20%
+   nghiệm│   nguồn lực,
+   nhỏ,  │   phát triển MVP,
+   kiểm  │   tìm Product-
+   chứng │   Market Fit)
+   thêm) │
   ───────┼────────────
   KILL   │  WATCH
   (Không │  (Có thế mạnh
-   đầu   │   nhưng market
-   tư)   │   chưa rõ)
+   đầu   │   nhưng thị
+   tư)   │   trường chưa
+         │   rõ ràng)
          │
-    Dolphin's Competitive Advantage (High) →
+    Lợi thế cạnh tranh của Dolphin (Cao) →
 ```
 
-Chỉ chọn **1 sản phẩm** vào ô INVEST. Đây là "product bet" đầu tiên.
+Chỉ chọn **1 sản phẩm** vào ô INVEST. Đây là sản phẩm đầu tư chiến lược đầu tiên.
 
 ---
 
-## Phần 4: Chuyển Đổi Service Arm — Từ "Nhận Mọi Thứ" Sang "Chọn Lọc"
+## Phần 4: Chuyển Đổi Mảng Dịch Vụ — Từ "Nhận Mọi Thứ" Sang "Chọn Lọc"
 
-### 4.1 Service Domain Focus
+### 4.1 Tập Trung Lĩnh Vực Cho Mảng Dịch Vụ
 
-Khi đã chọn product bet, Service Arm cũng cần focus vào domain liên quan:
-
-```
-Ví dụ: Nếu product bet = IPTV Khách sạn
-
-Service Arm nên:
-✅ Nhận project hospitality tech (PMS, booking, F&B tech)
-✅ Nhận project entertainment/media tech
-✅ Nhận project IoT/smart device
-⚠️ Cân nhắc project gần domain (retail tech, proptech)
-❌ Tránh project không liên quan (logistics, fintech, education...)
-
-Lý do: Mỗi service project trong domain tăng:
-• Domain knowledge cho product team
-• Relationships với potential product customers
-• Reusable components cho product
-• Credibility trong industry
-```
-
-### 4.2 "IP Harvesting" từ Service Projects
-
-**Quy trình bắt buộc cho mọi service project:**
+Khi đã chọn sản phẩm đầu tư, mảng dịch vụ cũng cần tập trung vào lĩnh vực liên quan:
 
 ```
-Trước project:
-□ Project có trong domain focus không?
-□ Components nào có thể reuse cho product?
-□ Learnings nào cần capture?
+Ví dụ: Nếu sản phẩm đầu tư = IPTV Khách sạn
 
-Trong project:
-□ Architect với reusability in mind
-□ Tách phần generic ra khỏi phần custom
-□ Document domain insights
+Mảng dịch vụ nên:
+✅ Nhận dự án hospitality tech (PMS, đặt phòng, F&B tech)
+✅ Nhận dự án entertainment/media tech
+✅ Nhận dự án IoT/thiết bị thông minh
+⚠️ Cân nhắc dự án gần lĩnh vực (retail tech, proptech)
+❌ Tránh dự án không liên quan (logistics, fintech, education...)
 
-Sau project:
-□ Extract reusable components vào shared library
-□ Write case study (dùng cho marketing cả service & product)
-□ Update product roadmap nếu có insights mới
-□ Debrief: domain knowledge nào team đã learn?
+Lý do: Mỗi dự án dịch vụ trong cùng lĩnh vực sẽ tích lũy thêm:
+• Kiến thức chuyên ngành cho đội sản phẩm
+• Quan hệ với khách hàng tiềm năng của sản phẩm
+• Thành phần phần mềm có thể tái sử dụng
+• Uy tín chuyên môn trong ngành
 ```
 
-### 4.3 Giải Quyết Vấn Đề "CEO = Sales"
+### 4.2 Khai Thác Tài Sản Trí Tuệ Từ Dự Án Dịch Vụ
 
-**Transition Plan cho Sales:**
+**Quy trình bắt buộc cho mọi dự án dịch vụ:**
 
 ```
-Phase 1 (0-6 tháng): CEO vẫn lead, nhưng bắt đầu xây
-├── CEO document quy trình sales hiện tại
-├── CEO giới thiệu key relationships cho 1 sales hire
-├── Tuyển 1 BD/Account Manager
-├── Xây dựng sales collateral (portfolio, case studies)
-└── CEO bắt đầu dành 20% thời gian cho product vision
+Trước dự án:
+□ Dự án có thuộc lĩnh vực trọng tâm không?
+□ Thành phần nào có thể tái sử dụng cho sản phẩm?
+□ Kiến thức nào cần ghi nhận lại?
 
-Phase 2 (6-12 tháng): Chuyển dần
-├── BD Manager tự handle 30-50% pipeline
-├── CEO focus vào strategic deals + product direction
-├── Bắt đầu inbound marketing (content, SEO trong domain)
-├── Xây relationships với industry partners
-└── CEO dành 40% thời gian cho product
+Trong dự án:
+□ Thiết kế kiến trúc hướng tới khả năng tái sử dụng
+□ Tách rõ phần chung ra khỏi phần tùy chỉnh riêng
+□ Ghi chép kiến thức chuyên ngành thu được
 
-Phase 3 (12-24 tháng): CEO = Chief Product Officer
-├── BD Manager + team handle 80%+ service sales
-├── CEO lead product strategy & vision
-├── Product có own sales channel (website, self-serve)
-├── CEO chỉ involve trong strategic/large service deals
-└── CEO dành 60%+ thời gian cho product
+Sau dự án:
+□ Tách các thành phần tái sử dụng vào thư viện dùng chung
+□ Viết case study (phục vụ tiếp thị cho cả mảng dịch vụ lẫn sản phẩm)
+□ Cập nhật lộ trình sản phẩm nếu có phát hiện mới
+□ Tổng kết: đội ngũ đã tích lũy thêm kiến thức chuyên ngành gì?
+```
+
+### 4.3 Giải Quyết Vấn Đề CEO Kiêm Nhiệm Bán Hàng
+
+**Kế hoạch chuyển giao:**
+
+```
+Giai đoạn 1 (0–6 tháng): CEO vẫn chủ trì, bắt đầu xây dựng nền tảng
+├── CEO tài liệu hóa quy trình bán hàng hiện tại
+├── CEO giới thiệu các mối quan hệ trọng yếu cho nhân sự kinh doanh mới
+├── Tuyển 1 Trưởng phòng Kinh doanh / Account Manager
+├── Xây dựng tài liệu bán hàng (portfolio, case study)
+└── CEO bắt đầu dành 20% thời gian cho tầm nhìn sản phẩm
+
+Giai đoạn 2 (6–12 tháng): Chuyển giao dần
+├── Trưởng phòng KD tự đảm nhận 30–50% pipeline
+├── CEO tập trung vào thương vụ chiến lược + định hướng sản phẩm
+├── Triển khai tiếp thị nội dung (content marketing, SEO trong lĩnh vực)
+├── Xây dựng quan hệ với đối tác ngành
+└── CEO dành 40% thời gian cho sản phẩm
+
+Giai đoạn 3 (12–24 tháng): CEO chuyển trọng tâm sang sản phẩm
+├── Đội kinh doanh đảm nhận 80%+ pipeline dịch vụ
+├── CEO dẫn dắt chiến lược và tầm nhìn sản phẩm
+├── Sản phẩm có kênh bán hàng riêng (website, tự phục vụ)
+├── CEO chỉ tham gia các thương vụ dịch vụ lớn/chiến lược
+└── CEO dành 60%+ thời gian cho sản phẩm
 ```
 
 ---
 
-## Phần 5: Financial Model & Milestones
+## Phần 5: Mô Hình Tài Chính & Cột Mốc
 
-### 5.1 Financial Planning cho Hybrid Model
+### 5.1 Quy Hoạch Tài Chính Cho Mô Hình Kết Hợp
 
-**Workshop Activity 6:** Ước tính financial model
+**Workshop Activity 6:** Ước tính mô hình tài chính
 
 ```
 HIỆN TẠI:
-Revenue: ___ tỷ VND/năm
-Gross Margin: ___%
-Team: ~50 người
-Revenue per head: ___ triệu VND/tháng
-Recurring revenue: ___%
+Doanh thu: ___ tỷ VND/năm
+Biên lợi nhuận gộp: ___%
+Nhân sự: ~50 người
+Doanh thu trên đầu người: ___ triệu VND/tháng
+Doanh thu định kỳ: ___%
 
-YEAR 1 TARGET:
-Service revenue: ___ tỷ (duy trì hoặc tăng nhẹ)
-Product investment: ___ tỷ (từ margin service)
-Product revenue: ___ triệu (bắt đầu từ rất nhỏ)
-Team allocation: 42 service / 5 product / 3 shared
-Burn rate cho product team: ~___ triệu/tháng
+MỤC TIÊU NĂM 1:
+Doanh thu dịch vụ: ___ tỷ (duy trì hoặc tăng nhẹ)
+Đầu tư cho sản phẩm: ___ tỷ (từ lợi nhuận mảng dịch vụ)
+Doanh thu sản phẩm: ___ triệu (bắt đầu từ quy mô nhỏ)
+Phân bổ nhân sự: 42 dịch vụ / 5 sản phẩm / 3 dùng chung
+Chi phí đội sản phẩm: ~___ triệu/tháng
 
-YEAR 3 TARGET:
-Service revenue: ___ tỷ
-Product revenue: ___ tỷ (target 30% tổng)
-Blended margin: ___% (target tăng 10pp so với hiện tại)
-Team: __ service / __ product / __ shared
+MỤC TIÊU NĂM 3:
+Doanh thu dịch vụ: ___ tỷ
+Doanh thu sản phẩm: ___ tỷ (mục tiêu 30% tổng doanh thu)
+Biên lợi nhuận tổng hợp: ___% (mục tiêu tăng 10 điểm % so với hiện tại)
+Nhân sự: __ dịch vụ / __ sản phẩm / __ dùng chung
 ```
 
-### 5.2 "Runway Thinking" — Bao Lâu Dolphin Có Thể Fund Product?
+### 5.2 Tư Duy Runway — Dolphin Có Thể Tài Trợ Sản Phẩm Bao Lâu?
 
 ```
-Product Team Cost / tháng = Số người × Avg salary × 1.3 (overhead)
-Ví dụ: 5 người × 25 triệu × 1.3 = ~162 triệu/tháng
+Chi phí đội sản phẩm / tháng = Số người × Lương trung bình × 1,3 (chi phí quản lý)
+Ví dụ: 5 người × 25 triệu × 1,3 = ~162 triệu/tháng
 
-Service Arm monthly profit cần ≥ Product Team Cost + buffer 20%
-→ Service cần generate ≥ 195 triệu profit/tháng để fund product
+Lợi nhuận mảng dịch vụ hàng tháng cần ≥ Chi phí đội sản phẩm + 20% dự phòng
+→ Mảng dịch vụ cần tạo ra ≥ 195 triệu lợi nhuận/tháng để tài trợ mảng sản phẩm
 
-Nếu Service margin = 25% → cần Service revenue ≥ 780 triệu/tháng
-Nếu Service margin = 30% → cần Service revenue ≥ 650 triệu/tháng
+Nếu biên lợi nhuận dịch vụ = 25% → cần doanh thu dịch vụ ≥ 780 triệu/tháng
+Nếu biên lợi nhuận dịch vụ = 30% → cần doanh thu dịch vụ ≥ 650 triệu/tháng
 
-Runway = (Cash reserves + Projected service profit) / Product burn rate
-Target: Runway ≥ 12 tháng trước khi product cần self-sustain
+Runway = (Tiền mặt dự trữ + Lợi nhuận dịch vụ dự kiến) / Chi phí đội sản phẩm
+Mục tiêu: Runway ≥ 12 tháng trước khi sản phẩm cần tự trang trải
 ```
 
-### 5.3 Key Milestones & Go/No-Go Gates
+### 5.3 Cột Mốc & Điểm Quyết Định Tiếp Tục/Dừng
 
-| Milestone | Timeline | Go/No-Go Criteria |
-|-----------|----------|-------------------|
-| **Product bet selected** | Month 0 | Leadership aligned, ICP defined |
-| **MVP built** | Month 3 | Core features working, usable |
-| **First 3 pilots** | Month 6 | 3 khách dùng thử, có feedback |
-| **First paying customer** | Month 9 | ≥ 1 khách trả tiền (không phải miễn phí) |
-| **Product-Market Fit signal** | Month 12 | ≥ 5 paying customers, NPS > 30, churn < 10%/month |
-| **BU viability** | Month 18 | Revenue cover ≥ 50% product team cost |
-| **BU independent** | Month 24-36 | Product BU profitable, own P&L |
+| Cột mốc | Thời điểm | Tiêu chí đánh giá |
+|---------|----------|-------------------|
+| **Chọn sản phẩm đầu tư** | Tháng 0 | Ban lãnh đạo thống nhất, xác định rõ chân dung khách hàng mục tiêu |
+| **Hoàn thành MVP** | Tháng 3 | Các tính năng cốt lõi hoạt động, sản phẩm có thể sử dụng |
+| **3 khách hàng thử nghiệm đầu tiên** | Tháng 6 | 3 khách hàng dùng thử, có phản hồi cụ thể |
+| **Khách hàng trả phí đầu tiên** | Tháng 9 | Ít nhất 1 khách hàng trả phí (không phải dùng miễn phí) |
+| **Tín hiệu Product-Market Fit** | Tháng 12 | ≥ 5 khách hàng trả phí, NPS > 30, tỷ lệ rời bỏ < 10%/tháng |
+| **Đơn vị kinh doanh khả thi** | Tháng 18 | Doanh thu sản phẩm trang trải ≥ 50% chi phí đội ngũ |
+| **Đơn vị kinh doanh độc lập** | Tháng 24–36 | Mảng sản phẩm có lãi, có báo cáo lãi/lỗ riêng |
 
-**Go/No-Go tại Month 12:**
+**Điểm quyết định tại Tháng 12:**
 ```
-GO nếu:
-✅ ≥ 5 paying customers
-✅ Positive NPS (customers recommend)
-✅ Monthly churn < 10%
-✅ Clear path to cover product team cost in 12 months
-✅ Service arm vẫn healthy
+TIẾP TỤC nếu:
+✅ Có ≥ 5 khách hàng trả phí
+✅ Khách hàng sẵn sàng giới thiệu cho người khác (NPS tích cực)
+✅ Tỷ lệ rời bỏ hàng tháng < 10%
+✅ Có lộ trình rõ ràng để trang trải chi phí đội sản phẩm trong 12 tháng tới
+✅ Mảng dịch vụ vẫn hoạt động ổn định
 
-NO-GO nếu:
-❌ < 3 paying customers sau 12 tháng
-❌ Khách pilot churn hết
-❌ Service arm bị ảnh hưởng nghiêm trọng
-❌ No clear differentiation vs competitors
+DỪNG nếu:
+❌ Dưới 3 khách hàng trả phí sau 12 tháng
+❌ Khách hàng thử nghiệm đều ngừng sử dụng
+❌ Mảng dịch vụ bị ảnh hưởng nghiêm trọng
+❌ Không tìm được yếu tố khác biệt so với đối thủ
 
-→ Nếu NO-GO: Kill product bet, harvest learnings, chọn bet mới
-```
-
----
-
-## Phần 6: Rủi Ro & Cách Giảm Thiểu
-
-### 6.1 Top Risks
-
-| Risk | Xác suất | Impact | Mitigation |
-|------|---------|--------|------------|
-| Service revenue giảm khi CEO focus sang product | Cao | Cao | Tuyển BD Manager sớm, CEO chuyển dần |
-| Product không tìm được PMF | Trung bình | Cao | Lean approach, pilot sớm, kill fast rule |
-| Team bị kéo qua lại giữa service & product | Cao | Trung bình | Tách team rõ ràng, không share developer |
-| Cash flow đứt khi cả 2 arm chưa stable | Trung bình | Rất cao | Runway ≥ 12 tháng, never invest > service profit |
-| CEO không buông được service sales | Cao | Cao | Coaching, milestones rõ ràng, accountability |
-| Chọn sai product bet | Trung bình | Trung bình | Data-driven selection, 6-month gate |
-
-### 6.2 "Golden Rules" Cho Quá Trình Chuyển Đổi
-
-```
-1. KHÔNG BAO GIỜ đầu tư vào product nhiều hơn monthly profit của service
-2. KHÔNG BAO GIỜ pull product developers sang service project (ngoại trừ 
-   emergency có thể mất khách hàng lớn)
-3. LUÔN có 6 tháng runway cho product team
-4. KILL product bet nếu không đạt Go/No-Go gate
-5. CEO PHẢI có succession plan cho sales trong 12 tháng đầu
+Nếu DỪNG: ngừng đầu tư vào sản phẩm hiện tại, rút bài học, chọn hướng đi mới.
 ```
 
 ---
 
-## Phần 7: Case Studies — Công Ty Nhỏ VN Chuyển Từ Service Sang Product
+## Phần 6: Rủi Ro & Biện Pháp Giảm Thiểu
 
-### Case Study 1: Base.vn
-- **Từ:** Agency làm web/app theo đơn
-- **Sang:** Platform quản trị doanh nghiệp (SaaS)
-- **Cách làm:** Nhận ra nhiều khách cần cùng loại tool → productize → SaaS
-- **Kết quả:** Trở thành 1 trong top workplace platform VN
-- **Bài học:** Quan sát pattern từ service projects → tìm common need
+### 6.1 Các Rủi Ro Chính
 
-### Case Study 2: Palexy (Analytics cho retail)
-- **Từ:** Làm project AI/analytics cho retailers
-- **Sang:** SaaS platform phân tích hành vi khách hàng trong store
-- **Cách làm:** 1 project thành công → standardize → bán cho retailers khác
-- **Bài học:** 1 custom project có thể trở thành product nếu market đủ lớn
+| Rủi ro | Xác suất | Mức độ ảnh hưởng | Biện pháp giảm thiểu |
+|--------|---------|------------------|---------------------|
+| Doanh thu dịch vụ sụt giảm khi CEO chuyển trọng tâm sang sản phẩm | Cao | Cao | Tuyển Trưởng phòng KD sớm, CEO chuyển giao dần |
+| Sản phẩm không đạt Product-Market Fit | Trung bình | Cao | Tiếp cận tinh gọn, thử nghiệm sớm, nguyên tắc dừng sớm |
+| Nhân sự bị kéo qua lại giữa hai mảng | Cao | Trung bình | Tách đội ngũ rõ ràng, không chia sẻ lập trình viên |
+| Đứt gãy cash flow khi cả hai mảng chưa ổn định | Trung bình | Rất cao | Duy trì runway ≥ 12 tháng, không đầu tư vượt lợi nhuận dịch vụ |
+| CEO không chuyển giao được vai trò bán hàng | Cao | Cao | Huấn luyện, cột mốc rõ ràng, cơ chế giám sát |
+| Chọn sai sản phẩm đầu tư | Trung bình | Trung bình | Quyết định dựa trên dữ liệu, điểm đánh giá lại tại tháng 6 |
 
-### Case Study 3: KMS Technology → QASymphony
-- **Từ:** Outsourcing company
-- **Sang:** Build QASymphony (test management platform) song song
-- **Cách làm:** Service fund product, tách BU riêng, cuối cùng sell cho Tricentis
-- **Bài học:** Hybrid model works, nhưng cần tách biệt rõ ràng
+### 6.2 Nguyên Tắc Bất Di Bất Dịch Trong Quá Trình Chuyển Đổi
+
+```
+1. KHÔNG BAO GIỜ đầu tư vào sản phẩm nhiều hơn lợi nhuận hàng tháng của mảng dịch vụ.
+2. KHÔNG BAO GIỜ điều chuyển lập trình viên sản phẩm sang dự án dịch vụ
+   (ngoại trừ tình huống khẩn cấp có nguy cơ mất khách hàng lớn).
+3. LUÔN duy trì ít nhất 6 tháng runway cho đội sản phẩm.
+4. DỪNG đầu tư vào sản phẩm nếu không đạt tiêu chí tại các điểm quyết định.
+5. CEO PHẢI có kế hoạch kế nhiệm cho vai trò bán hàng trong 12 tháng đầu tiên.
+```
 
 ---
 
-## Deliverables Sau Module 1
+## Phần 7: Tình Huống Tham Khảo — Công Ty Việt Nam Chuyển Từ Dịch Vụ Sang Sản Phẩm
 
-| # | Deliverable | Owner | Status |
-|---|------------|-------|--------|
-| 1 | Bài chẩn đoán 10 câu (completed) | Leadership | □ |
-| 2 | Business Model Canvas — Hiện tại (completed) | CEO + Team | □ |
-| 3 | Product Spin-off Assessment (scored) | CEO + PM | □ |
-| 4 | Product bet đầu tiên được chọn | CEO | □ |
-| 5 | Service domain focus xác định | CEO + BD | □ |
-| 6 | Financial model & runway calculation | CEO + Finance | □ |
-| 7 | CEO transition plan (sales → product) | CEO | □ |
-| 8 | Business Model Canvas — Mục tiêu Year 3 | Leadership | □ |
-| 9 | Go/No-Go milestones agreed | Leadership | □ |
+### Tình huống 1: Base.vn
+- **Xuất phát:** Agency phát triển web/ứng dụng theo đơn đặt hàng
+- **Hiện tại:** Nền tảng quản trị doanh nghiệp (SaaS)
+- **Quá trình:** Nhận ra nhiều khách hàng có chung nhu cầu, chuẩn hóa giải pháp thành sản phẩm, chuyển sang mô hình SaaS
+- **Kết quả:** Trở thành một trong những nền tảng quản trị doanh nghiệp hàng đầu Việt Nam
+- **Bài học:** Quan sát nhu cầu lặp lại từ các dự án dịch vụ để tìm ra sản phẩm tiềm năng
+
+### Tình huống 2: Palexy (Analytics cho ngành bán lẻ)
+- **Xuất phát:** Triển khai dự án phân tích dữ liệu cho các nhà bán lẻ
+- **Hiện tại:** Nền tảng SaaS phân tích hành vi khách hàng tại cửa hàng
+- **Quá trình:** Một dự án thành công được chuẩn hóa và triển khai cho các nhà bán lẻ khác
+- **Bài học:** Một dự án dịch vụ riêng lẻ có thể trở thành sản phẩm nếu thị trường đủ lớn
+
+### Tình huống 3: KMS Technology → QASymphony
+- **Xuất phát:** Công ty outsourcing
+- **Hiện tại:** Phát triển QASymphony (nền tảng quản lý kiểm thử phần mềm) song song với mảng dịch vụ
+- **Quá trình:** Mảng dịch vụ tài trợ cho mảng sản phẩm, tách thành BU riêng, sau đó bán cho Tricentis
+- **Bài học:** Mô hình kết hợp dịch vụ–sản phẩm khả thi, nhưng cần tách biệt tổ chức rõ ràng
+
+---
+
+## Kết Quả Cần Đạt Sau Module 1
+
+| # | Kết quả | Người chịu trách nhiệm | Trạng thái |
+|---|---------|------------------------|-----------|
+| 1 | Hoàn thành bài chẩn đoán 10 câu | Ban lãnh đạo | □ |
+| 2 | Business Model Canvas hiện tại (đã điền) | CEO + Ban lãnh đạo | □ |
+| 3 | Bảng đánh giá tiềm năng spin-off (đã chấm điểm) | CEO + PM | □ |
+| 4 | Xác định sản phẩm đầu tư đầu tiên | CEO | □ |
+| 5 | Xác định lĩnh vực trọng tâm cho mảng dịch vụ | CEO + Kinh doanh | □ |
+| 6 | Mô hình tài chính & tính toán runway | CEO + Tài chính | □ |
+| 7 | Kế hoạch chuyển giao vai trò bán hàng của CEO | CEO | □ |
+| 8 | Business Model Canvas mục tiêu Năm 3 | Ban lãnh đạo | □ |
+| 9 | Thống nhất các cột mốc và điểm quyết định | Ban lãnh đạo | □ |
 
 ---
 
 ## Kết Nối Sang Module 2
 
-Khi đã có:
-- ✅ Product bet được chọn
-- ✅ Service domain focus xác định
-- ✅ Hybrid model agreed
+Khi đã hoàn thành Module 1 với các kết quả:
+- ✅ Sản phẩm đầu tư đã được chọn
+- ✅ Lĩnh vực trọng tâm cho mảng dịch vụ đã xác định
+- ✅ Ban lãnh đạo thống nhất mô hình kết hợp
 
-→ Module 2 sẽ thiết kế chi tiết:
-- Portfolio service nào giữ, bỏ, phát triển thêm (align với domain focus)
-- Product roadmap và MVP scope cho product bet
-- Pricing strategy cho cả service (nâng margin) và product (SaaS/subscription)
+Module 2 sẽ thiết kế chi tiết:
+- Portfolio dịch vụ: giữ lại, loại bỏ, hoặc phát triển thêm dịch vụ nào (phù hợp với lĩnh vực trọng tâm)
+- Lộ trình sản phẩm và phạm vi MVP cho sản phẩm đã chọn
+- Chiến lược định giá cho cả mảng dịch vụ (nâng biên lợi nhuận) và sản phẩm (SaaS/thuê bao)
