@@ -1,6 +1,6 @@
 import json
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 
 
 class SessionCreate(BaseModel):
@@ -33,6 +33,15 @@ class SessionDetail(SessionOut):
 
 class JoinSession(BaseModel):
     name: str
+    role: str | None = None
+
+
+class JoinByModule(BaseModel):
+    model_config = {"populate_by_name": True}
+
+    module_id: str = Field(alias="moduleId")
+    name: str
+    role: str | None = None
 
 
 class FacilitatorAuth(BaseModel):

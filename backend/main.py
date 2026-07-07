@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from core.config import CORS_ORIGINS, DEFAULT_SESSION_ID
+from core.config import CORS_ORIGINS, DEFAULT_SESSION_ID, DEFAULT_MODULE_ID
 from db import Base, engine, SessionLocal
 from models import Session
 from routes import sessions, participants, responses, facilitator
@@ -42,7 +42,7 @@ def _seed_default_session():
     try:
         existing = db.query(Session).filter(Session.id == DEFAULT_SESSION_ID).first()
         if not existing:
-            db.add(Session(id=DEFAULT_SESSION_ID, module_id="module-1", name="Module 1 — Default Session"))
+            db.add(Session(id=DEFAULT_SESSION_ID, module_id=DEFAULT_MODULE_ID, name="Module 1 — Default Session"))
             db.commit()
     finally:
         db.close()

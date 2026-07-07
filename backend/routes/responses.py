@@ -45,13 +45,25 @@ def upsert_response(
         )
         db.add(existing)
 
-    activity_num = int(activity_id.replace("activity-", "")) if activity_id.startswith("activity-") else 0
+    activity_num = _activity_number(activity_id)
     if activity_num > 0:
         current_user.last_activity = max(current_user.last_activity, activity_num)
 
     db.commit()
     db.refresh(existing)
     return existing
+
+
+def _activity_number(activity_id: str) -> int:
+    """Parse activity index from `activity-1` or `activity_1` formats."""
+    lowered = activity_id.lower()
+    for prefix in ("activity-", "activity_"):
+        if lowered.startswith(prefix):
+            try:
+                return int(lowered[len(prefix):])
+            except ValueError:
+                return 0
+    return 0
 
 
 @router.get("/{participant_id}/responses", response_model=list[ResponseOut])

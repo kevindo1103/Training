@@ -27,7 +27,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -148,6 +153,47 @@
               }
             }
           }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/join": {
+      "post": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "Join By Module",
+        "operationId": "join_by_module_api_sessions_join_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinByModule"
+              }
+            }
+          },
+          "required": true
         },
         "responses": {
           "201": {
@@ -533,6 +579,35 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "JoinByModule": {
+        "properties": {
+          "moduleId": {
+            "type": "string",
+            "title": "Moduleid"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          }
+        },
+        "type": "object",
+        "required": [
+          "moduleId",
+          "name"
+        ],
+        "title": "JoinByModule"
+      },
       "JoinResponse": {
         "properties": {
           "participant_id": {
@@ -561,6 +636,17 @@
           "name": {
             "type": "string",
             "title": "Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
           }
         },
         "type": "object",

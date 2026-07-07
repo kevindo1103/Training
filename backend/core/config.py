@@ -6,7 +6,8 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./training.db")
 PORT = int(os.getenv("PORT", "8000"))
-DEFAULT_SESSION_ID = "default-module1-session"
+DEFAULT_SESSION_ID = os.getenv("DEFAULT_SESSION_ID", "default-module1-session")
+DEFAULT_MODULE_ID = os.getenv("DEFAULT_MODULE_ID", "module1")
 
 _JWT_SECRET_DEFAULT = "change-me-in-production"
 JWT_SECRET = os.getenv("JWT_SECRET", _JWT_SECRET_DEFAULT)

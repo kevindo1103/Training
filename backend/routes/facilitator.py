@@ -76,7 +76,7 @@ def get_activity_detail(
 
 
 def _aggregate_survey(responses: list[Response]) -> dict:
-    survey_responses = [r for r in responses if r.activity_type == "survey"]
+    survey_responses = [r for r in responses if r.activity_type == "survey" and r.completed]
     if not survey_responses:
         return {"averages": {}, "thresholds": {"safe": 0, "warning": 0, "critical": 0}, "count": 0}
 
@@ -121,7 +121,7 @@ CRITERIA_WEIGHTS = {
 
 
 def _aggregate_matrix(responses: list[Response]) -> dict:
-    matrix_responses = [r for r in responses if r.activity_type == "matrix"]
+    matrix_responses = [r for r in responses if r.activity_type == "matrix" and r.completed]
     if not matrix_responses:
         return {"products": {}, "count": 0}
 
@@ -151,7 +151,7 @@ def _aggregate_iwk(responses: list[Response]) -> dict:
 
     iwk_responses = []
     for r in responses:
-        if r.activity_type != "form":
+        if r.activity_type != "form" or not r.completed:
             continue
         data = json.loads(r.data)
         if any(k in data for k in ["invest", "watch", "kill"]):
