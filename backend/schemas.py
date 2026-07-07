@@ -33,7 +33,10 @@ class SessionDetail(SessionOut):
 
 class JoinSession(BaseModel):
     name: str
-    role: str | None = None
+
+
+class FacilitatorAuth(BaseModel):
+    secret: str
 
 
 class JoinResponse(BaseModel):

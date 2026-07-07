@@ -2,7 +2,7 @@ import json
 from collections import defaultdict
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from core.auth import require_facilitator
 from db import get_db
@@ -58,14 +58,15 @@ def get_activity_detail(
     responses = (
         db.query(Response)
         .filter(Response.session_id == session_id, Response.activity_id == activity_id)
+        .options(joinedload(Response.participant))
         .all()
     )
 
     results = []
     for r in responses:
-        participant = db.query(Participant).filter(Participant.id == r.participant_id).first()
+        p = r.participant
         results.append({
-            "participant": {"id": participant.id, "name": participant.name, "role": participant.role} if participant else None,
+            "participant": {"id": p.id, "name": p.name, "role": p.role} if p else None,
             "data": json.loads(r.data),
             "completed": bool(r.completed),
             "updated_at": r.updated_at,
@@ -86,7 +87,10 @@ def _aggregate_survey(responses: list[Response]) -> dict:
         data = json.loads(r.data)
         total = 0
         for key, val in data.items():
-            score = int(val) if isinstance(val, (int, float, str)) and str(val).isdigit() else 0
+            try:
+                score = int(round(float(val)))
+            except (TypeError, ValueError):
+                score = 0
             all_scores[key].append(score)
             total += score
         totals.append(total)

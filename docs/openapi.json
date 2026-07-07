@@ -81,6 +81,11 @@
         ],
         "summary": "Get Session",
         "operationId": "get_session_api_sessions__session_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "session_id",
@@ -140,6 +145,58 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/JoinSession"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{session_id}/facilitator-auth": {
+      "post": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "Facilitator Auth",
+        "operationId": "facilitator_auth_api_sessions__session_id__facilitator_auth_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FacilitatorAuth"
               }
             }
           }
@@ -450,6 +507,19 @@
   },
   "components": {
     "schemas": {
+      "FacilitatorAuth": {
+        "properties": {
+          "secret": {
+            "type": "string",
+            "title": "Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "secret"
+        ],
+        "title": "FacilitatorAuth"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -491,17 +561,6 @@
           "name": {
             "type": "string",
             "title": "Name"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role"
           }
         },
         "type": "object",
