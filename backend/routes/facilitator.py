@@ -4,6 +4,7 @@ from collections import defaultdict
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from core.auth import require_facilitator
 from db import get_db
 from models import Session as SessionModel, Participant, Response
 
@@ -11,7 +12,7 @@ router = APIRouter(prefix="/api/facilitator", tags=["facilitator"])
 
 
 @router.get("/{session_id}/summary")
-def get_summary(session_id: str, db: Session = Depends(get_db)):
+def get_summary(session_id: str, _=Depends(require_facilitator), db: Session = Depends(get_db)):
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -47,7 +48,9 @@ def get_summary(session_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{session_id}/activity/{activity_id}")
-def get_activity_detail(session_id: str, activity_id: str, db: Session = Depends(get_db)):
+def get_activity_detail(
+    session_id: str, activity_id: str, _=Depends(require_facilitator), db: Session = Depends(get_db),
+):
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -139,17 +142,23 @@ def _aggregate_matrix(responses: list[Response]) -> dict:
 
 
 def _aggregate_iwk(responses: list[Response]) -> dict:
-    iwk_responses = [r for r in responses if r.activity_type == "form" and any(
-        k in json.loads(r.data) for k in ["invest", "watch", "kill"]
-    )] if responses else []
+    if not responses:
+        return {"tally": {}, "count": 0}
+
+    iwk_responses = []
+    for r in responses:
+        if r.activity_type != "form":
+            continue
+        data = json.loads(r.data)
+        if any(k in data for k in ["invest", "watch", "kill"]):
+            iwk_responses.append((r, data))
 
     if not iwk_responses:
         return {"tally": {}, "count": 0}
 
     tally = defaultdict(lambda: {"invest": 0, "watch": 0, "kill": 0})
 
-    for r in iwk_responses:
-        data = json.loads(r.data)
+    for _, data in iwk_responses:
         for decision in ["invest", "watch", "kill"]:
             products = data.get(decision, [])
             if isinstance(products, list):

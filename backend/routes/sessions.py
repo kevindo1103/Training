@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from core.auth import create_token, get_current_user
 from db import get_db
 from models import Session as SessionModel, Participant
 from schemas import SessionCreate, SessionOut, SessionDetail, JoinSession, JoinResponse
@@ -9,7 +10,7 @@ router = APIRouter(prefix="/api/sessions", tags=["sessions"])
 
 
 @router.post("", response_model=SessionOut, status_code=201)
-def create_session(body: SessionCreate, db: Session = Depends(get_db)):
+def create_session(body: SessionCreate, _=Depends(get_current_user), db: Session = Depends(get_db)):
     session = SessionModel(module_id=body.module_id, name=body.name)
     db.add(session)
     db.commit()
@@ -42,4 +43,6 @@ def join_session(session_id: str, body: JoinSession, db: Session = Depends(get_d
     db.add(participant)
     db.commit()
     db.refresh(participant)
-    return JoinResponse(participant_id=participant.id, session_id=session_id)
+
+    token = create_token(participant.id, session_id, body.role)
+    return JoinResponse(participant_id=participant.id, session_id=session_id, token=token)

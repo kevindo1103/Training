@@ -3,6 +3,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from core.auth import get_current_user
 from db import get_db
 from models import Participant, Response
 from schemas import ResponseUpsert, ResponseOut
@@ -15,11 +16,11 @@ def upsert_response(
     participant_id: str,
     activity_id: str,
     body: ResponseUpsert,
+    current_user: Participant = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    participant = db.query(Participant).filter(Participant.id == participant_id).first()
-    if not participant:
-        raise HTTPException(status_code=404, detail="Participant not found")
+    if current_user.id != participant_id:
+        raise HTTPException(status_code=403, detail="Cannot modify other participant's responses")
 
     existing = (
         db.query(Response)
@@ -33,31 +34,32 @@ def upsert_response(
         existing.activity_type = body.type
         existing.data = data_json
         existing.completed = int(body.completed)
-        db.commit()
-        db.refresh(existing)
-        return existing
+    else:
+        existing = Response(
+            participant_id=participant_id,
+            session_id=current_user.session_id,
+            activity_id=activity_id,
+            activity_type=body.type,
+            data=data_json,
+            completed=int(body.completed),
+        )
+        db.add(existing)
 
-    response = Response(
-        participant_id=participant_id,
-        session_id=participant.session_id,
-        activity_id=activity_id,
-        activity_type=body.type,
-        data=data_json,
-        completed=int(body.completed),
-    )
-    db.add(response)
+    activity_num = int(activity_id.replace("activity-", "")) if activity_id.startswith("activity-") else 0
+    if activity_num > 0:
+        current_user.last_activity = max(current_user.last_activity, activity_num)
+
     db.commit()
-    db.refresh(response)
-
-    participant.last_activity = max(participant.last_activity, int(activity_id.replace("activity-", "")) if activity_id.startswith("activity-") else participant.last_activity)
-    db.commit()
-
-    return response
+    db.refresh(existing)
+    return existing
 
 
 @router.get("/{participant_id}/responses", response_model=list[ResponseOut])
-def get_responses(participant_id: str, db: Session = Depends(get_db)):
-    participant = db.query(Participant).filter(Participant.id == participant_id).first()
-    if not participant:
-        raise HTTPException(status_code=404, detail="Participant not found")
+def get_responses(
+    participant_id: str,
+    current_user: Participant = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if current_user.id != participant_id:
+        raise HTTPException(status_code=403, detail="Cannot view other participant's responses")
     return db.query(Response).filter(Response.participant_id == participant_id).all()

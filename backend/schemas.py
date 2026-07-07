@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+import json
+
+from pydantic import BaseModel, field_validator
 
 
 class SessionCreate(BaseModel):
@@ -37,6 +39,7 @@ class JoinSession(BaseModel):
 class JoinResponse(BaseModel):
     participant_id: str
     session_id: str
+    token: str
 
 
 class ResponseUpsert(BaseModel):
@@ -51,7 +54,14 @@ class ResponseOut(BaseModel):
     session_id: str
     activity_id: str
     activity_type: str
-    data: str
+    data: dict
     completed: int
     updated_at: str
     model_config = {"from_attributes": True}
+
+    @field_validator("data", mode="before")
+    @classmethod
+    def parse_data(cls, v):
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
