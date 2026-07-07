@@ -25,7 +25,7 @@
 
 - **KHÔNG sửa trực tiếp** root `*.md` (README, CLAUDE.md, `0N_*/MODULE_*.md`).
   - Ngoại lệ: thêm ghi chú vận hành vào `CLAUDE.md` (bug pattern, fix mới).
-- Sau bất kỳ thay đổi nào ảnh hưởng tới **content rule, API contract, schema, UI spec, deploy info, known bug** → comment vào GitHub issue DOCS_INBOX theo template:
+- Sau bất kỳ thay đổi nào ảnh hưởng tới **content rule, API contract, schema, UI spec, deploy info, known bug** → comment vào GitHub issue **DOCS_INBOX [#10](https://github.com/kevindo1103/Training/issues/10)** theo template:
 
   ```
   ### <YYYY-MM-DD> — <session / branch>
@@ -36,7 +36,7 @@
   - **Ambiguity / cần Kevin xác nhận:** <nếu có, hoặc "none">
   ```
 
-- **Post-merge rule (BẮT BUỘC):** PR merge vào `main` → MUST comment vào DOCS_INBOX issue trong vòng 24h.
+- **Post-merge rule (BẮT BUỘC):** PR merge vào `main` → MUST comment vào DOCS_INBOX issue #10 trong vòng 24h.
 - Không tự resolve ambiguity về nội dung Dolphin — nêu trong comment để docs-editor xử lý.
 
 ### Session docs-editor
@@ -258,7 +258,7 @@ Ví dụ: `claude/feat-backend-response-api`, `windsurf/feat-frontend-diagnostic
 GitHub Issues + labels — sessions tự đọc inbox khi spawn.
 
 - Lead giao task cho Windsurf: issue `from:<lead>` + `for:<dev>` + `task-assignment` + `status:planned`. Body PHẢI có `## Plan` (1-5 dòng).
-- **Backend schema change** → Training_Backend lead MUST comment DOCS_INBOX để Frontend biết. Tránh field-name mismatch bug.
+- **Backend schema change** → Training_Backend lead MUST comment DOCS_INBOX #10 để Frontend biết. Tránh field-name mismatch bug.
 - Spec conflict → Kevin: `for:pm` + `spec-conflict`
 - Blocker: `blocker:human-needed` (cần Kevin) vs `blocker:waiting-dependency` (track only)
 - **Bước 0 kickoff:** list issues `label:for:<my-role> state:open`
