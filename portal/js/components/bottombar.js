@@ -24,6 +24,19 @@ export function renderBottomBar(currentIndex, total, onBack, onNext) {
     progress.appendChild(seg);
   }
 
+  const mobileProgress = document.createElement('div');
+  mobileProgress.className = 'flex md:hidden flex-col gap-1 flex-1 min-w-0';
+  mobileProgress.setAttribute('role', 'progressbar');
+  mobileProgress.setAttribute('aria-valuemin', '0');
+  mobileProgress.setAttribute('aria-valuemax', String(total));
+  mobileProgress.setAttribute('aria-valuenow', String(currentIndex + 1));
+  mobileProgress.innerHTML = `
+    <span class="text-label-sm font-ui font-semibold text-on-surface-variant">Activity ${currentIndex + 1} / ${total}</span>
+    <div class="h-1.5 w-full rounded-full bg-outline-variant overflow-hidden">
+      <div class="h-full bg-primary rounded-full transition-all" style="width: ${((currentIndex + 1) / total) * 100}%"></div>
+    </div>
+  `;
+
   const backBtn = document.createElement('button');
   backBtn.className = `px-5 py-2.5 rounded-lg font-ui font-semibold border border-outline text-on-surface hover:bg-surface-container-high min-h-[44px] ${isFirst ? 'invisible' : ''}`;
   backBtn.textContent = 'Quay lại';
@@ -36,6 +49,7 @@ export function renderBottomBar(currentIndex, total, onBack, onNext) {
   nextBtn.addEventListener('click', onNext);
 
   bar.appendChild(progress);
+  bar.appendChild(mobileProgress);
   bar.appendChild(backBtn);
   bar.appendChild(nextBtn);
 

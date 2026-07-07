@@ -38,7 +38,7 @@ let appContainer = null;
 export async function boot() {
   initTheme();
   await initStore();
-  setOnPersist(() => showToast('Đã lưu'));
+  setOnPersist(() => showToast('Đã lưu nháp'));
   appContainer = document.getElementById('app');
   renderShell();
   checkEntry();
@@ -252,15 +252,22 @@ function renderActivity() {
 }
 
 function renderIntro(activity, container) {
+  const intro = activity.intro || {};
+  const purpose = intro.purpose || 'Hoàn thành activity này để chuẩn bị dữ liệu cho workshop.';
+  const howTo = intro.howTo || 'Đọc kỹ từng phần, điền thông tin theo thực tế của Dolphin.';
+  const example = intro.example || 'Nếu chưa có số liệu chính xác, hãy dùng ước tính tốt nhất.';
+  const estimatedTime = intro.estimatedTime || '';
+
   container.innerHTML = `
     <div class="max-w-3xl mx-auto p-4 md:p-12">
       <div class="bg-surface-container-lowest rounded-2xl p-6 md:p-12 shadow-card border border-outline-variant">
-        <span class="material-symbols-outlined text-5xl text-primary mb-4">${activity.icon}</span>
-        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-4">${activity.name}</h2>
+        <span class="material-symbols-outlined text-5xl text-primary mb-4">${escapeHtml(activity.icon)}</span>
+        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">${escapeHtml(activity.name)}</h2>
+        ${estimatedTime ? `<p class="text-label-sm font-ui font-semibold text-primary mb-4">⏱ ${escapeHtml(estimatedTime)}</p>` : ''}
         <div class="text-body-md text-on-surface-variant mb-8 space-y-2">
-          <p><strong>Mục đích:</strong> Hoàn thành activity này để chuẩn bị dữ liệu cho workshop.</p>
-          <p><strong>Cách làm:</strong> Đọc kỹ từng phần, điền thông tin theo thực tế của Dolphin.</p>
-          <p><strong>Ví dụ:</strong> Nếu chưa có số liệu chính xác, hãy dùng ước tính tốt nhất.</p>
+          <p><strong>Mục đích:</strong> ${escapeHtml(purpose)}</p>
+          <p><strong>Cách làm:</strong> ${escapeHtml(howTo)}</p>
+          <p><strong>Ví dụ:</strong> ${escapeHtml(example)}</p>
         </div>
         <button id="start-activity" class="px-6 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container min-h-[44px]">Bắt đầu</button>
       </div>
@@ -270,6 +277,16 @@ function renderIntro(activity, container) {
     markIntroSeen(activity.id);
     renderActivity();
   });
+}
+
+function escapeHtml(text) {
+  if (text == null) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function dispatchRenderer(activity, data, container) {

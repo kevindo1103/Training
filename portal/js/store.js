@@ -96,15 +96,14 @@ export function persist() {
 }
 
 async function syncToApi() {
-  if (!state.participant) return;
+  if (!state.participant || !state.participant.sessionId) return;
   try {
     const payload = {
       participant: state.participant,
       responses: state.responses,
       lastSaved: state.lastSaved,
     };
-    const sessionId = state.participant.sessionId || 'local';
-    await api.put(`/sessions/${sessionId}/responses`, payload);
+    await api.put(`/sessions/${state.participant.sessionId}/responses`, payload);
     state.lastSynced = Date.now();
   } catch (err) {
     console.log('API sync skipped', err);
