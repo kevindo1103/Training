@@ -54,9 +54,10 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "${VPS_USER}@${VPS_HOST}" << 'EOF'
             set -e
+            id deploy >/dev/null 2>&1 || sudo useradd -r -s /bin/false deploy
             sudo mkdir -p /opt/dolphin-training/backend-staging
             sudo mkdir -p /opt/dolphin-training/data-staging
-            sudo chown -R "${USER}:${USER}" /opt/dolphin-training
+            sudo chown -R deploy:deploy /opt/dolphin-training
           EOF
 
       - name: Sync backend to VPS staging
@@ -98,7 +99,16 @@ jobs:
             } > .env
             chmod 600 .env
 
-            alembic upgrade head
+            echo "--- diagnostics ---"
+            ls -la /opt/dolphin-training/ || true
+            ls -la /opt/dolphin-training/data-staging/ || true
+            echo "--- .env (redacted) ---"
+            sed 's/=.*$/=***/' .env
+            echo "--- end diagnostics ---"
+
+            sudo mkdir -p /opt/dolphin-training/data-staging
+            sudo chown -R deploy:deploy /opt/dolphin-training
+            sudo -u deploy alembic upgrade head
             sudo systemctl restart dolphin-training-backend-staging
           EOF
 
