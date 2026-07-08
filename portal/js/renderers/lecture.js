@@ -407,6 +407,10 @@ function groupBlocks(lines) {
       const tableData = parseMarkdownTable(tableLines);
       if (tableData) {
         blocks.push({ type: 'table', data: tableData });
+      } else {
+        // Malformed table — fall back to paragraph so content isn't silently dropped.
+        const text = tableLines.map((l) => l.trim()).join(' ');
+        if (text) blocks.push({ type: 'paragraph', text });
       }
       continue;
     }
@@ -484,8 +488,12 @@ function renderBlocks(container, blocks) {
       container.appendChild(ul);
     } else if (block.type === 'table') {
       const tableData = block.data;
-      const wrap = document.createElement('div');
-      wrap.className = 'overflow-x-auto mb-4';
+      const outerWrap = document.createElement('div');
+      outerWrap.className = 'mb-4';
+
+      // Desktop table
+      const tableWrap = document.createElement('div');
+      tableWrap.className = 'hidden md:block overflow-x-auto';
       const table = document.createElement('table');
       table.className = 'w-full text-left border-collapse';
       const thead = document.createElement('thead');
@@ -499,8 +507,26 @@ function renderBlocks(container, blocks) {
         tbody.appendChild(tr);
       });
       table.appendChild(tbody);
-      wrap.appendChild(table);
-      container.appendChild(wrap);
+      tableWrap.appendChild(table);
+      outerWrap.appendChild(tableWrap);
+
+      // Mobile stacked cards
+      const cardsWrap = document.createElement('div');
+      cardsWrap.className = 'md:hidden space-y-4';
+      tableData.rows.forEach((row) => {
+        const card = document.createElement('div');
+        card.className = 'card-elite p-4';
+        card.innerHTML = tableData.headers.map((h, i) => `
+          <div class="flex justify-between gap-3 py-2 border-b border-outline-variant/30 last:border-0">
+            <span class="text-label-sm font-ui font-bold text-on-surface-variant">${escapeHtml(h)}</span>
+            <span class="text-body-md text-on-surface text-right">${inlineMarkdown(row[i] || '')}</span>
+          </div>
+        `).join('');
+        cardsWrap.appendChild(card);
+      });
+      outerWrap.appendChild(cardsWrap);
+
+      container.appendChild(outerWrap);
     }
   });
 }
