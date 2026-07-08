@@ -81,7 +81,7 @@ jobs:
           elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-frontend- ]]; then
             ALLOWED='^portal/'
           elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-content- ]]; then
-            ALLOWED='^portal/js/modules/.*\.config\.js$'
+            ALLOWED='^portal/js/modules/.*\.config\.js$|^portal/content/'
           elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/test- ]]; then
             ALLOWED='^tests/'
           elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-design- ]]; then
