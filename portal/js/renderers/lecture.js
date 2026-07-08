@@ -45,7 +45,7 @@ export async function render(container, unit, onComplete) {
   `;
   container.appendChild(footer);
 
-  const continueBtn = document.getElementById('lecture-continue');
+  const continueBtn = footer.querySelector('#lecture-continue');
   if (continueBtn && typeof onComplete === 'function') {
     continueBtn.addEventListener('click', onComplete);
   }
@@ -289,23 +289,24 @@ function renderComparison(container, section) {
   titleEl.textContent = section.title;
   wrapper.appendChild(titleEl);
 
-  wrapper.innerHTML += `
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="card-elite border-l-4 border-l-primary p-5 md:p-6">
-        <h4 class="text-label-caps font-ui font-bold text-primary uppercase tracking-widest mb-3">Branch A</h4>
-        <ul class="list-disc pl-5 space-y-2">
-          ${left.map((item) => `<li class="text-body-md text-on-surface-variant">${escapeHtml(item)}</li>`).join('')}
-        </ul>
-      </div>
-      <div class="card-elite border-l-4 p-5 md:p-6" style="border-left-color: #6B7280;">
-        <!-- TODO: replace #6B7280 with Branch B design token when Designer confirms -->
-        <h4 class="text-label-caps font-ui font-bold uppercase tracking-widest mb-3" style="color: #6B7280;">Branch B</h4>
-        <ul class="list-disc pl-5 space-y-2">
-          ${right.map((item) => `<li class="text-body-md text-on-surface-variant">${escapeHtml(item)}</li>`).join('')}
-        </ul>
-      </div>
+  const grid = document.createElement('div');
+  grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+  grid.innerHTML = `
+    <div class="card-elite border-l-4 border-l-primary p-5 md:p-6">
+      <h4 class="text-label-caps font-ui font-bold text-primary uppercase tracking-widest mb-3">Branch A</h4>
+      <ul class="list-disc pl-5 space-y-2">
+        ${left.map((item) => `<li class="text-body-md text-on-surface-variant">${escapeHtml(item)}</li>`).join('')}
+      </ul>
+    </div>
+    <div class="card-elite border-l-4 p-5 md:p-6" style="border-left-color: #6B7280;">
+      <!-- TODO: replace #6B7280 with Branch B design token when Designer confirms -->
+      <h4 class="text-label-caps font-ui font-bold uppercase tracking-widest mb-3" style="color: #6B7280;">Branch B</h4>
+      <ul class="list-disc pl-5 space-y-2">
+        ${right.map((item) => `<li class="text-body-md text-on-surface-variant">${escapeHtml(item)}</li>`).join('')}
+      </ul>
     </div>
   `;
+  wrapper.appendChild(grid);
 
   container.appendChild(wrapper);
 }
