@@ -13,7 +13,6 @@ import {
   mergeResponse,
   markIntroSeen,
   isIntroSeen,
-  setOnPersist,
 } from './store.js';
 import { renderTopBar } from './components/topbar.js';
 import { renderSideBar } from './components/sidebar.js';
@@ -41,14 +40,6 @@ let appContainer = null;
 export async function boot() {
   initTheme();
   await initStore();
-  let lastToastTime = 0;
-  setOnPersist(() => {
-    const now = Date.now();
-    if (now - lastToastTime > 10000) {
-      lastToastTime = now;
-      showToast('Đã lưu nháp');
-    }
-  });
   appContainer = document.getElementById('app');
 
   await resolveRoute();
