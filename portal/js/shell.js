@@ -90,7 +90,7 @@ function renderShell() {
 
   const main = document.createElement('main');
   main.id = 'activity-content';
-  main.className = 'pt-20 pb-24 md:pb-20 md:pl-80 min-h-screen bg-surface-taupe';
+  main.className = 'pt-16 pb-20 md:pb-16 md:pl-72 min-h-screen bg-surface-taupe';
 
   const overlay = document.createElement('div');
   overlay.className = `fixed inset-0 bg-surface/50 backdrop-blur-sm z-40 md:hidden transition-opacity ${appState.sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`;
@@ -175,21 +175,26 @@ function showEntryForm() {
   const content = document.getElementById('activity-content');
   if (!content) return;
   content.innerHTML = `
-    <div class="fixed inset-0 bg-surface/90 backdrop-blur z-50 flex items-center justify-center p-4">
-      <div class="bg-surface-container-lowest rounded-2xl shadow-overlay max-w-md w-full p-6 md:p-8 border border-outline-variant">
-        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">Tham gia workshop</h2>
-        <p class="text-body-md text-on-surface-variant mb-6">Nhập thông tin để bắt đầu Module 1.</p>
-        <form id="entry-form" class="space-y-4">
+    <div class="fixed inset-0 bg-surface-taupe/95 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+      <div class="card-elite shadow-overlay max-w-md w-full p-8 md:p-10">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline font-bold">D</div>
           <div>
-            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1">Họ và tên</label>
+            <h2 class="text-headline-md font-headline font-bold text-on-surface">Tham gia workshop</h2>
+            <p class="text-label-sm text-on-surface-variant">Module 1 — Business Model</p>
+          </div>
+        </div>
+        <form id="entry-form" class="space-y-5">
+          <div>
+            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Họ và tên</label>
             <input name="name" type="text" required autocomplete="name"
-              class="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline text-on-surface placeholder-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface placeholder-on-surface-variant/60"
               placeholder="Ví dụ: Nguyễn Văn A">
           </div>
           <div>
-            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1">Vai trò</label>
+            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Vai trò</label>
             <select name="role" required
-              class="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface">
               <option value="">Chọn vai trò</option>
               <option value="CEO">CEO</option>
               <option value="CTO">CTO</option>
@@ -265,17 +270,19 @@ function renderIntro(activity, container) {
   const estimatedTime = intro.estimatedTime || '';
 
   container.innerHTML = `
-    <div class="max-w-3xl mx-auto p-4 md:p-12">
-      <div class="bg-surface-container-lowest rounded-2xl p-6 md:p-12 shadow-card border border-outline-variant">
-        <span class="material-symbols-outlined text-5xl text-primary mb-4">${escapeHtml(activity.icon)}</span>
+    <div class="max-w-reading mx-auto px-5 py-8 md:py-section">
+      <div class="card-elite p-8 md:p-12 context-stripe">
+        <span class="material-symbols-outlined text-5xl text-primary mb-6">${escapeHtml(activity.icon)}</span>
         <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">${escapeHtml(activity.title)}</h2>
-        ${estimatedTime ? `<p class="text-label-sm font-ui font-semibold text-primary mb-4">⏱ ${escapeHtml(estimatedTime)}</p>` : ''}
-        <div class="text-body-md text-on-surface-variant mb-8 space-y-2">
-          <p><strong>Mục đích:</strong> ${escapeHtml(purpose)}</p>
-          <p><strong>Cách làm:</strong> ${escapeHtml(howTo)}</p>
-          <p><strong>Ví dụ:</strong> ${escapeHtml(example)}</p>
+        ${estimatedTime ? `<p class="text-label-caps font-ui text-primary uppercase tracking-widest mb-6">${escapeHtml(estimatedTime)}</p>` : ''}
+        <div class="text-body-md text-on-surface-variant mb-8 space-y-3">
+          <p><span class="font-bold text-on-surface">Mục đích:</span> ${escapeHtml(purpose)}</p>
+          <p><span class="font-bold text-on-surface">Cách làm:</span> ${escapeHtml(howTo)}</p>
+          <p><span class="font-bold text-on-surface">Ví dụ:</span> ${escapeHtml(example)}</p>
         </div>
-        <button id="start-activity" class="px-6 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container min-h-[44px]">Bắt đầu</button>
+        <button id="start-activity" class="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container transition-colors min-h-[44px]">
+          Bắt đầu <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
       </div>
     </div>
   `;

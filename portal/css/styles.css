@@ -1,6 +1,6 @@
 /**
- * styles.css — Custom styles không cover được bởi Tailwind
- * Design tokens: design_v2/DESIGN.md
+ * styles.css — Dolphin Elite Design System
+ * Tokens: design_v2/DESIGN.md
  */
 
 /* Smooth scrolling */
@@ -31,9 +31,32 @@ html {
   background-color: #6d7a77;
 }
 
-/* Card shadow consistent với DESIGN.md */
-.card-shadow {
+/* Context stripe — 4px teal left accent for active/important cards */
+.context-stripe {
+  border-left: 4px solid #00685f;
+}
+.context-stripe-muted {
+  border-left: 4px solid #bcc9c6;
+}
+
+/* Card elevation system */
+.card-elite {
+  background: #ffffff;
+  border-radius: 1rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: none;
+}
+.card-elite:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* Input focus glow */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #00685f !important;
+  box-shadow: 0 0 0 4px rgba(0, 104, 95, 0.2) !important;
+  outline: none;
 }
 
 /* Toast slide-up + fade animation */
@@ -60,7 +83,7 @@ html {
 
 /* Scoring pill hover animation */
 .scoring-pill {
-  transition: transform 0.15s ease-out, background-color 0.15s ease-out;
+  transition: transform 0.15s ease-out, background-color 0.15s ease-out, border-color 0.15s ease-out;
 }
 .scoring-pill:hover {
   transform: scale(1.05);
@@ -71,6 +94,7 @@ html {
   background-color: #00685f;
   color: #ffffff;
   font-weight: 700;
+  border-color: #00685f;
 }
 
 /* Accordion content transition */
@@ -83,6 +107,19 @@ html {
 .focus-ring:focus-visible {
   outline: none;
   box-shadow: 0 0 0 4px rgba(0, 104, 95, 0.2);
+}
+
+/* Progress bar — thin elegant track */
+.progress-track {
+  height: 3px;
+  background: #bcc9c6;
+  border-radius: 9999px;
+}
+.progress-fill {
+  height: 100%;
+  background: #00685f;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
 }
 
 /* Dark mode overrides */
@@ -111,6 +148,11 @@ html.dark .bg-surface-container-lowest {
   background-color: #2a2a2a !important;
 }
 
+html.dark .card-elite {
+  background: #2a2a2a !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
 html.dark .text-on-surface {
   color: #f3f0ef !important;
 }
@@ -122,6 +164,13 @@ html.dark .text-on-surface-variant {
 html.dark .border-outline-variant,
 html.dark .border-outline {
   border-color: #525e5c !important;
+}
+
+html.dark .context-stripe {
+  border-left-color: #6bd8cb;
+}
+html.dark .context-stripe-muted {
+  border-left-color: #525e5c;
 }
 
 html.dark .bg-primary {
@@ -147,6 +196,7 @@ html.dark .text-inverse-on-surface {
 html.dark .active-pill {
   background-color: #6bd8cb !important;
   color: #00201d !important;
+  border-color: #6bd8cb !important;
 }
 
 html.dark .bg-green-50,
@@ -243,6 +293,13 @@ html.dark .shadow-card {
 
 html.dark .shadow-overlay {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .progress-track {
+  background: #525e5c;
+}
+html.dark .progress-fill {
+  background: #6bd8cb;
 }
 
 /* Mobile polish */
