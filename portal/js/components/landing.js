@@ -25,7 +25,7 @@ export const MODULES = [
     shortName: "Product/Service Portfolio",
     icon: "widgets",
     active: false,
-    totalActivities: 0,
+    totalActivities: 9,
     description: "Đánh giá portfolio, thiết kế portfolio mới align với mô hình kinh doanh.",
   },
   {

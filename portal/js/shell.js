@@ -4,6 +4,7 @@
  */
 
 import { MODULE_CONFIG as module1Config } from './modules/module1.config.js';
+import module2Config from './modules/module2.config.js';
 import {
   initStore,
   setParticipant,
@@ -214,7 +215,7 @@ function computeModuleStatus(state) {
     const status = {
       ...module,
       completed: 0,
-      available: module.id === 'module1',
+      available: module.id === 'module1' || module.id === 'module2',
       totalActivities: module.totalActivities || 0,
       programTotal: totalActivities,
     };
@@ -222,6 +223,15 @@ function computeModuleStatus(state) {
       status.totalActivities = module1Config.activities.length;
       status.completed = module1Config.activities.filter((activity) => {
         const data = state.responses[activity.id];
+        return data && Object.keys(data).length > 0;
+      }).length;
+    }
+    if (module.id === 'module2') {
+      const units = module2Config.units || [];
+      status.totalActivities = units.length;
+      const m2Responses = state.unitResponses?.module2 || {};
+      status.completed = units.filter((unit) => {
+        const data = m2Responses[unit.id];
         return data && Object.keys(data).length > 0;
       }).length;
     }
