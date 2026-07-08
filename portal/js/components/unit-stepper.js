@@ -1,12 +1,13 @@
 /**
  * unit-stepper.js — Unit stepper for Module 2
  *
- * Each unit has 3 sub-steps: lecture → quiz → practice.
+ * Each unit has up to 3 sub-steps: lecture → quiz → practice.
+ * If a unit has no `practice` section, only lecture and quiz are shown.
  * Purpose has been merged into lecture, so there is no separate purpose step.
  *
  * Usage:
  *   const stepper = new UnitStepper(unit, containerElement, () => {
- *     // called when all 3 steps are completed
+ *     // called when all steps are completed
  *   });
  *   stepper.render();
  *
@@ -16,12 +17,14 @@
  *     exist yet (skeleton phase), a placeholder is rendered without crashing.
  */
 
+import { escapeHtml } from '../utils/dom.js';
+
 export const STEPS = ['lecture', 'quiz', 'practice'];
 
 const STEP_LABELS = {
-  lecture: 'Lecture',
-  quiz: 'Quiz',
-  practice: 'Practice',
+  lecture: 'Bài giảng',
+  quiz: 'Kiểm tra',
+  practice: 'Thực hành',
 };
 
 export class UnitStepper {
@@ -30,13 +33,14 @@ export class UnitStepper {
     this.container = container;
     this.onUnitComplete = onUnitComplete;
     this.currentStep = 0;
+    this.steps = unit?.practice ? STEPS : STEPS.slice(0, 2);
   }
 
   /**
    * Advance to the next step, or notify caller when the unit is complete.
    */
   goNext() {
-    if (this.currentStep < STEPS.length - 1) {
+    if (this.currentStep < this.steps.length - 1) {
       this.currentStep++;
       this.render();
     } else if (typeof this.onUnitComplete === 'function') {
@@ -55,14 +59,16 @@ export class UnitStepper {
   }
 
   /**
-   * Render the 3-step progress bar.
+   * Render the step progress bar.
    * Style: 3px thin track with teal fill; dots mark each step.
    */
   renderStepBar() {
     const wrapper = document.createElement('div');
     wrapper.className = 'mb-8';
 
-    const progressPercent = (this.currentStep / (STEPS.length - 1)) * 100;
+    const progressPercent = this.steps.length > 1
+      ? (this.currentStep / (this.steps.length - 1)) * 100
+      : 0;
 
     wrapper.innerHTML = `
       <div class="relative flex items-center justify-between h-6 px-1">
@@ -71,7 +77,7 @@ export class UnitStepper {
         <!-- Fill -->
         <div class="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 bg-primary rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
         <!-- Steps -->
-        ${STEPS.map((step, index) => {
+        ${this.steps.map((step, index) => {
           const isCompleted = index <= this.currentStep;
           const isActive = index === this.currentStep;
           const dotClass = isActive
@@ -128,6 +134,10 @@ export class UnitStepper {
    * In the skeleton phase, if the lecture/quiz/practice renderer does not exist,
    * this falls back to a placeholder so the stepper remains testable without
    * crashing.
+   *
+   * Known issue: `render()` is async because of dynamic imports; rapid user
+   * clicks while a renderer is loading could race. Not blocking merge — tracked
+   * for follow-up.
    */
   async render() {
     if (!this.container) return;
@@ -137,7 +147,7 @@ export class UnitStepper {
     const stepBar = this.renderStepBar();
     this.container.appendChild(stepBar);
 
-    const step = STEPS[this.currentStep];
+    const step = this.steps[this.currentStep];
 
     try {
       const mod = await import(`../renderers/${step}.js`);
@@ -154,14 +164,4 @@ export class UnitStepper {
       this.container.appendChild(placeholder);
     }
   }
-}
-
-function escapeHtml(text) {
-  if (text == null) return '';
-  return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }
