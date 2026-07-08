@@ -1,12 +1,13 @@
 /**
  * store.js — Data Layer
- * localStorage key: `dolphin_training_module1`
+ * localStorage key: `dolphin_training_workshop`
  * API sync: fire-and-forget via api.js (offline skip silently)
  */
 
 import { api, setAuthToken } from './api.js';
 
-const STORAGE_KEY = 'dolphin_training_module1';
+const OLD_STORAGE_KEY = 'dolphin_training_module1';
+const STORAGE_KEY = 'dolphin_training_workshop';
 const TOKEN_KEY = 'dolphin_auth_token';
 const DEBOUNCE_MS = 500;
 
@@ -30,6 +31,16 @@ export function getState() {
 }
 
 export async function initStore() {
+  // Migrate from old single-module key if new key does not exist
+  const existing = localStorage.getItem(STORAGE_KEY);
+  if (!existing) {
+    const old = localStorage.getItem(OLD_STORAGE_KEY);
+    if (old) {
+      localStorage.setItem(STORAGE_KEY, old);
+      localStorage.removeItem(OLD_STORAGE_KEY);
+    }
+  }
+
   const raw = localStorage.getItem(STORAGE_KEY);
   state = raw ? JSON.parse(raw) : createEmptyState();
 
