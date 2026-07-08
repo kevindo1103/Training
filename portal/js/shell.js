@@ -37,7 +37,14 @@ let appContainer = null;
 export async function boot() {
   initTheme();
   await initStore();
-  setOnPersist(() => showToast('Đã lưu nháp'));
+  let lastToastTime = 0;
+  setOnPersist(() => {
+    const now = Date.now();
+    if (now - lastToastTime > 10000) {
+      lastToastTime = now;
+      showToast('Đã lưu nháp');
+    }
+  });
   appContainer = document.getElementById('app');
   renderShell();
   checkEntry();
