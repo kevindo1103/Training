@@ -1,100 +1,31 @@
 ## Mục đích
 
-- Hiểu sprint planning và Decision Framework (Go/Pivot/Kill).
-- Thiết kế 90-Day Sprint Plan cho sản phẩm INVEST.
-- Đặt KPIs cụ thể + kill criteria cam kết.
+- Chuyển quyết định chiến lược thành kế hoạch 90 ngày cụ thể: ai làm gì, khi nào review, đo bằng gì.
+- Hiểu Go/Pivot/Kill Decision Framework — cam kết trước tiêu chí quyết định để tránh bias khi đã đầu tư.
+- Thiết kế KPI Dashboard với targets cho 3 checkpoints (tuần 4, 8, 12).
 
-**Tại sao:** Evaluation plan rõ ràng tránh tình trạng "zombie product" — không sống, không chết.
-
-**Output:** 90-Day Sprint Plan + KPI Dashboard + Go/Pivot/Kill criteria.
+**Output:** 90-Day Sprint Plan + KPI Dashboard + Go/Pivot/Kill Framework.
 
 ---
 
-## Zombie Product — Vấn đề lớn nhất
+## Sprint Planning & Decision Framework
 
-> **Zombie product:** sản phẩm không đủ traction để scale nhưng không ai dám kill → tiếp tục tốn resource (team, budget, management attention) mà không tạo giá trị.
+### Tại sao 90 ngày?
 
-Tại sao zombie product tồn tại?
-- **Sunk cost bias:** "Đã đầu tư 6 tháng rồi, bỏ phí"
-- **Emotional attachment:** "Đây là ý tưởng của mình"
-- **Fear of failure:** "Kill = thất bại"
-- **Lack of criteria:** Không có tiêu chí rõ ràng để quyết định
+90 ngày (1 quý) là timeframe lý tưởng cho product testing: đủ dài để có data thực tế, đủ ngắn để không đốt quá nhiều resource nếu sai. Chia thành 3 checkpoint mỗi 4 tuần tạo kỷ luật review đều đặn.
 
-→ Giải pháp: **đặt criteria TRƯỚC khi bắt đầu**, cam kết tuân thủ.
+### 3 Checkpoint trong 90 ngày
 
----
+- **Tuần 4 (Checkpoint 1):** MVP core features hoạt động, demo nội bộ, review tiến độ vs plan.
+- **Tuần 8 (Checkpoint 2):** Beta release, 2-3 khách pilot, feedback analysis, adjust roadmap.
+- **Tuần 12 (Decision Gate):** Sales validation, đo willingness to pay, quyết định Go/Pivot/Kill.
 
-## 90-Day Sprint Plan
+### Go/Pivot/Kill — quyết định trước, không đợi cảm xúc
 
-Tại sao 90 ngày?
-- Đủ dài để validate hypothesis chính
-- Đủ ngắn để không tốn quá nhiều resource nếu sai
-- Tạo urgency cho team
-- Dễ commit budget và resource
+Sai lầm lớn nhất: định nghĩa tiêu chí SAU KHI đã đầu tư thời gian và tiền bạc — lúc đó bias sunk cost sẽ khiến team không bao giờ chịu Kill. Cam kết tiêu chí TRƯỚC KHI bắt đầu:
 
-### Cấu trúc Sprint Plan
-
-| Phần | Nội dung | Ví dụ |
-|------|----------|-------|
-| Sprint Goal | 1 câu mục tiêu rõ ràng | "Validate PMF cho segment khách sạn 3-4 sao" |
-| Budget | Ngân sách allocated | 500 triệu VND |
-| Team Size | Số người dedicated | 4 người (PM, 2 dev, 1 sales) |
-| KPIs | 4-5 chỉ số đo lường | Revenue, clients, NPS, churn, custom |
-| Milestones | 3 checkpoints | Day 30, Day 60, Day 90 |
-| Go/Pivot/Kill | Criteria cho mỗi quyết định | Xem bên dưới |
-
----
-
-## KPI Dashboard
-
-KPIs cần đo lường:
-
-| KPI | Mô tả | Ví dụ target |
-|-----|--------|-------------|
-| Revenue target | Doanh thu hàng tháng | 200 triệu/tháng |
-| Số khách hàng mới | New paying customers | 5 khách |
-| NPS | Net Promoter Score | ≥ 40 |
-| Churn rate | Tỷ lệ khách rời bỏ | ≤ 10% |
-| KPI bổ sung | Tùy sản phẩm | 3 case studies |
-
----
-
-## Milestones: Day 30 / 60 / 90
-
-### Day 30 — Foundation
-- Team assembled và aligned
-- Prospects đầu tiên contacted
-- MVP scoping hoàn thành
-
-### Day 60 — Validation
-- 3+ pilots running
-- Pricing validated với real customers
-- First feedback collected
-
-### Day 90 — Decision
-- Full KPI review
-- Go/Pivot/Kill decision
-- Next 90-day plan nếu GO
-
----
-
-## Go / Pivot / Kill Framework
-
-### GO nếu:
-- Đạt ≥80% KPIs
-- ≥3 khách hàng trả tiền
-- Team morale tốt
-- Clear path to profitability
-
-### PIVOT nếu:
-- 1-2 KPIs đạt nhưng không đồng đều
-- Khách có interest nhưng cần thay đổi segment hoặc pricing
-- Core hypothesis validated nhưng approach cần adjust
-
-### KILL nếu:
-- <2 khách hàng quan tâm
-- 0 revenue
-- Team morale thấp
-- Không có validated learning nào
-
-> **Cam kết:** Kill criteria phải đặt TRƯỚC khi bắt đầu — khi team chưa bị sunk cost bias. Sau khi đã invest effort, rất khó objective.
+| **Quyết định** | **Tiêu chí** | **Hành động** |
+|---|---|---|
+| **GO** | Nhiều KPI đạt target, có paying customer hoặc strong intent | Scale team theo lộ trình 85:15 → 70:30 |
+| **PIVOT** | Một số KPI miss nhưng có signal thị trường quan tâm ở góc khác | Chuyển quadrant, reset 90-day plan, giữ budget |
+| **KILL** | Hầu hết KPI miss, không có signal, market không respond | Dừng ngay, thu learnings, chuyển team về service |

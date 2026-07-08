@@ -1,101 +1,43 @@
 ## Mục đích
 
-- Hiểu 3 mô hình Brand Architecture (Branded House, House of Brands, Endorsed Brands).
-- Chọn mô hình phù hợp cho Dolphin Technology.
-- Đặt tên riêng cho 4 sản phẩm hiện tại theo framework đã chọn.
+- Giải quyết điểm yếu lớn nhất của Dolphin: chưa có brand — cả company lẫn product đều thiếu identity rõ ràng.
+- Hiểu 3 mô hình brand architecture và chọn mô hình phù hợp với quy mô, ngân sách, và chiến lược spin-off.
+- Đặt tên riêng cho 4 sản phẩm hiện tại, tạo naming framework cho sản phẩm tương lai.
 
-**Tại sao:** Dolphin hiện chưa có brand strategy rõ ràng. Sản phẩm chỉ được mô tả chức năng, chưa có brand name. Naming là bước đầu để khách hàng nhận diện.
-
-**Output:** Brand Architecture Decision + 4 product brand names + taglines.
+**Output:** Company Brand Canvas + Brand Architecture Decision + Product Naming cho 4 sản phẩm.
 
 ---
 
-## 3 Mô hình Brand Architecture
+## Brand Architecture là gì?
 
-### 1. Branded House
-
-**Mô tả:** Tất cả sản phẩm dùng chung tên công ty mẹ.
-
-**Ví dụ:** Google Maps, Google Drive, Google Cloud — tất cả mang tên Google.
-
-**Ưu điểm:**
-- Leverage brand recognition có sẵn
-- Chi phí marketing thấp — 1 brand, 1 message
-- Khách hàng dễ nhận diện ecosystem
-
-**Nhược điểm:**
-- Rủi ro liên đới: 1 sản phẩm fail → ảnh hưởng cả brand
-- Khó differentiate khi sản phẩm phục vụ segments rất khác nhau
-- Sản phẩm khó có identity riêng
-
-**Phù hợp khi:** Brand mẹ đã mạnh, sản phẩm phục vụ cùng ecosystem.
-
-### 2. House of Brands
-
-**Mô tả:** Mỗi sản phẩm có thương hiệu hoàn toàn độc lập.
-
-**Ví dụ:** P&G sở hữu Tide, Gillette, Pampers — khách hàng thường không biết cùng công ty mẹ.
-
-**Ưu điểm:**
-- Mỗi sản phẩm tự do định vị cho segment riêng
-- Rủi ro không liên đới giữa các brand
-- Linh hoạt khi mua bán sản phẩm
-
-**Nhược điểm:**
-- Chi phí marketing rất cao — phải build brand riêng cho mỗi sản phẩm
-- Không leverage được uy tín công ty mẹ
-- Cần team marketing riêng cho mỗi brand
-
-**Phù hợp khi:** Sản phẩm phục vụ segments rất khác nhau, ngân sách marketing lớn. **Không phù hợp cho công ty 50 người.**
-
-### 3. Endorsed Brands (Khuyến nghị cho Dolphin)
-
-**Mô tả:** Sản phẩm có tên riêng nhưng kèm "by [Company]".
-
-**Ví dụ:** Courtyard **by Marriott**, PlayStation **by Sony**.
-
-**Ưu điểm:**
-- Sản phẩm có identity riêng → dễ differentiate
-- Vẫn leverage uy tín công ty mẹ → giảm trust barrier
-- Chi phí marketing hợp lý — brand mới + endorsement
-
-**Nhược điểm:**
-- Nếu brand mẹ yếu, endorsement ít giá trị
-- Cần consistency trong quality across brands
-
-**Phù hợp khi:** Công ty có uy tín nhưng sản phẩm cần identity riêng. **Ideal cho Dolphin ở quy mô hiện tại.**
+Brand architecture là cách tổ chức mối quan hệ giữa thương hiệu mẹ (company brand) và các thương hiệu con (product brands). Đây không phải chuyện logo hay màu sắc — mà là chiến lược kinh doanh: sản phẩm nào chia sẻ uy tín công ty, sản phẩm nào đứng độc lập?
 
 ---
 
-## Tại sao Endorsed Brands cho Dolphin?
+## 3 Mô hình chính
 
-Với quy mô ~50 người:
-- Chưa đủ ngân sách build brand riêng cho mỗi sản phẩm (House of Brands)
-- Sản phẩm phục vụ industries khác nhau (văn bản, khách sạn, sự kiện, báo chí) → cần tên riêng
-- Dolphin có uy tín trong giới IT Việt Nam → endorsement có giá trị
-
-**Format:** `[Tên sản phẩm] by Dolphin Technology`
-
----
-
-## Brand Foundation
-
-Trước khi đặt tên sản phẩm, cần xác định:
-
-- **Brand Positioning:** Dolphin Technology muốn được nhận diện là gì?
-- **Brand Personality:** Nếu Dolphin là một người, tính cách như thế nào?
-- **Brand Promise:** Cam kết cốt lõi cho khách hàng
-- **Target Audience:** Khách hàng mục tiêu tổng thể
+| Mô hình | Cách hoạt động | Ví dụ thực tế | Chi phí | Phù hợp khi |
+|---------|---------------|---------------|---------|-------------|
+| Branded House | Tất cả SP mang tên công ty | Google Maps, Google Drive, FedEx Express, FedEx Ground | Thấp nhất | Company brand mạnh, SP cùng segment |
+| House of Brands | Mỗi SP brand riêng, không gắn company | P&G: Tide, Gillette, Pampers (không ai biết đến P&G) | Cao nhất | Budget lớn, SP nhắm thị trường rất khác nhau |
+| Endorsed Brands | SP có tên riêng + "by [Company]" | Courtyard by Marriott, Polo by Ralph Lauren | Trung bình | Cần cả product identity lẫn company credibility |
 
 ---
 
-## Product Naming Guidelines
+## Tại sao Endorsed Brands phù hợp Dolphin?
 
-Tên sản phẩm tốt cần:
-- Ngắn gọn, dễ nhớ, dễ phát âm
-- Gợi lên chức năng hoặc giá trị
-- Có thể đăng ký domain
-- Phù hợp với brand architecture đã chọn
+Với quy mô ~50 người và budget marketing hạn chế:
 
-**Positioning Statement Format:**
-> Cho [target audience], [product name] là [category] giúp [benefit] khác biệt bởi [differentiator].
+- **House of Brands** đòi hỏi xây 4+ brand song song — tốn gấp 4 lần chi phí marketing. Không khả thi cho SME.
+- **Branded House** ("Dolphin Docs", "Dolphin IPTV") rẻ nhất nhưng khó khi SP nhắm khách hàng hoàn toàn khác nhau (cơ quan nhà nước vs khách sạn).
+- **Endorsed Brands** ("[Tên SP] by Dolphin Technology") là lựa chọn cân bằng: mỗi SP có identity riêng phù hợp target market, đồng thời "by Dolphin" tạo credibility chung trong B2B tại Việt Nam.
+- **Hỗ trợ spin-off:** nếu SP trưởng thành thành BU độc lập → bỏ "by Dolphin" = tách sạch. Nếu không → giữ halo effect.
+
+---
+
+## Quy tắc đặt tên sản phẩm
+
+- Ngắn gọn (1-2 từ), dễ nhớ, dễ phát âm bằng tiếng Việt và tiếng Anh.
+- Gợi liên tưởng đến chức năng hoặc giá trị sản phẩm (không phải mã nội bộ).
+- Kiểm tra: tên miền (.vn, .com) khả dụng, không trùng thương hiệu đã đăng ký.
+- Tên tạm cho sản phẩm mới cũng phải tuân theo quy tắc — team cần identity ngay từ MVP.

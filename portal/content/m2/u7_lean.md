@@ -1,100 +1,46 @@
 ## Mục đích
 
-- Hiểu phương pháp Lean Startup và Build-Measure-Learn loop.
-- Nắm 4 loại MVP (Concierge, Wizard of Oz, Single-feature, Landing Page).
-- Brainstorm ≥5 ý tưởng sản phẩm mới + screening nhanh.
-
-**Tại sao:** Công ty dịch vụ thường build product như build project — waterfall. Lean Startup cung cấp phương pháp validate nhanh, chi phí thấp.
+- Hiểu phương pháp Lean Startup và tại sao nó phù hợp cho công ty dịch vụ muốn phát triển sản phẩm.
+- Nắm Build-Measure-Learn loop và các loại MVP khác nhau.
+- Brainstorm ý tưởng sản phẩm mới và điền Lean Canvas cho 1-2 ý tưởng tiềm năng nhất.
 
 **Output:** Lean Canvas + Problem-Solution Fit hypothesis cho 1-2 ý tưởng.
 
 ---
 
-## Service Mindset vs Product Mindset
+## Lean Startup cho Công ty Dịch vụ
 
-| | Service Mindset | Product Mindset |
-|---|----------------|-----------------|
-| Bắt đầu từ | Brief/yêu cầu khách hàng | Hypothesis cần validate |
-| Quy trình | Waterfall: spec → build → deliver | Lean: hypothesis → experiment → iterate |
-| Scope | Rõ ràng từ đầu | Nhỏ nhất có thể, expand dần |
-| Success metric | Delivery đúng spec, đúng hạn | Validated learning, customer traction |
-| Failure | Không deliver đúng spec | Không validate hypothesis sớm |
+### Build-Measure-Learn Loop
 
-**Dolphin cần chuyển:** Khi build product nội bộ, áp dụng product mindset — không phải service mindset.
+Lean Startup không phải "làm ẩu rồi sửa" — mà là phương pháp khoa học cho phát triển sản phẩm: đặt giả thuyết → build artifact nhỏ nhất để test → đo phản ứng thực tế → học và điều chỉnh. Lặp lại mỗi 4-6 tuần.
 
----
+| **Giai đoạn** | **Hỏi gì?** | **Làm gì?** | **Output** |
+|---|---|---|---|
+| **BUILD** | Cần build gì để test hypothesis? | Xây MVP tối thiểu — CHỈ core feature | MVP có thể dùng được |
+| **MEASURE** | Đo gì để biết hypothesis đúng/sai? | Cho target users dùng, thu thập data | Usage metrics + feedback |
+| **LEARN** | Hypothesis validated hay invalidated? | Phân tích data, đối chiếu hypothesis | Quyết định: persevere / pivot / kill |
 
-## Build-Measure-Learn Loop
+### 4 loại MVP
 
-Mặc dù tên là Build-Measure-Learn, thực tế bắt đầu **ngược lại**:
+| **Loại MVP** | **Cách hoạt động** | **Phù hợp khi** | **Chi phí** |
+|---|---|---|---|
+| **Concierge MVP** | Deliver giá trị hoàn toàn bằng tay, 1 khách 1 lần | Validate problem-solution fit, chưa rõ solution | Rất thấp |
+| **Wizard of Oz** | Giao diện sản phẩm nhưng fulfill thủ công phía sau | Validate UX + willingness to pay | Thấp |
+| **Single-Feature** | 1 tính năng cốt lõi duy nhất, bỏ mọi thứ khác | Đã biết core value, cần validate demand | Trung bình |
+| **Landing Page** | Trang giới thiệu + nút "Đăng ký" / "Request Demo" | Đo demand trước khi build bất kỳ thứ gì | Rất thấp |
 
-1. **LEARN (Trước tiên):** Xác định hypothesis cần validate
-   - "Khách sạn nhỏ sẵn sàng trả 2M/tháng cho hệ thống quản lý tích hợp?"
-   
-2. **BUILD:** Thiết kế experiment nhỏ nhất để test hypothesis
-   - Không phải build full product — chỉ cần MVP đủ để test
-   
-3. **MEASURE:** Thu thập data từ experiment
-   - Sign-ups, conversion rate, willingness to pay, engagement
-   
-4. **LEARN (Kết quả):** Rút bài học → quyết định tiếp
-   - Hypothesis confirmed → scale
-   - Hypothesis invalidated → pivot hoặc kill
+### Validated Learning là gì?
 
-→ Lặp lại loop cho hypothesis tiếp theo.
+Không phải mọi "learning" đều có giá trị. Validated Learning phải đáp ứng 3 tiêu chí:
 
----
+- **Empirical:** dựa trên data từ hành vi thực (không phải ý kiến, không phải khảo sát).
+- **Falsifiable:** hypothesis được phát biểu trước, có thể bị bác bỏ.
+- **Quantifiable:** có threshold cụ thể (ví dụ: "≥ 40% users nói rất thất vọng nếu không có SP").
 
-## 4 Loại MVP
+### Lợi thế của công ty dịch vụ khi làm Lean Startup
 
-### 1. Concierge MVP
-**Mô tả:** Phục vụ khách hàng bằng tay thay vì tự động.
+- **Dòng tiền ổn định:** không cần gọi vốn, service arm fund experiments.
+- **Domain expertise:** đã hiểu sâu ngành từ dự án dịch vụ.
+- **Khách hàng có sẵn:** service clients có thể trở thành early adopters.
 
-**Ví dụ:** Thay vì build app quản lý khách sạn, team Dolphin trực tiếp đến khách sạn thực hiện quy trình bằng tay.
-
-**Validate:** Demand có thật không? Workflow thực tế ra sao?
-
-**Chi phí:** Rất thấp — chỉ tốn thời gian team.
-
-### 2. Wizard of Oz MVP
-**Mô tả:** Frontend trông tự động nhưng backend có người thực hiện.
-
-**Ví dụ:** Khách sạn dùng app để check-in → thực ra có nhân viên Dolphin xử lý phía sau.
-
-**Validate:** UX có ổn không? Khách hàng có adopt không?
-
-**Chi phí:** Thấp — build UI cơ bản, manual processing phía sau.
-
-### 3. Single-feature MVP
-**Mô tả:** Build đúng 1 tính năng core nhất.
-
-**Ví dụ:** Chỉ build tính năng "booking management" — không build check-in, không build reporting.
-
-**Validate:** Core feature có giải quyết pain point chính?
-
-**Chi phí:** Trung bình — cần develop nhưng scope nhỏ.
-
-### 4. Landing Page MVP
-**Mô tả:** Tạo trang web mô tả solution → đo interest.
-
-**Ví dụ:** Landing page "HotelOps — Quản lý khách sạn thông minh" với nút "Đăng ký dùng thử".
-
-**Validate:** Có đủ người quan tâm? Messaging đúng không?
-
-**Chi phí:** Rất thấp — 1-2 ngày setup.
-
----
-
-## Quick Screening Framework
-
-Khi brainstorm ý tưởng mới, screen nhanh bằng 5 câu hỏi:
-
-| Câu hỏi | Tiêu chuẩn |
-|----------|-----------|
-| Problem có thật? | Khách hàng thực sự đau, không phải "nice to have" |
-| Dolphin có lợi thế? | Domain expertise, tech stack, customer relationship |
-| Market đủ lớn? | Đủ khách hàng tiềm năng để cover chi phí + profit |
-| Build được trong 3 tháng? | MVP scope khả thi với resource hiện tại |
-| Có revenue model rõ? | Biết charge ai, charge bao nhiêu, charge thế nào |
-
-**Tất cả phải "Có" để proceed.** Nếu 1 câu "Không" hoặc "Chưa rõ" → park hoặc cần research thêm.
+**Rủi ro cần tránh:** kéo resource từ service khi client gấp; over-engineer MVP vì team quen build lớn; skip validation vì "đã biết thị trường".
