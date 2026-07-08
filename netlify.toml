@@ -1,0 +1,6 @@
+[build]
+  publish = "portal"
+  command = ""
+
+[build.environment]
+  NODE_VERSION = ""
