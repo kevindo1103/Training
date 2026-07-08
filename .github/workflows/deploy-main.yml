@@ -133,7 +133,7 @@ jobs:
             sudo chown -R deploy:deploy "$DB_DIR"
             sudo chmod 775 "$DB_DIR"
 
-            sudo "$(pwd)/venv/bin/alembic" upgrade head
+            sudo DATABASE_URL="$DATABASE_URL" "$(pwd)/venv/bin/alembic" upgrade head
             sudo chown -R deploy:deploy "$DB_DIR"
             sudo systemctl restart dolphin-training-backend
           REMOTE
