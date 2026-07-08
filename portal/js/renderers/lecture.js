@@ -3,6 +3,8 @@
  *
  * Đọc markdown từ `unit.lecture.contentPath`, parse các section marker,
  * và render ra DOM tương ứng:
+ *
+ * Typed markers (backwards-compatible):
  *   - ## Mục đích        → purpose header + objective bullets
  *   - ## Nội dung        → lecture body paragraphs
  *   - ### Definition: X  → term + definition box
@@ -10,8 +12,15 @@
  *   - ### Comparison: X  → 2-col comparison (Branch A vs Branch B)
  *   - ### Bullets: X     → bullet list
  *
- * Nếu content file chưa tồn tại (skeleton phase), render placeholder
- * với thông tin unit + nút Tiếp tục.
+ * Generic markdown (M2 content):
+ *   - ## Any heading     → h2 section; body auto-detects inline tables/hr/blockquote/bullets
+ *   - ### Any heading    → h3 section; same body detection
+ *   - | table |          → responsive table (inside any section)
+ *   - ---                → <hr> divider
+ *   - > blockquote       → callout card
+ *   - - / * bullets      → bullet list block
+ *
+ * Nếu content file chưa tồn tại (skeleton phase), render placeholder.
  */
 
 import { escapeHtml } from '../utils/dom.js';
@@ -88,6 +97,21 @@ function parseMarkdown(markdown) {
       continue;
     }
 
+    const h2Match = !purposeMatch && !bodyMatch && line.match(/^##\s+(.+)$/);
+    const h3Match = !subMatch && line.match(/^###\s+(.+)$/);
+
+    if (h2Match) {
+      if (current) sections.push(current);
+      current = { type: 'heading', title: h2Match[1].trim(), lines: [] };
+      continue;
+    }
+
+    if (h3Match) {
+      if (current) sections.push(current);
+      current = { type: 'subheading', title: h3Match[1].trim(), lines: [] };
+      continue;
+    }
+
     if (current) {
       current.lines.push(line);
     }
@@ -117,6 +141,12 @@ function renderSection(container, section) {
     case 'bullets':
       renderBullets(container, section);
       break;
+    case 'heading':
+      renderHeading(container, section);
+      break;
+    case 'subheading':
+      renderSubheading(container, section);
+      break;
     default:
       renderBody(container, section);
   }
@@ -139,7 +169,7 @@ function renderPurpose(container, section) {
 }
 
 function renderBody(container, section) {
-  const paragraphs = groupParagraphs(section.lines);
+  const blocks = groupBlocks(section.lines);
 
   const wrapper = document.createElement('section');
   wrapper.className = 'mb-8';
@@ -151,14 +181,34 @@ function renderBody(container, section) {
     wrapper.appendChild(heading);
   }
 
-  paragraphs.forEach((text) => {
-    if (!text) return;
-    const p = document.createElement('p');
-    p.className = 'text-body-md text-on-surface-variant mb-4 leading-relaxed';
-    p.innerHTML = inlineMarkdown(text);
-    wrapper.appendChild(p);
-  });
+  renderBlocks(wrapper, blocks);
 
+  container.appendChild(wrapper);
+}
+
+function renderHeading(container, section) {
+  const wrapper = document.createElement('section');
+  wrapper.className = 'mb-8';
+
+  const heading = document.createElement('h2');
+  heading.className = 'font-headline font-bold text-headline-sm text-on-surface mb-4';
+  heading.textContent = section.title;
+  wrapper.appendChild(heading);
+
+  renderBlocks(wrapper, groupBlocks(section.lines));
+  container.appendChild(wrapper);
+}
+
+function renderSubheading(container, section) {
+  const wrapper = document.createElement('section');
+  wrapper.className = 'mb-6';
+
+  const heading = document.createElement('h3');
+  heading.className = 'font-headline font-bold text-title-md text-on-surface mb-3';
+  heading.textContent = section.title;
+  wrapper.appendChild(heading);
+
+  renderBlocks(wrapper, groupBlocks(section.lines));
   container.appendChild(wrapper);
 }
 
@@ -328,6 +378,131 @@ function renderBullets(container, section) {
     </ul>
   `;
   container.appendChild(wrapper);
+}
+
+function groupBlocks(lines) {
+  const blocks = [];
+  let paragraphLines = [];
+
+  const flushParagraph = () => {
+    if (paragraphLines.length) {
+      const text = paragraphLines.join(' ').trim();
+      if (text) blocks.push({ type: 'paragraph', text });
+      paragraphLines = [];
+    }
+  };
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith('|')) {
+      flushParagraph();
+      const tableLines = [];
+      while (i < lines.length && lines[i].trim().startsWith('|')) {
+        tableLines.push(lines[i]);
+        i++;
+      }
+      const tableData = parseMarkdownTable(tableLines);
+      if (tableData) {
+        blocks.push({ type: 'table', data: tableData });
+      }
+      continue;
+    }
+
+    if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
+      flushParagraph();
+      blocks.push({ type: 'hr' });
+      i++;
+      continue;
+    }
+
+    if (trimmed.startsWith('> ')) {
+      flushParagraph();
+      const quoteLines = [];
+      while (i < lines.length && lines[i].trim().startsWith('> ')) {
+        quoteLines.push(lines[i].trim().replace(/^>\s?/, ''));
+        i++;
+      }
+      blocks.push({ type: 'blockquote', lines: quoteLines });
+      continue;
+    }
+
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      flushParagraph();
+      const bulletLines = [];
+      while (i < lines.length && (lines[i].trim().startsWith('- ') || lines[i].trim().startsWith('* '))) {
+        bulletLines.push(lines[i].trim().replace(/^[-*]\s+/, ''));
+        i++;
+      }
+      blocks.push({ type: 'bullets', items: bulletLines });
+      continue;
+    }
+
+    if (!trimmed) {
+      flushParagraph();
+      i++;
+      continue;
+    }
+
+    paragraphLines.push(trimmed);
+    i++;
+  }
+
+  flushParagraph();
+  return blocks;
+}
+
+function renderBlocks(container, blocks) {
+  blocks.forEach((block) => {
+    if (block.type === 'paragraph') {
+      const p = document.createElement('p');
+      p.className = 'text-body-md text-on-surface-variant mb-4 leading-relaxed';
+      p.innerHTML = inlineMarkdown(block.text);
+      container.appendChild(p);
+    } else if (block.type === 'hr') {
+      const hr = document.createElement('hr');
+      hr.className = 'border-outline-variant my-6';
+      container.appendChild(hr);
+    } else if (block.type === 'blockquote') {
+      const bq = document.createElement('div');
+      bq.className = 'card-elite border-l-4 border-l-primary px-5 py-4 mb-4';
+      bq.innerHTML = block.lines
+        .map((l) => `<p class="text-body-md text-on-surface-variant leading-relaxed">${inlineMarkdown(l)}</p>`)
+        .join('');
+      container.appendChild(bq);
+    } else if (block.type === 'bullets') {
+      const ul = document.createElement('ul');
+      ul.className = 'list-disc pl-5 space-y-2 mb-4';
+      block.items.forEach((item) => {
+        const li = document.createElement('li');
+        li.className = 'text-body-md text-on-surface-variant';
+        li.innerHTML = inlineMarkdown(item);
+        ul.appendChild(li);
+      });
+      container.appendChild(ul);
+    } else if (block.type === 'table') {
+      const tableData = block.data;
+      const wrap = document.createElement('div');
+      wrap.className = 'overflow-x-auto mb-4';
+      const table = document.createElement('table');
+      table.className = 'w-full text-left border-collapse';
+      const thead = document.createElement('thead');
+      thead.innerHTML = `<tr class="border-b border-outline-variant">${tableData.headers.map((h) => `<th class="py-3 pr-4 text-label-sm font-ui font-bold text-on-surface-variant uppercase tracking-wider">${escapeHtml(h)}</th>`).join('')}</tr>`;
+      table.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      tableData.rows.forEach((row, ri) => {
+        const tr = document.createElement('tr');
+        tr.className = ri % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface';
+        tr.innerHTML = row.map((cell) => `<td class="py-3 pr-4 text-body-md text-on-surface-variant">${inlineMarkdown(cell)}</td>`).join('');
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      wrap.appendChild(table);
+      container.appendChild(wrap);
+    }
+  });
 }
 
 function groupParagraphs(lines) {
