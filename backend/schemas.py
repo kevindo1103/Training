@@ -4,13 +4,13 @@ from pydantic import BaseModel, field_validator, Field
 
 
 class SessionCreate(BaseModel):
-    module_id: str
+    module_id: str | None = None
     name: str | None = None
 
 
 class SessionOut(BaseModel):
     id: str
-    module_id: str
+    module_id: str | None
     name: str | None
     created_at: str
     status: str
@@ -39,7 +39,7 @@ class JoinSession(BaseModel):
 class JoinByModule(BaseModel):
     model_config = {"populate_by_name": True}
 
-    module_id: str = Field(alias="moduleId")
+    module_id: str | None = Field(None, alias="moduleId")
     name: str
     role: str | None = None
 
