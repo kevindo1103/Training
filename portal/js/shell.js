@@ -175,9 +175,10 @@ function renderShell() {
   }
 
   const completedIds = getCompletedIds();
-  const sidebar = renderSideBar(config, appState.currentIndex, completedIds, navigateTo, appState.sidebarOpen, showSummary);
-  const isSummary = appState.currentIndex >= config.activities.length;
-  const bottombar = renderBottomBar(isSummary ? config.activities.length - 1 : appState.currentIndex, config.activities.length, goBack, isSummary ? null : goNext);
+  const activities = config.activities || [];
+  const sidebar = renderSideBar(config, appState.currentIndex, completedIds, navigateTo, appState.sidebarOpen, activities.length > 0 ? showSummary : null);
+  const isSummary = activities.length > 0 && appState.currentIndex >= activities.length;
+  const bottombar = renderBottomBar(isSummary ? activities.length - 1 : appState.currentIndex, activities.length, goBack, isSummary ? null : goNext);
 
   const main = document.createElement('main');
   main.id = 'activity-content';
@@ -196,7 +197,7 @@ function renderShell() {
 function getCompletedIds() {
   const state = getState();
   const completed = new Set();
-  config.activities.forEach((activity) => {
+  (config.activities || []).forEach((activity) => {
     const data = state.responses[activity.id];
     if (data && Object.keys(data).length > 0) {
       completed.add(activity.id);
@@ -247,7 +248,8 @@ function closeSidebar() {
 /* ---------- Navigation ---------- */
 
 function navigateTo(index) {
-  if (index < 0 || index >= config.activities.length) return;
+  const len = (config.activities || []).length;
+  if (index < 0 || index >= len) return;
   appState.currentIndex = index;
   appState.sidebarOpen = false;
   renderShell();
@@ -255,15 +257,17 @@ function navigateTo(index) {
 }
 
 function goBack() {
-  if (appState.currentIndex > config.activities.length - 1) {
-    navigateTo(config.activities.length - 1);
+  const len = (config.activities || []).length;
+  if (appState.currentIndex > len - 1) {
+    navigateTo(len - 1);
     return;
   }
   navigateTo(appState.currentIndex - 1);
 }
 
 function goNext() {
-  if (appState.currentIndex === config.activities.length - 1) {
+  const len = (config.activities || []).length;
+  if (appState.currentIndex === len - 1) {
     showSummary();
     return;
   }
@@ -271,7 +275,7 @@ function goNext() {
 }
 
 function showSummary() {
-  appState.currentIndex = config.activities.length;
+  appState.currentIndex = (config.activities || []).length;
   appState.sidebarOpen = false;
   renderShell();
   renderActivity();
@@ -350,6 +354,20 @@ async function joinSession(name, role) {
 function renderActivity() {
   const content = document.getElementById('activity-content');
   if (!content) return;
+
+  // Unit-based modules (M2+) use UnitStepper — activity model not applicable
+  if (!config.activities) {
+    content.innerHTML = `
+      <div class="max-w-reading mx-auto px-5 py-8 md:py-section text-center">
+        <div class="card-elite p-8 md:p-12 context-stripe">
+          <span class="material-symbols-outlined text-5xl text-primary mb-6">school</span>
+          <h2 class="text-headline-md font-headline font-bold text-on-surface mb-4">${escapeHtml(config.moduleTitle || config.title || 'Module')}</h2>
+          <p class="text-body-md text-on-surface-variant">Nội dung module này đang được xây dựng. Vui lòng quay lại sau.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
   if (appState.currentIndex >= config.activities.length) {
     import('./renderers/summary.js').then((mod) => {
