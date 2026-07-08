@@ -151,6 +151,31 @@ jobs:
             sudo systemctl restart dolphin-training-backend-staging
           REMOTE
 
+      - name: Deploy frontend to VPS staging
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "${VPS_USER}@${VPS_HOST}" << 'BOOTSTRAP'
+            set -e
+            sudo mkdir -p /var/www/dolphin-staging/portal
+            sudo chown -R "${USER}:${USER}" /var/www/dolphin-staging
+          BOOTSTRAP
+
+          rsync -avz --delete \
+            --exclude='.git' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            portal/ "${VPS_USER}@${VPS_HOST}:/var/www/dolphin-staging/portal/"
+
+          rsync -avz \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            nginx/staging.conf "${VPS_USER}@${VPS_HOST}:/tmp/dolphin-nginx-staging.conf"
+
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "${VPS_USER}@${VPS_HOST}" << 'NGINX'
+            set -e
+            sudo mv /tmp/dolphin-nginx-staging.conf /etc/nginx/sites-available/dolphin-staging
+            sudo ln -sf /etc/nginx/sites-available/dolphin-staging /etc/nginx/sites-enabled/dolphin-staging
+            sudo nginx -t
+            sudo systemctl reload nginx
+          NGINX
+
       - name: Health check
         if: steps.detect.outputs.exists == 'true' && env.STAGING_HEALTH_URL != ''
         env:
