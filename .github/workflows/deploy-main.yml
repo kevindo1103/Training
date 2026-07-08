@@ -99,6 +99,11 @@ jobs:
             } > .env
             chmod 600 .env
 
+            if [[ -z "${DATABASE_URL}" ]]; then
+              echo "ERROR: DATABASE_URL is empty. Check the DATABASE_URL_PRODUCTION secret."
+              exit 1
+            fi
+
             echo "--- diagnostics ---"
             echo "PWD=$(pwd)"
             DB_PATH=$(python3 -c "from urllib.parse import urlparse; import os; print(urlparse(os.environ['DATABASE_URL']).path)")
