@@ -19,6 +19,7 @@ import { renderSideBar } from './components/sidebar.js';
 import { renderBottomBar } from './components/bottombar.js';
 import { showToast } from './components/toast.js';
 import { renderLandingPage, renderLandingSideBar } from './components/landing.js';
+import { escapeHtml } from './utils/dom.js';
 
 const config = MODULE_CONFIG;
 
@@ -117,6 +118,15 @@ function renderShell() {
     return;
   }
 
+  if (appState.view === 'entry') {
+    const main = document.createElement('main');
+    main.id = 'activity-content';
+    main.className = 'pt-16 min-h-screen bg-surface-taupe';
+    appContainer.appendChild(main);
+    showEntryForm();
+    return;
+  }
+
   const completedIds = getCompletedIds();
   const sidebar = renderSideBar(config, appState.currentIndex, completedIds, navigateTo, appState.sidebarOpen, showSummary);
   const isSummary = appState.currentIndex >= config.activities.length;
@@ -151,13 +161,17 @@ function getCompletedIds() {
 function toggleSidebar() {
   appState.sidebarOpen = !appState.sidebarOpen;
   renderShell();
-  renderActivity();
+  if (appState.view === 'activity') {
+    renderActivity();
+  }
 }
 
 function closeSidebar() {
   appState.sidebarOpen = false;
   renderShell();
-  renderActivity();
+  if (appState.view === 'activity') {
+    renderActivity();
+  }
 }
 
 /* ---------- Navigation ---------- */
@@ -198,15 +212,6 @@ function showSummary() {
 function startWorkshop() {
   appState.view = 'entry';
   renderShell();
-  showEntryForm();
-}
-
-function checkEntry() {
-  const state = getState();
-  if (state.participant) {
-    renderActivity();
-    return;
-  }
   showEntryForm();
 }
 
@@ -331,16 +336,6 @@ function renderIntro(activity, container) {
     markIntroSeen(activity.id);
     renderActivity();
   });
-}
-
-function escapeHtml(text) {
-  if (text == null) return '';
-  return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }
 
 function dispatchRenderer(activity, data, container) {

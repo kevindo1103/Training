@@ -4,14 +4,15 @@
  * Content từ issue #63 (tiếng Việt)
  */
 
-// Module list — 5 canonical modules + 1 placeholder awaiting final name
+import { escapeHtml } from '../utils/dom.js';
+
+// Canonical module list từ project structure + MODULE_*.md titles
 export const MODULES = [
   { id: "module1", title: "Module 1", name: "Tái Cấu Trúc Mô Hình Kinh Doanh", icon: "corporate_fare", active: true },
-  { id: "module2", title: "Module 2", name: "Product / Service Portfolio", icon: "widgets", active: false },
-  { id: "module3", title: "Module 3", name: "Business Development", icon: "trending_up", active: false },
-  { id: "module4", title: "Module 4", name: "Organization & Operation", icon: "account_tree", active: false },
-  { id: "module5", title: "Module 5", name: "Product Development Lifecycle", icon: "cycle", active: false },
-  { id: "module6", title: "Module 6", name: "Tổng Kết & Lộ Trình (cần xác nhận)", icon: "flag", active: false },
+  { id: "module2", title: "Module 2", name: "Tái Cấu Trúc Product/Service Portfolio", icon: "widgets", active: false },
+  { id: "module3", title: "Module 3", name: "Xây Dựng & Triển Khai Business Development Framework", icon: "trending_up", active: false },
+  { id: "module4", title: "Module 4", name: "Cấu Trúc Organization & Operation", icon: "account_tree", active: false },
+  { id: "module5", title: "Module 5", name: "Điều Chỉnh Product Development Life Cycle", icon: "cycle", active: false },
 ];
 
 export function renderLandingSideBar(isOpen, onToggle) {
@@ -22,7 +23,7 @@ export function renderLandingSideBar(isOpen, onToggle) {
   header.className = 'px-6 py-5';
   header.innerHTML = `
     <h2 class="font-headline font-bold text-headline-sm text-on-surface">Dolphin Training</h2>
-    <span class="text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">6 Modules</span>
+    <span class="text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">5 Modules</span>
   `;
   aside.appendChild(header);
 
@@ -144,12 +145,4 @@ export function renderLandingPage(container, onStart) {
   }
 }
 
-function escapeHtml(text) {
-  if (text == null) return '';
-  return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+
