@@ -106,6 +106,8 @@ jobs:
 
             echo "--- diagnostics ---"
             echo "PWD=$(pwd)"
+            echo "DATABASE_URL length: ${#DATABASE_URL}"
+            echo "DATABASE_URL prefix: ${DATABASE_URL:0:15}"
             DB_PATH=$(python3 -c "from urllib.parse import urlparse; import os; print(urlparse(os.environ['DATABASE_URL']).path)")
             echo "DATABASE_URL path: $DB_PATH"
             ls -la /opt/dolphin-training/ || true
