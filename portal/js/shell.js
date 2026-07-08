@@ -84,8 +84,9 @@ function renderShell() {
   const completedIds = getCompletedIds();
 
   const topbar = renderTopBar(config, toggleSidebar, toggleTheme, appState.isDark);
-  const sidebar = renderSideBar(config, appState.currentIndex, completedIds, navigateTo, appState.sidebarOpen);
-  const bottombar = renderBottomBar(appState.currentIndex, config.activities.length, goBack, goNext);
+  const sidebar = renderSideBar(config, appState.currentIndex, completedIds, navigateTo, appState.sidebarOpen, showSummary);
+  const isSummary = appState.currentIndex >= config.activities.length;
+  const bottombar = renderBottomBar(isSummary ? config.activities.length - 1 : appState.currentIndex, config.activities.length, goBack, isSummary ? null : goNext);
 
   const main = document.createElement('main');
   main.id = 'activity-content';
@@ -137,31 +138,26 @@ function navigateTo(index) {
 }
 
 function goBack() {
+  if (appState.currentIndex > config.activities.length - 1) {
+    navigateTo(config.activities.length - 1);
+    return;
+  }
   navigateTo(appState.currentIndex - 1);
 }
 
 function goNext() {
   if (appState.currentIndex === config.activities.length - 1) {
-    showCompletion();
+    showSummary();
     return;
   }
   navigateTo(appState.currentIndex + 1);
 }
 
-function showCompletion() {
-  const content = document.getElementById('activity-content');
-  if (!content) return;
-  content.innerHTML = `
-    <div class="max-w-3xl mx-auto p-6 md:p-12">
-      <div class="bg-surface-container-lowest rounded-2xl p-8 md:p-12 shadow-card border border-outline-variant text-center">
-        <span class="material-symbols-outlined text-5xl text-success-emerald mb-4">check_circle</span>
-        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-4">Đã hoàn thành Module 1</h2>
-        <p class="text-body-md text-on-surface-variant mb-6">Cảm ơn bạn đã hoàn thành các activity. Dữ liệu đã được lưu tự động.</p>
-        <button id="back-to-first" class="px-6 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container">Xem lại từ đầu</button>
-      </div>
-    </div>
-  `;
-  document.getElementById('back-to-first').addEventListener('click', () => navigateTo(0));
+function showSummary() {
+  appState.currentIndex = config.activities.length;
+  appState.sidebarOpen = false;
+  renderShell();
+  renderActivity();
 }
 
 /* ---------- Entry form ---------- */
@@ -241,6 +237,15 @@ async function joinSession(name, role) {
 function renderActivity() {
   const content = document.getElementById('activity-content');
   if (!content) return;
+
+  if (appState.currentIndex >= config.activities.length) {
+    import('./renderers/summary.js').then((mod) => {
+      const state = getState();
+      mod.render(content, state.responses || {}, config);
+    });
+    return;
+  }
+
   const activity = config.activities[appState.currentIndex];
   const data = getResponse(activity.id);
 
