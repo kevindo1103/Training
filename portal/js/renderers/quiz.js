@@ -27,6 +27,23 @@
 import { escapeHtml } from '../utils/dom.js';
 import { setUnitResponse } from '../store.js';
 
+// Normalize options to [{key, label}] regardless of array or object format.
+// Array format: options=["A. x","B. y"], correct=0 (index)
+// Object format: options={A:"x",B:"y"}, correct="B" (key)
+function getOptionEntries(options) {
+  if (Array.isArray(options)) {
+    return options.map((text, i) => ({ key: String(i), label: text }));
+  }
+  if (options && typeof options === 'object') {
+    return Object.entries(options).map(([k, v]) => ({ key: k, label: `${k}. ${v}` }));
+  }
+  return [];
+}
+
+function getCorrectKey(question) {
+  return String(question.correct);
+}
+
 export async function render(container, unit, onComplete) {
   const config = unit?.quiz || unit || {};
   const questions = Array.isArray(config.questions) ? config.questions : [];
@@ -85,21 +102,21 @@ function createQuestionFieldset(question, index, state) {
   const optionsWrap = document.createElement('div');
   optionsWrap.className = 'space-y-3';
 
-  const options = Array.isArray(question.options) ? question.options : [];
-  options.forEach((option, optIndex) => {
-    const optionId = `q-${index}-opt-${optIndex}`;
+  const optionEntries = getOptionEntries(question.options);
+  optionEntries.forEach(({ key, label: optText }) => {
+    const optionId = `q-${index}-opt-${key}`;
     const label = document.createElement('label');
     label.className = 'flex items-start gap-3 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer min-h-[44px]';
     label.htmlFor = optionId;
     label.innerHTML = `
-      <input type="radio" name="q-${index}" id="${optionId}" value="${optIndex}" class="mt-1 accent-primary">
-      <span class="text-body-md text-on-surface-variant">${escapeHtml(option)}</span>
+      <input type="radio" name="q-${index}" id="${optionId}" value="${key}" class="mt-1 accent-primary">
+      <span class="text-body-md text-on-surface-variant">${escapeHtml(optText)}</span>
     `;
 
     const radio = label.querySelector('input');
     radio.addEventListener('change', () => {
       if (!state.submitted) {
-        state.answers[index] = optIndex;
+        state.answers[index] = key;
       }
     });
 
@@ -139,7 +156,8 @@ function handleSubmit(questions, state, form, footer, submitBtn, onComplete, uni
   let score = 0;
   questions.forEach((question, index) => {
     const selected = state.answers[index];
-    const isCorrect = selected === question.correct;
+    const correctKey = getCorrectKey(question);
+    const isCorrect = selected === correctKey;
     if (isCorrect) score++;
 
     const fieldset = form.querySelector(`[data-question-index="${index}"]`);
@@ -148,15 +166,14 @@ function handleSubmit(questions, state, form, footer, submitBtn, onComplete, uni
     const radios = fieldset.querySelectorAll('input[type="radio"]');
     radios.forEach((radio) => {
       radio.disabled = true;
-      const optIndex = Number(radio.value);
       const label = radio.closest('label');
       if (!label) return;
 
       label.classList.remove('bg-surface-container-low', 'hover:bg-surface-container');
 
-      if (optIndex === question.correct) {
+      if (radio.value === correctKey) {
         label.classList.add('bg-success-emerald/10', 'border', 'border-success-emerald');
-      } else if (optIndex === selected && !isCorrect) {
+      } else if (radio.value === selected && !isCorrect) {
         label.classList.add('bg-error/10', 'border', 'border-error');
       } else {
         label.classList.add('bg-surface-container-lowest', 'opacity-70');
