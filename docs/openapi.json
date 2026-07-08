@@ -549,6 +549,22 @@
           }
         }
       }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Root",
+        "operationId": "health_root_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

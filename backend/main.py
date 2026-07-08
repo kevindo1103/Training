@@ -37,6 +37,11 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/health")
+def health_root():
+    return health()
+
+
 def _seed_default_session():
     db = SessionLocal()
     try:
