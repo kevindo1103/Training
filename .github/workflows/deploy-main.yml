@@ -76,7 +76,7 @@ jobs:
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
             backend/ "${VPS_USER}@${VPS_HOST}:/opt/dolphin-training/backend/"
 
-      - name: Install dependencies and restart service
+      - name: Install dependencies and write env
         if: steps.detect.outputs.exists == 'true'
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "${VPS_USER}@${VPS_HOST}" << EOF
@@ -98,24 +98,35 @@ jobs:
               [[ -n "${JWT_EXPIRE_MINUTES}" ]] && printf 'JWT_EXPIRE_MINUTES=%s\n' "${JWT_EXPIRE_MINUTES}"
             } > .env
             chmod 600 .env
+          EOF
 
-            if [[ -z "${DATABASE_URL}" ]]; then
-              echo "ERROR: DATABASE_URL is empty. Check the DATABASE_URL_PRODUCTION secret."
-              exit 1
-            fi
+      - name: Migrate and restart service
+        if: steps.detect.outputs.exists == 'true'
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "${VPS_USER}@${VPS_HOST}" << 'REMOTE'
+            set -e
+            cd /opt/dolphin-training/backend
+            source venv/bin/activate
+
+            set -a
+            source .env
+            set +a
 
             echo "--- diagnostics ---"
-            echo "PWD=$(pwd)"
             echo "DATABASE_URL length: ${#DATABASE_URL}"
             echo "DATABASE_URL prefix: ${DATABASE_URL:0:15}"
-            DB_PATH="${DATABASE_URL#sqlite://}"
-            echo "DATABASE_URL path length: ${#DB_PATH}"
             ls -la /opt/dolphin-training/ || true
             ls -la /opt/dolphin-training/data/ || true
             echo "--- .env (redacted) ---"
             sed 's/=.*$/=***/' .env
             echo "--- end diagnostics ---"
 
+            if [[ -z "${DATABASE_URL}" ]]; then
+              echo "ERROR: DATABASE_URL is empty after sourcing .env."
+              exit 1
+            fi
+
+            DB_PATH="${DATABASE_URL#sqlite://}"
             DB_DIR=$(dirname "$DB_PATH")
             echo "Ensuring DB directory: $DB_DIR"
             sudo mkdir -p "$DB_DIR"
@@ -125,7 +136,7 @@ jobs:
             alembic upgrade head
             sudo chown -R deploy:deploy "$DB_DIR"
             sudo systemctl restart dolphin-training-backend
-          EOF
+          REMOTE
 
       - name: Health check
         if: steps.detect.outputs.exists == 'true' && env.PRODUCTION_HEALTH_URL != ''
