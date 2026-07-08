@@ -21,9 +21,10 @@ export function renderSideBar(config, currentIndex, completedIds, onNavigate, is
   nav.className = 'px-3 pb-4 space-y-1 overflow-y-auto custom-scrollbar';
   nav.setAttribute('aria-label', 'Activities');
 
-  const summaryIndex = config.activities.length;
+  const activities = config.activities || [];
+  const summaryIndex = activities.length;
 
-  config.activities.forEach((activity, index) => {
+  activities.forEach((activity, index) => {
     const isActive = index === currentIndex;
     const isCompleted = completedIds.has(activity.id);
     const btn = document.createElement('button');
