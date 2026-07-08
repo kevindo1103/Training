@@ -24,8 +24,11 @@ jobs:
       VPS_USER: ${{ secrets.VPS_USER }}
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      FACILITATOR_SECRET: ${{ secrets.FACILITATOR_SECRET }}
       DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCTION }}
       CORS_ORIGINS: ${{ secrets.CORS_ORIGINS_PRODUCTION }}
+      JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
+      JWT_EXPIRE_MINUTES: ${{ secrets.JWT_EXPIRE_MINUTES }}
     steps:
       - uses: actions/checkout@v4
 
@@ -84,12 +87,16 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
 
-            printf '%s\n' \
-              "JWT_SECRET=${JWT_SECRET}" \
-              "DATABASE_URL=${DATABASE_URL}" \
-              "CORS_ORIGINS=${CORS_ORIGINS}" \
-              "ENV=production" \
-              > .env
+            {
+              printf '%s\n' \
+                "JWT_SECRET=${JWT_SECRET}" \
+                "FACILITATOR_SECRET=${FACILITATOR_SECRET}" \
+                "DATABASE_URL=${DATABASE_URL}" \
+                "CORS_ORIGINS=${CORS_ORIGINS}" \
+                "ENV=production"
+              [[ -n "${JWT_ALGORITHM}" ]] && printf 'JWT_ALGORITHM=%s\n' "${JWT_ALGORITHM}"
+              [[ -n "${JWT_EXPIRE_MINUTES}" ]] && printf 'JWT_EXPIRE_MINUTES=%s\n' "${JWT_EXPIRE_MINUTES}"
+            } > .env
             chmod 600 .env
 
             alembic upgrade head
