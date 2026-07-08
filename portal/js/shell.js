@@ -25,6 +25,11 @@ let config = module1Config;
 
 const THEME_KEY = 'dolphin_theme';
 
+// Returns the navigable items list regardless of module type
+function getItems() {
+  return config.activities || config.units || [];
+}
+
 const appState = {
   currentIndex: 0,
   sidebarOpen: false,
@@ -167,10 +172,10 @@ function renderShell() {
   }
 
   const completedIds = getCompletedIds();
-  const activities = config.activities || [];
-  const sidebar = renderSideBar(config, appState.currentIndex, completedIds, navigateTo, appState.sidebarOpen, activities.length > 0 ? showSummary : null);
-  const isSummary = activities.length > 0 && appState.currentIndex >= activities.length;
-  const bottombar = renderBottomBar(isSummary ? activities.length - 1 : appState.currentIndex, activities.length, goBack, isSummary ? null : goNext);
+  const items = getItems();
+  const sidebar = renderSideBar(config, appState.currentIndex, completedIds, navigateTo, appState.sidebarOpen, config.activities ? showSummary : null);
+  const isSummary = items.length > 0 && appState.currentIndex >= items.length;
+  const bottombar = renderBottomBar(isSummary ? items.length - 1 : appState.currentIndex, items.length, goBack, isSummary ? null : goNext);
 
   const main = document.createElement('main');
   main.id = 'activity-content';
@@ -189,12 +194,18 @@ function renderShell() {
 function getCompletedIds() {
   const state = getState();
   const completed = new Set();
-  (config.activities || []).forEach((activity) => {
-    const data = state.responses[activity.id];
-    if (data && Object.keys(data).length > 0) {
-      completed.add(activity.id);
-    }
-  });
+  if (config.activities) {
+    config.activities.forEach((activity) => {
+      const data = state.responses[activity.id];
+      if (data && Object.keys(data).length > 0) completed.add(activity.id);
+    });
+  } else if (config.units) {
+    const unitResponses = state.unitResponses?.[config.id] || {};
+    config.units.forEach((unit) => {
+      const data = unitResponses[unit.id];
+      if (data && Object.keys(data).length > 0) completed.add(unit.id);
+    });
+  }
   return completed;
 }
 
@@ -249,7 +260,7 @@ function closeSidebar() {
 /* ---------- Navigation ---------- */
 
 function navigateTo(index) {
-  const len = (config.activities || []).length;
+  const len = getItems().length;
   if (index < 0 || index >= len) return;
   appState.currentIndex = index;
   appState.sidebarOpen = false;
@@ -258,7 +269,7 @@ function navigateTo(index) {
 }
 
 function goBack() {
-  const len = (config.activities || []).length;
+  const len = getItems().length;
   if (appState.currentIndex > len - 1) {
     navigateTo(len - 1);
     return;
@@ -267,7 +278,7 @@ function goBack() {
 }
 
 function goNext() {
-  const len = (config.activities || []).length;
+  const len = getItems().length;
   if (appState.currentIndex === len - 1) {
     showSummary();
     return;
@@ -276,7 +287,7 @@ function goNext() {
 }
 
 function showSummary() {
-  appState.currentIndex = (config.activities || []).length;
+  appState.currentIndex = getItems().length;
   appState.sidebarOpen = false;
   renderShell();
   renderActivity();
@@ -356,17 +367,26 @@ function renderActivity() {
   const content = document.getElementById('activity-content');
   if (!content) return;
 
-  // Unit-based modules (M2+) use UnitStepper — activity model not applicable
-  if (!config.activities) {
-    content.innerHTML = `
-      <div class="max-w-reading mx-auto px-5 py-8 md:py-section text-center">
-        <div class="card-elite p-8 md:p-12 context-stripe">
-          <span class="material-symbols-outlined text-5xl text-primary mb-6">school</span>
-          <h2 class="text-headline-md font-headline font-bold text-on-surface mb-4">${escapeHtml(config.moduleTitle || config.title || 'Module')}</h2>
-          <p class="text-body-md text-on-surface-variant">Nội dung module này đang được xây dựng. Vui lòng quay lại sau.</p>
+  // Unit-based modules (M2+)
+  if (config.units) {
+    const units = config.units;
+    if (appState.currentIndex >= units.length) {
+      content.innerHTML = `
+        <div class="max-w-reading mx-auto px-5 py-8 md:py-section text-center">
+          <div class="card-elite p-8 md:p-12 context-stripe">
+            <span class="material-symbols-outlined text-5xl text-success-emerald mb-6">check_circle</span>
+            <h2 class="text-headline-md font-headline font-bold text-on-surface mb-4">Hoàn thành ${escapeHtml(config.moduleTitle || config.title || 'Module')}</h2>
+            <p class="text-body-md text-on-surface-variant">Bạn đã hoàn thành tất cả ${units.length} units của module này.</p>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+      return;
+    }
+    const unit = units[appState.currentIndex];
+    import('./components/unit-stepper.js').then(({ UnitStepper }) => {
+      const stepper = new UnitStepper(unit, content, () => goNext());
+      stepper.render();
+    });
     return;
   }
 
