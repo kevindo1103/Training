@@ -101,9 +101,13 @@ function renderBMC(container, activity, data, onChange) {
       const bar = document.createElement('div');
       bar.innerHTML = `
         <p class="text-label-sm font-ui font-bold text-on-surface mb-1.5">${escapeHtml(item.label)}</p>
-        <div class="flex h-9 rounded-lg overflow-hidden">
-          <div class="bg-primary flex items-center justify-center text-on-primary text-label-sm font-bold" style="width: ${item.service}%">Dịch vụ ${item.service}%</div>
-          <div class="bg-secondary flex items-center justify-center text-on-secondary text-label-sm font-bold" style="width: ${item.product}%">Sản phẩm ${item.product}%</div>
+        <div class="flex h-5 rounded-lg overflow-hidden mb-1.5">
+          <div class="bg-primary rounded-l-lg" style="width: ${item.service}%"></div>
+          <div class="bg-secondary rounded-r-lg" style="width: ${item.product}%"></div>
+        </div>
+        <div class="flex justify-between text-label-sm font-ui">
+          <span class="text-primary font-bold">Dịch vụ ${item.service}%</span>
+          <span class="text-secondary font-bold">Sản phẩm ${item.product}%</span>
         </div>
       `;
       barsContainer.appendChild(bar);
@@ -146,9 +150,13 @@ function renderBMC(container, activity, data, onChange) {
       const bar = document.createElement('div');
       bar.innerHTML = `
         <p class="text-label-sm font-ui font-bold text-on-surface mb-1.5">${escapeHtml(item.label)}</p>
-        <div class="flex h-9 rounded-lg overflow-hidden">
-          <div class="bg-primary flex items-center justify-center text-on-primary text-label-sm font-bold" style="width: ${item.service}%">Dịch vụ ${item.service}%</div>
-          <div class="bg-secondary flex items-center justify-center text-on-secondary text-label-sm font-bold" style="width: ${item.product}%">Sản phẩm ${item.product}%</div>
+        <div class="flex h-5 rounded-lg overflow-hidden mb-1.5">
+          <div class="bg-primary rounded-l-lg" style="width: ${item.service}%"></div>
+          <div class="bg-secondary rounded-r-lg" style="width: ${item.product}%"></div>
+        </div>
+        <div class="flex justify-between text-label-sm font-ui">
+          <span class="text-primary font-bold">Dịch vụ ${item.service}%</span>
+          <span class="text-secondary font-bold">Sản phẩm ${item.product}%</span>
         </div>
       `;
       barsContainer.appendChild(bar);
