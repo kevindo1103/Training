@@ -20,6 +20,7 @@ function createEmptyState() {
     participant: null,
     responses: {},
     responseTypes: {},
+    unitResponses: {},
     introsSeen: {},
     lastSaved: null,
     lastSynced: null,
@@ -131,6 +132,19 @@ export function mergeResponse(activityId, data, type = null) {
       type,
     };
   }
+  persist();
+}
+
+export function setUnitResponse(moduleId, unitId, step, data) {
+  if (!moduleId || !unitId || !step) return;
+  state.unitResponses = state.unitResponses || {};
+  state.unitResponses[moduleId] = state.unitResponses[moduleId] || {};
+  state.unitResponses[moduleId][unitId] = state.unitResponses[moduleId][unitId] || {};
+  state.unitResponses[moduleId][unitId][step] = {
+    ...(state.unitResponses[moduleId][unitId][step] || {}),
+    ...data,
+    updatedAt: Date.now(),
+  };
   persist();
 }
 
