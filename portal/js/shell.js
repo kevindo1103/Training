@@ -18,6 +18,7 @@ import { renderTopBar } from './components/topbar.js';
 import { renderSideBar } from './components/sidebar.js';
 import { renderBottomBar } from './components/bottombar.js';
 import { showToast } from './components/toast.js';
+import { renderLandingPage, renderLandingSideBar } from './components/landing.js';
 
 const config = MODULE_CONFIG;
 
@@ -27,6 +28,7 @@ const appState = {
   currentIndex: 0,
   sidebarOpen: false,
   isDark: false,
+  view: 'landing', // 'landing' | 'entry' | 'activity'
 };
 
 let appContainer = null;
@@ -46,8 +48,14 @@ export async function boot() {
     }
   });
   appContainer = document.getElementById('app');
+
+  const state = getState();
+  appState.view = state.participant ? 'activity' : 'landing';
+
   renderShell();
-  checkEntry();
+  if (appState.view === 'activity') {
+    renderActivity();
+  }
 }
 
 /* ---------- Theme ---------- */
@@ -88,9 +96,28 @@ function renderShell() {
   if (!appContainer) return;
   appContainer.innerHTML = '';
 
-  const completedIds = getCompletedIds();
-
   const topbar = renderTopBar(config, toggleSidebar, toggleTheme, appState.isDark);
+  appContainer.appendChild(topbar);
+
+  if (appState.view === 'landing') {
+    const landingSidebar = renderLandingSideBar(appState.sidebarOpen, closeSidebar);
+    const main = document.createElement('main');
+    main.id = 'activity-content';
+    main.className = 'pt-16 pb-0 md:pl-72 min-h-screen bg-surface-taupe';
+
+    const overlay = document.createElement('div');
+    overlay.className = `fixed inset-0 bg-surface/50 backdrop-blur-sm z-40 md:hidden transition-opacity ${appState.sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`;
+    overlay.addEventListener('click', closeSidebar);
+
+    appContainer.appendChild(landingSidebar);
+    appContainer.appendChild(overlay);
+    appContainer.appendChild(main);
+
+    renderLandingPage(main, startWorkshop);
+    return;
+  }
+
+  const completedIds = getCompletedIds();
   const sidebar = renderSideBar(config, appState.currentIndex, completedIds, navigateTo, appState.sidebarOpen, showSummary);
   const isSummary = appState.currentIndex >= config.activities.length;
   const bottombar = renderBottomBar(isSummary ? config.activities.length - 1 : appState.currentIndex, config.activities.length, goBack, isSummary ? null : goNext);
@@ -103,7 +130,6 @@ function renderShell() {
   overlay.className = `fixed inset-0 bg-surface/50 backdrop-blur-sm z-40 md:hidden transition-opacity ${appState.sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`;
   overlay.addEventListener('click', closeSidebar);
 
-  appContainer.appendChild(topbar);
   appContainer.appendChild(sidebar);
   appContainer.appendChild(overlay);
   appContainer.appendChild(main);
@@ -168,6 +194,12 @@ function showSummary() {
 }
 
 /* ---------- Entry form ---------- */
+
+function startWorkshop() {
+  appState.view = 'entry';
+  renderShell();
+  showEntryForm();
+}
 
 function checkEntry() {
   const state = getState();
@@ -241,6 +273,8 @@ async function joinSession(name, role) {
     console.log('Join session API failed, continuing offline', err);
   }
   setParticipant(name, role, participantId, sessionId, token);
+  appState.view = 'activity';
+  renderShell();
   renderActivity();
 }
 
