@@ -842,8 +842,10 @@
       unitIds.forEach((uid) => {
         const qs = quizScores[uid];
         const avg = qs.avg || 0;
+        const total = qs.total || 1;
+        const ratio = avg / total;
         const responses = qs.responses || [];
-        const isGap = avg < 3;
+        const isGap = ratio < 0.6;
         const gapBadge = isGap
           ? `<span class="ml-2 px-2 py-0.5 rounded-full bg-error/10 text-error text-label-sm font-ui font-bold">Gap</span>`
           : '';
@@ -864,7 +866,7 @@
             <div class="flex items-center gap-2 mb-3">
               <h4 class="font-headline font-bold text-headline-sm text-on-surface">${escapeHtml(M2_UNIT_LABELS[uid] || uid)}</h4>
               ${gapBadge}
-              <span class="ml-auto text-body-md font-ui font-bold ${isGap ? 'text-error' : 'text-primary'}">TB: ${avg}/5</span>
+              <span class="ml-auto text-body-md font-ui font-bold ${isGap ? 'text-error' : 'text-primary'}">TB: ${avg}/${total} (${Math.round(ratio * 100)}%)</span>
             </div>
             <ul>${participantRows}</ul>
           </div>
@@ -1000,9 +1002,20 @@
             icon.textContent = 'expand_less';
             if (!panel.dataset.loaded) {
               panel.innerHTML = '<p class="text-body-md text-on-surface-variant">Đang tải chi tiết...</p>';
-              const detail = await apiFetch(`/facilitator/${currentSessionId}/module2/unit/${uid}`);
-              panel.innerHTML = renderPracticeDetail(detail, uid);
-              panel.dataset.loaded = 'true';
+              try {
+                const detail = await apiFetch(`/facilitator/${currentSessionId}/module2/unit/${uid}`);
+                panel.innerHTML = renderPracticeDetail(detail, uid);
+                panel.dataset.loaded = 'true';
+              } catch (err) {
+                panel.innerHTML = `
+                  <div class="flex items-center justify-between gap-3">
+                    <p class="text-body-md text-error">Không tải được dữ liệu. <span class="text-on-surface-variant">(${escapeHtml(String(err?.message || err))})</span></p>
+                    <button class="text-label-sm font-ui font-bold text-primary underline" data-m2-retry="${uid}">Thử lại</button>
+                  </div>
+                `;
+                const retryBtn = panel.querySelector(`[data-m2-retry="${uid}"]`);
+                if (retryBtn) retryBtn.addEventListener('click', () => btn.click());
+              }
             }
           } else {
             panel.classList.add('hidden');
