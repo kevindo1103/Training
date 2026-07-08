@@ -108,16 +108,20 @@ jobs:
             echo "PWD=$(pwd)"
             echo "DATABASE_URL length: ${#DATABASE_URL}"
             echo "DATABASE_URL prefix: ${DATABASE_URL:0:15}"
-            # Strip sqlite:/// prefix for SQLite absolute-path URLs.
-            DB_PATH="${DATABASE_URL#sqlite://}"
-            echo "DATABASE_URL path length: ${#DB_PATH}"
             ls -la /opt/dolphin-training/ || true
             ls -la /opt/dolphin-training/data-staging/ || true
             echo "--- .env (redacted) ---"
             sed 's/=.*$/=***/' .env
             echo "--- end diagnostics ---"
 
+            # Source .env on the remote so DATABASE_URL is available for parsing.
+            set -a
+            source .env
+            set +a
+
             # Ensure DB parent directory exists and is writable by deploy user.
+            # Derive directory from DATABASE_URL so it always matches the secret.
+            DB_PATH="${DATABASE_URL#sqlite://}"
             DB_DIR=$(dirname "$DB_PATH")
             echo "Ensuring DB directory: $DB_DIR"
             sudo mkdir -p "$DB_DIR"
