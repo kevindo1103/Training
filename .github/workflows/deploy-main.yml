@@ -126,8 +126,15 @@ jobs:
               exit 1
             fi
 
-            DB_PATH="${DATABASE_URL#sqlite://}"
-            DB_DIR=$(dirname "$DB_PATH")
+            # Normalize sqlite:///path → sqlite:////path so SQLAlchemy treats it as absolute.
+            # 3-slash URLs are interpreted as relative paths from CWD; 4-slash = absolute.
+            if [[ "$DATABASE_URL" =~ ^sqlite:///[^/] ]]; then
+              DATABASE_URL="sqlite:////${DATABASE_URL#sqlite:///}"
+              echo "Normalized DATABASE_URL to 4-slash absolute: ${DATABASE_URL:0:30}..."
+            fi
+
+            DB_PATH="${DATABASE_URL#sqlite:////}"
+            DB_DIR=$(dirname "/$DB_PATH")
             echo "Ensuring DB directory: $DB_DIR"
             sudo mkdir -p "$DB_DIR"
             sudo chown -R deploy:deploy "$DB_DIR"
