@@ -66,9 +66,13 @@ async function resolveRoute() {
     } else {
       appState.view = 'entry';
       renderShell();
-      showEntryForm();
     }
     return;
+  }
+
+  // Clear stale ?module from URL after failed config load to avoid repeated toasts on refresh
+  if (window.location.search) {
+    history.replaceState({}, '', window.location.pathname);
   }
 
   // No ?module param: show home (module selector) if logged in, else entry form
