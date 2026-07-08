@@ -3,7 +3,7 @@
  * Boot sequence, layout, navigation, entry form, renderer dispatch
  */
 
-import { MODULE_CONFIG } from './modules/module1.config.js';
+import { MODULE_CONFIG as module1Config } from './modules/module1.config.js';
 import {
   initStore,
   setParticipant,
@@ -18,10 +18,10 @@ import { renderTopBar } from './components/topbar.js';
 import { renderSideBar } from './components/sidebar.js';
 import { renderBottomBar } from './components/bottombar.js';
 import { showToast } from './components/toast.js';
-import { renderLandingPage, renderLandingSideBar } from './components/landing.js';
+import { renderHomePage, renderHomeSideBar, MODULES } from './components/landing.js';
 import { escapeHtml } from './utils/dom.js';
 
-const config = MODULE_CONFIG;
+let config = module1Config;
 
 const THEME_KEY = 'dolphin_theme';
 
@@ -50,12 +50,55 @@ export async function boot() {
   });
   appContainer = document.getElementById('app');
 
-  const state = getState();
-  appState.view = state.participant ? 'activity' : 'landing';
+  await resolveRoute();
+}
 
+async function resolveRoute() {
+  const state = getState();
+  const moduleConfig = await loadConfig();
+
+  if (moduleConfig) {
+    config = moduleConfig;
+    if (state.participant) {
+      appState.view = 'activity';
+      renderShell();
+      renderActivity();
+    } else {
+      appState.view = 'entry';
+      renderShell();
+    }
+    return;
+  }
+
+  // Clear stale ?module from URL after failed config load to avoid repeated toasts on refresh
+  if (window.location.search) {
+    history.replaceState({}, '', window.location.pathname);
+  }
+
+  // No ?module param: show home (module selector) if logged in, else entry form
+  appState.view = state.participant ? 'landing' : 'entry';
   renderShell();
   if (appState.view === 'activity') {
     renderActivity();
+  }
+}
+
+async function loadConfig() {
+  const params = new URLSearchParams(window.location.search);
+  const moduleId = params.get('module');
+  if (!moduleId) return null;
+
+  if (moduleId === '1') {
+    return module1Config;
+  }
+
+  try {
+    const mod = await import(`./modules/module${moduleId}.config.js`);
+    return mod.MODULE_CONFIG || mod.default || null;
+  } catch (err) {
+    console.error(`Failed to load module${moduleId}.config.js`, err);
+    showToast('Module không tồn tại hoặc chưa sẵn sàng');
+    return null;
   }
 }
 
@@ -101,7 +144,9 @@ function renderShell() {
   appContainer.appendChild(topbar);
 
   if (appState.view === 'landing') {
-    const landingSidebar = renderLandingSideBar(appState.sidebarOpen, closeSidebar);
+    const state = getState();
+    const moduleStatus = computeModuleStatus(state);
+    const homeSidebar = renderHomeSideBar(appState.sidebarOpen, closeSidebar);
     const main = document.createElement('main');
     main.id = 'activity-content';
     main.className = 'pt-16 pb-0 md:pl-72 min-h-screen bg-surface-taupe';
@@ -110,11 +155,13 @@ function renderShell() {
     overlay.className = `fixed inset-0 bg-surface/50 backdrop-blur-sm z-40 md:hidden transition-opacity ${appState.sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`;
     overlay.addEventListener('click', closeSidebar);
 
-    appContainer.appendChild(landingSidebar);
+    appContainer.appendChild(homeSidebar);
     appContainer.appendChild(overlay);
     appContainer.appendChild(main);
 
-    renderLandingPage(main, startWorkshop);
+    renderHomePage(main, state.participant, moduleStatus, (moduleId) => {
+      window.location.search = `?module=${moduleId}`;
+    });
     return;
   }
 
@@ -156,6 +203,29 @@ function getCompletedIds() {
     }
   });
   return completed;
+}
+
+function computeModuleStatus(state) {
+  const totalActivities = MODULES.reduce((sum, mod) => {
+    return sum + (mod.totalActivities || 0);
+  }, 0);
+  return MODULES.map((module) => {
+    const status = {
+      ...module,
+      completed: 0,
+      available: module.id === 'module1',
+      totalActivities: module.totalActivities || 0,
+      programTotal: totalActivities,
+    };
+    if (module.id === 'module1') {
+      status.totalActivities = module1Config.activities.length;
+      status.completed = module1Config.activities.filter((activity) => {
+        const data = state.responses[activity.id];
+        return data && Object.keys(data).length > 0;
+      }).length;
+    }
+    return status;
+  });
 }
 
 function toggleSidebar() {
@@ -208,12 +278,6 @@ function showSummary() {
 }
 
 /* ---------- Entry form ---------- */
-
-function startWorkshop() {
-  appState.view = 'entry';
-  renderShell();
-  showEntryForm();
-}
 
 function showEntryForm() {
   const content = document.getElementById('activity-content');
@@ -268,7 +332,7 @@ async function joinSession(name, role) {
   let token = null;
   try {
     const { api } = await import('./api.js');
-    const res = await api.post('/sessions/join', { moduleId: config.id, name, role });
+    const res = await api.post('/sessions/join', { moduleId: 'workshop', name, role });
     if (res?.participant_id) {
       participantId = res.participant_id;
       sessionId = res.session_id;
@@ -278,9 +342,7 @@ async function joinSession(name, role) {
     console.log('Join session API failed, continuing offline', err);
   }
   setParticipant(name, role, participantId, sessionId, token);
-  appState.view = 'activity';
-  renderShell();
-  renderActivity();
+  await resolveRoute();
 }
 
 /* ---------- Activity rendering ---------- */
