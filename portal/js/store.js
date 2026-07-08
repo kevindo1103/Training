@@ -111,16 +111,27 @@ export function persist() {
 }
 
 async function syncToApi() {
-  if (!state.participant || !state.participant.sessionId) return;
+  if (!state.participant || !state.participant.participantId) return;
+
+  const responses = state.responses;
+  const activityIds = Object.keys(responses);
+  if (activityIds.length === 0) return;
+
   try {
-    const payload = {
-      participant: state.participant,
-      responses: state.responses,
-      lastSaved: state.lastSaved,
-    };
-    await api.put(`/sessions/${state.participant.sessionId}/responses`, payload);
+    const participantId = state.participant.participantId;
+    await Promise.all(
+      activityIds.map((activityId) => {
+        const payload = {
+          data: responses[activityId],
+          lastSaved: state.lastSaved,
+        };
+        return api.put(`/participants/${participantId}/responses/${activityId}`, payload);
+      })
+    );
     state.lastSynced = Date.now();
   } catch (err) {
     console.log('API sync skipped', err);
   }
 }
+
+
