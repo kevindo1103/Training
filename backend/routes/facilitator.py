@@ -120,7 +120,10 @@ def get_module2_summary(session_id: str, _=Depends(require_facilitator), db: Ses
         if p and p.role == "facilitator":
             continue
         p_info = {"id": p.id, "name": p.name, "role": p.role} if p else None
-        data = json.loads(r.data)
+        try:
+            data = json.loads(r.data) if r.data else {}
+        except (json.JSONDecodeError, TypeError):
+            continue
 
         if "lecture" in data:
             unit_completion[uid]["lecture"] += 1
@@ -144,7 +147,7 @@ def get_module2_summary(session_id: str, _=Depends(require_facilitator), db: Ses
                     if not isinstance(criteria, dict):
                         continue
                     weighted = sum(
-                        float(criteria.get(c, 0)) * w
+                        _safe_float(criteria.get(c, 0)) * w
                         for c, w in SPINOFF_WEIGHTS.items()
                     )
                     product_scores[product_id] = round(weighted, 2)
@@ -186,6 +189,9 @@ def get_module2_summary(session_id: str, _=Depends(require_facilitator), db: Ses
 def get_module2_unit(
     session_id: str, unit_id: str, _=Depends(require_facilitator), db: Session = Depends(get_db),
 ):
+    if unit_id not in M2_UNIT_IDS:
+        raise HTTPException(status_code=404, detail="Unit not found")
+
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -202,7 +208,10 @@ def get_module2_unit(
         p = r.participant
         if p and p.role == "facilitator":
             continue
-        data = json.loads(r.data)
+        try:
+            data = json.loads(r.data) if r.data else {}
+        except (json.JSONDecodeError, TypeError):
+            continue
         results.append({
             "participant": {"id": p.id, "name": p.name, "role": p.role} if p else None,
             "quiz": data.get("quiz"),
@@ -210,6 +219,13 @@ def get_module2_unit(
         })
 
     return {"unit_id": unit_id, "responses": results}
+
+
+def _safe_float(val, default: float = 0.0) -> float:
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return default
 
 
 def _aggregate_survey(responses: list[Response]) -> dict:
