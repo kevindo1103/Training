@@ -22,7 +22,7 @@ def get_summary(session_id: str, _=Depends(require_facilitator), db: Session = D
 
     completion = defaultdict(int)
     for r in responses:
-        if r.completed:
+        if r.data and r.data != "{}":
             completion[r.activity_id] += 1
 
     survey_scores = _aggregate_survey(responses)
@@ -76,7 +76,7 @@ def get_activity_detail(
 
 
 def _aggregate_survey(responses: list[Response]) -> dict:
-    survey_responses = [r for r in responses if r.activity_type == "survey" and r.completed]
+    survey_responses = [r for r in responses if r.activity_type == "survey"]
     if not survey_responses:
         return {"averages": {}, "thresholds": {"safe": 0, "warning": 0, "critical": 0}, "count": 0}
 
@@ -84,9 +84,11 @@ def _aggregate_survey(responses: list[Response]) -> dict:
     totals = []
 
     for r in survey_responses:
-        data = json.loads(r.data)
+        raw = json.loads(r.data)
+        # Frontend stores {answers: {q1: 3, ...}, totalScore: N} — extract answers
+        scores_dict = raw.get("answers", raw) if isinstance(raw.get("answers"), dict) else raw
         total = 0
-        for key, val in data.items():
+        for key, val in scores_dict.items():
             try:
                 score = int(round(float(val)))
             except (TypeError, ValueError):
@@ -121,14 +123,16 @@ CRITERIA_WEIGHTS = {
 
 
 def _aggregate_matrix(responses: list[Response]) -> dict:
-    matrix_responses = [r for r in responses if r.activity_type == "matrix" and r.completed]
+    matrix_responses = [r for r in responses if r.activity_type == "matrix"]
     if not matrix_responses:
         return {"products": {}, "count": 0}
 
     product_scores = defaultdict(list)
 
     for r in matrix_responses:
-        data = json.loads(r.data)
+        raw = json.loads(r.data)
+        # Frontend stores {scores: {product: {criteria: score}}, weightedTotals: {...}}
+        data = raw.get("scores", raw) if isinstance(raw.get("scores"), dict) else raw
         for product_key, criteria in data.items():
             if not isinstance(criteria, dict):
                 continue
@@ -151,10 +155,12 @@ def _aggregate_iwk(responses: list[Response]) -> dict:
 
     iwk_responses = []
     for r in responses:
-        if r.activity_type != "form" or not r.completed:
+        if r.activity_type != "form":
             continue
         data = json.loads(r.data)
-        if any(k in data for k in ["invest", "watch", "kill"]):
+        # Frontend stores {decisions: {product: "INVEST"/"WATCH"/"KILL"}}
+        # or legacy flat format {invest: [...], watch: [...], kill: [...]}
+        if "decisions" in data or any(k in data for k in ["invest", "watch", "kill"]):
             iwk_responses.append((r, data))
 
     if not iwk_responses:
@@ -163,12 +169,18 @@ def _aggregate_iwk(responses: list[Response]) -> dict:
     tally = defaultdict(lambda: {"invest": 0, "watch": 0, "kill": 0})
 
     for _, data in iwk_responses:
-        for decision in ["invest", "watch", "kill"]:
-            products = data.get(decision, [])
-            if isinstance(products, list):
-                for p in products:
-                    tally[p][decision] += 1
-            elif isinstance(products, str):
-                tally[products][decision] += 1
+        if "decisions" in data and isinstance(data["decisions"], dict):
+            for product, decision in data["decisions"].items():
+                d = decision.lower() if isinstance(decision, str) else ""
+                if d in ("invest", "watch", "kill"):
+                    tally[product][d] += 1
+        else:
+            for decision in ["invest", "watch", "kill"]:
+                products = data.get(decision, [])
+                if isinstance(products, list):
+                    for p in products:
+                        tally[p][decision] += 1
+                elif isinstance(products, str):
+                    tally[products][decision] += 1
 
     return {"tally": dict(tally), "count": len(iwk_responses)}
