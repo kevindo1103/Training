@@ -151,6 +151,31 @@ jobs:
             sudo systemctl restart dolphin-training-backend
           REMOTE
 
+      - name: Deploy frontend to VPS production
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "${VPS_USER}@${VPS_HOST}" << 'BOOTSTRAP'
+            set -e
+            sudo mkdir -p /var/www/dolphin/portal
+            sudo chown -R "${USER}:${USER}" /var/www/dolphin
+          BOOTSTRAP
+
+          rsync -avz --delete \
+            --exclude='.git' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            portal/ "${VPS_USER}@${VPS_HOST}:/var/www/dolphin/portal/"
+
+          rsync -avz \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            nginx/production.conf "${VPS_USER}@${VPS_HOST}:/tmp/dolphin-nginx-production.conf"
+
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "${VPS_USER}@${VPS_HOST}" << 'NGINX'
+            set -e
+            sudo mv /tmp/dolphin-nginx-production.conf /etc/nginx/sites-available/dolphin-production
+            sudo ln -sf /etc/nginx/sites-available/dolphin-production /etc/nginx/sites-enabled/dolphin-production
+            sudo nginx -t
+            sudo systemctl reload nginx
+          NGINX
+
       - name: Health check
         if: steps.detect.outputs.exists == 'true' && env.PRODUCTION_HEALTH_URL != ''
         env:
