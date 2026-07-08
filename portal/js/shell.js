@@ -221,17 +221,19 @@ function showEntryForm() {
 async function joinSession(name, role) {
   let participantId = null;
   let sessionId = null;
+  let token = null;
   try {
     const { api } = await import('./api.js');
     const res = await api.post('/sessions/join', { moduleId: config.moduleId, name, role });
-    if (res?.participantId) {
-      participantId = res.participantId;
-      sessionId = res.sessionId;
+    if (res?.participant_id) {
+      participantId = res.participant_id;
+      sessionId = res.session_id;
+      token = res.token;
     }
   } catch (err) {
     console.log('Join session API failed, continuing offline', err);
   }
-  setParticipant(name, role, participantId, sessionId);
+  setParticipant(name, role, participantId, sessionId, token);
   renderActivity();
 }
 
