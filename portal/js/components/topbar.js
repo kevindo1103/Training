@@ -8,10 +8,10 @@ export function renderTopBar(config, onToggleSidebar, onToggleTheme, isDark) {
       <button id="menu-btn" class="md:hidden p-2 -ml-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant" aria-label="Mở menu">
         <span class="material-symbols-outlined">menu</span>
       </button>
-      <div class="flex items-center gap-3">
+      <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity" aria-label="Về trang chủ">
         <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline font-bold text-body-md">D</div>
         <span class="hidden sm:block font-headline font-bold text-on-surface text-headline-sm tracking-tight">Dolphin Training</span>
-      </div>
+      </a>
     </div>
     <div class="flex items-center gap-3">
       <span class="hidden md:block text-label-caps font-ui text-on-surface-variant uppercase tracking-widest">${escapeHtml(config.title || config.moduleTitle)}</span>
