@@ -3,19 +3,35 @@
  * Base URL: relative `/api/...`
  * Error handling: catch network errors silently (offline fallback), log to console
  * Không block UI nếu API fail
+ * Tự động gắn Authorization: Bearer <token> khi có token
  */
 
 const BASE_URL = '/api';
 const REQUEST_TIMEOUT_MS = 10000;
+
+let authToken = null;
+
+export function setAuthToken(token) {
+  authToken = token || null;
+}
+
+export function getAuthToken() {
+  return authToken;
+}
 
 async function request(method, path, data) {
   const url = `${BASE_URL}${path}`;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
+  const headers = { 'Content-Type': 'application/json' };
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
   const options = {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     signal: controller.signal,
   };
   if (data !== undefined && data !== null) {

@@ -4,7 +4,7 @@
  * API sync: fire-and-forget via api.js (offline skip silently)
  */
 
-import { api } from './api.js';
+import { api, setAuthToken } from './api.js';
 
 const STORAGE_KEY = 'dolphin_training_module1';
 const DEBOUNCE_MS = 300;
@@ -31,6 +31,11 @@ export async function initStore() {
   const raw = localStorage.getItem(STORAGE_KEY);
   state = raw ? JSON.parse(raw) : createEmptyState();
 
+  // Restore auth token if participant already has one
+  if (state.participant?.token) {
+    setAuthToken(state.participant.token);
+  }
+
   // Nếu có participant + sessionId, thử fetch từ API và dùng newest
   if (state.participant?.sessionId) {
     try {
@@ -48,8 +53,18 @@ export async function initStore() {
   return state;
 }
 
-export function setParticipant(name, role, participantId = null, sessionId = null) {
-  state.participant = { name, role, participantId, sessionId, joinedAt: Date.now() };
+export function setParticipant(name, role, participantId = null, sessionId = null, token = null) {
+  state.participant = { name, role, participantId, sessionId, token, joinedAt: Date.now() };
+  setAuthToken(token);
+  persist();
+}
+
+export function clearParticipant() {
+  state.participant = null;
+  state.responses = {};
+  state.introsSeen = {};
+  state.lastSynced = null;
+  setAuthToken(null);
   persist();
 }
 
