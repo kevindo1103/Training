@@ -196,7 +196,7 @@ function handleSubmit(questions, state, form, footer, submitBtn, onComplete, uni
 
   // Callback
   if (typeof onComplete === 'function') {
-    document.getElementById('quiz-continue').addEventListener('click', () => {
+    summary.querySelector('#quiz-continue').addEventListener('click', () => {
       onComplete(score, state.answers);
     });
   }
