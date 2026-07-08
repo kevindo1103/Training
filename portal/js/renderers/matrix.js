@@ -1,13 +1,11 @@
-import { MODULE_CONFIG } from '../modules/module1.config.js';
-
 function escapeHtml(text) {
   if (text == null) return '';
   return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-export function render(container, activity, data, onChange) {
-  const products = MODULE_CONFIG.products || [];
-  const criteria = MODULE_CONFIG.scoringCriteria || [];
+export function render(container, activity, data, onChange, moduleConfig) {
+  const products = (moduleConfig && moduleConfig.products) || [];
+  const criteria = (moduleConfig && moduleConfig.scoringCriteria) || [];
   const scale = activity.scale || { min: 1, max: 5, minLabel: 'Thấp', maxLabel: 'Cao' };
   const scores = {};
   products.forEach(p => {

@@ -1,15 +1,13 @@
-import { MODULE_CONFIG } from '../modules/module1.config.js';
-
 function escapeHtml(text) {
   if (text == null) return '';
   return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-export function render(container, activity, data, onChange) {
+export function render(container, activity, data, onChange, moduleConfig) {
   if (activity.layout === 'bmc_grid') {
     renderBMC(container, activity, data, onChange);
   } else if (activity.decisions) {
-    renderIWK(container, activity, data, onChange);
+    renderIWK(container, activity, data, onChange, moduleConfig);
   } else if (activity.sections) {
     renderFinancial(container, activity, data, onChange);
   }
@@ -128,8 +126,8 @@ function renderBMC(container, activity, data, onChange) {
 
 /* ─── Invest / Watch / Kill (Activity 5) ─── */
 
-function renderIWK(container, activity, data, onChange) {
-  const products = MODULE_CONFIG.products || [];
+function renderIWK(container, activity, data, onChange, moduleConfig) {
+  const products = (moduleConfig && moduleConfig.products) || [];
   const decisions = activity.decisions || [];
   const validation = activity.validation || {};
   const values = { ...(data?.decisions || {}) };
