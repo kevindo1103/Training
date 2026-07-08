@@ -36,7 +36,7 @@ def create_session(body: SessionCreate, _=Depends(require_facilitator), db: Sess
 
 
 @router.get("", response_model=list[SessionOut])
-def list_sessions(_=Depends(require_facilitator), db: Session = Depends(get_db)):
+def list_sessions(db: Session = Depends(get_db)):
     return db.query(SessionModel).all()
 
 
