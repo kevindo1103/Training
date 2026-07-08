@@ -2,8 +2,18 @@ export function renderSideBar(config, currentIndex, completedIds, onNavigate, is
   const aside = document.createElement('aside');
   aside.className = `fixed top-16 left-0 bottom-0 md:bottom-20 w-72 bg-surface-container-lowest border-r border-outline-variant/50 z-50 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`;
 
+  const homeLink = document.createElement('div');
+  homeLink.className = 'px-3 pt-4 pb-2';
+  homeLink.innerHTML = `
+    <a href="/" class="flex items-center gap-2 px-4 py-3 rounded-lg text-body-md text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors min-h-[44px]">
+      <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+      Trang chủ
+    </a>
+  `;
+  aside.appendChild(homeLink);
+
   const header = document.createElement('div');
-  header.className = 'px-6 py-5';
+  header.className = 'px-6 pb-5';
   header.innerHTML = `<span class="text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">6 Activities</span>`;
   aside.appendChild(header);
 
