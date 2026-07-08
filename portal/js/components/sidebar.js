@@ -12,19 +12,21 @@ export function renderSideBar(config, currentIndex, completedIds, onNavigate, is
   `;
   aside.appendChild(homeLink);
 
+  const items = config.activities || config.units || [];
+  const itemLabel = config.activities ? 'Activities' : 'Units';
+
   const header = document.createElement('div');
   header.className = 'px-6 pb-5';
-  header.innerHTML = `<span class="text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">6 Activities</span>`;
+  header.innerHTML = `<span class="text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">${items.length} ${itemLabel}</span>`;
   aside.appendChild(header);
 
   const nav = document.createElement('nav');
   nav.className = 'px-3 pb-4 space-y-1 overflow-y-auto custom-scrollbar';
-  nav.setAttribute('aria-label', 'Activities');
+  nav.setAttribute('aria-label', itemLabel);
 
-  const activities = config.activities || [];
-  const summaryIndex = activities.length;
+  const summaryIndex = items.length;
 
-  activities.forEach((activity, index) => {
+  items.forEach((activity, index) => {
     const isActive = index === currentIndex;
     const isCompleted = completedIds.has(activity.id);
     const btn = document.createElement('button');
