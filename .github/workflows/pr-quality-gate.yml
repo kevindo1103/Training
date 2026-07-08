@@ -1,0 +1,184 @@
+name: PR Quality Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_call:
+
+jobs:
+  branch-pattern-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name pattern
+        env:
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -e
+          echo "HEAD_REF=$HEAD_REF"
+
+          # Allowed patterns:
+          # - claude/<type>-<scope>-<short-desc>
+          # - windsurf/<type>-<scope>-<short-desc>
+          # - claude/infra-<short-desc> (special Infra session prefix)
+          # - claude/chore-infra-<short-desc>
+          # - main, staging, claude/edit-git-docs-*
+          if [[ "$HEAD_REF" =~ ^(claude|windsurf)/[a-z]+-[a-z]+-[a-z0-9-]+$ ]]; then
+            echo "Branch name OK: $HEAD_REF"
+            exit 0
+          fi
+          if [[ "$HEAD_REF" =~ ^(claude|windsurf)/infra-[a-z0-9-]+$ ]]; then
+            echo "Infra branch OK: $HEAD_REF"
+            exit 0
+          fi
+          if [[ "$HEAD_REF" =~ ^(claude|windsurf)/chore-infra-[a-z0-9-]+$ ]]; then
+            echo "Infra chore branch OK: $HEAD_REF"
+            exit 0
+          fi
+          if [[ "$HEAD_REF" =~ ^(main|staging|claude/edit-git-docs-.*)$ ]]; then
+            echo "Long-lived branch exempt: $HEAD_REF"
+            exit 0
+          fi
+
+          echo "Invalid branch name: $HEAD_REF"
+          echo "Expected patterns:"
+          echo "  claude/<type>-<scope>-<short-desc>"
+          echo "  windsurf/<type>-<scope>-<short-desc>"
+          echo "  claude/infra-<short-desc>"
+          echo "  claude/chore-infra-<short-desc>"
+          echo "  main | staging | claude/edit-git-docs-<id>"
+          exit 1
+
+  scope-lock:
+    runs-on: ubuntu-latest
+    needs: branch-pattern-check
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check file scope lock
+        env:
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -e
+
+          # Skip scope lock when not running in a PR context (e.g. deploy workflow_call)
+          if [[ -z "${{ github.head_ref }}" ]]; then
+            echo "Not a PR context; skipping scope lock."
+            exit 0
+          fi
+
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Determine allowed file patterns based on branch prefix
+          if [[ "$HEAD_REF" =~ ^(claude|windsurf)/infra- ]] || \
+             [[ "$HEAD_REF" =~ ^(claude|windsurf)/chore-infra- ]]; then
+            ALLOWED='^\.github/workflows/|^vercel\.json$|^netlify\.toml$'
+          elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-backend- ]]; then
+            ALLOWED='^backend/|^docs/openapi\.json$'
+          elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-frontend- ]]; then
+            ALLOWED='^portal/'
+          elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-content- ]]; then
+            ALLOWED='^portal/js/modules/.*\.config\.js$'
+          elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/test- ]]; then
+            ALLOWED='^tests/'
+          elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-design- ]]; then
+            ALLOWED='^design_v2/'
+          elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/docs- ]]; then
+            ALLOWED='^.*\.md$|^0[0-9]_|^docs/'
+          elif [[ "$HEAD_REF" =~ ^claude/edit-git-docs- ]]; then
+            ALLOWED='^.*\.md$|^0[0-9]_|^docs/'
+          else
+            echo "Branch prefix not recognized for scope lock: $HEAD_REF"
+            echo "If this is a new legitimate pattern, update pr-quality-gate.yml."
+            exit 1
+          fi
+
+          VIOLATIONS=0
+          while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+            if ! echo "$file" | grep -Eq "$ALLOWED"; then
+              echo "SCOPE VIOLATION: $file is not allowed on branch $HEAD_REF"
+              VIOLATIONS=$((VIOLATIONS + 1))
+            fi
+          done <<< "$CHANGED_FILES"
+
+          if [[ $VIOLATIONS -gt 0 ]]; then
+            echo "Found $VIOLATIONS scope violation(s)."
+            exit 1
+          fi
+          echo "Scope lock OK."
+
+  backend-check:
+    runs-on: ubuntu-latest
+    needs: scope-lock
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect backend
+        id: detect
+        run: |
+          if [[ -f backend/requirements.txt ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "backend/requirements.txt not found; skipping backend checks."
+          fi
+      - name: Set up Python
+        if: steps.detect.outputs.exists == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install backend dependencies
+        if: steps.detect.outputs.exists == 'true'
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Check backend imports
+        if: steps.detect.outputs.exists == 'true' && hashFiles('backend/main.py') != ''
+        run: |
+          cd backend
+          python -c "import main"
+      - name: Check alembic heads
+        if: steps.detect.outputs.exists == 'true' && hashFiles('backend/alembic.ini') != ''
+        run: |
+          cd backend
+          HEAD_COUNT=$(alembic heads | wc -l)
+          echo "Alembic heads: $HEAD_COUNT"
+          if [[ "$HEAD_COUNT" -ne 1 ]]; then
+            echo "Expected exactly one alembic head, found $HEAD_COUNT"
+            exit 1
+          fi
+
+  frontend-check:
+    runs-on: ubuntu-latest
+    needs: scope-lock
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect portal
+        id: detect
+        run: |
+          if [[ -f portal/index.html ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "portal/index.html not found; skipping frontend checks."
+          fi
+      - name: Validate portal structure
+        if: steps.detect.outputs.exists == 'true'
+        run: |
+          test -f portal/index.html || (echo "Missing portal/index.html"; exit 1)
+          echo "portal/index.html OK"
+      - name: Build frontend if package.json exists
+        if: steps.detect.outputs.exists == 'true' && hashFiles('portal/package.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install and build
+        if: steps.detect.outputs.exists == 'true' && hashFiles('portal/package.json') != ''
+        run: |
+          cd portal
+          npm ci
+          npm run build
