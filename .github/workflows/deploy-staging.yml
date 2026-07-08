@@ -133,8 +133,7 @@ jobs:
             sudo chown -R deploy:deploy "$DB_DIR"
             sudo chmod 775 "$DB_DIR"
 
-            alembic upgrade head
-            sudo chown -R deploy:deploy "$DB_DIR"
+            sudo -u deploy "$(pwd)/venv/bin/alembic" upgrade head
             sudo systemctl restart dolphin-training-backend-staging
           REMOTE
 
