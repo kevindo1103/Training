@@ -72,6 +72,8 @@
     let currentSessionId = null;
     let refreshTimer = null;
     let isRefreshing = false;
+    let currentModule = 'm1';
+    let m2SummaryCache = null;
 
     async function apiFetch(path) {
       const token = getAuthToken();
@@ -238,9 +240,10 @@
       if (indicator) { indicator.classList.remove('hidden'); indicator.classList.add('flex'); }
       isRefreshing = true;
 
-      const [summary, financialDetail] = await Promise.all([
+      const [summary, financialDetail, m2Summary] = await Promise.all([
         apiFetch(`/facilitator/${currentSessionId}/summary`),
         apiFetch(`/facilitator/${currentSessionId}/activity/activity_6`),
+        apiFetch(`/facilitator/${currentSessionId}/module2/summary`),
       ]);
 
       if (indicator) { indicator.classList.add('hidden'); indicator.classList.remove('flex'); }
@@ -258,7 +261,8 @@
         return;
       }
 
-      renderDashboard(summary, financialDetail);
+      m2SummaryCache = m2Summary;
+      renderDashboard(summary, financialDetail, m2Summary);
       scheduleRefresh();
     }
 
@@ -267,7 +271,7 @@
       refreshTimer = setInterval(() => loadDashboard(), REFRESH_MS);
     }
 
-    function renderDashboard(data, financialDetail) {
+    function renderDashboard(data, financialDetail, m2Summary) {
       const content = document.getElementById('dashboard-content');
       const session = data.session || {};
       const participants = data.participants || [];
@@ -283,13 +287,57 @@
 
       content.innerHTML = `
         <div class="space-y-6">
-          ${renderOverview(session, participants, completion, activityIds, activityLabels, totalP, now)}
-          ${renderDiagnostic(survey, participants)}
-          ${renderScoring(matrix, participants)}
-          ${renderIWKConsensus(iwk)}
-          ${renderFinancialSummary(financialDetail)}
+          ${renderModuleTabs()}
+          ${currentModule === 'm2'
+            ? renderModule2Dashboard(m2Summary || { session, participants })
+            : `
+              ${renderOverview(session, participants, completion, activityIds, activityLabels, totalP, now)}
+              ${renderDiagnostic(survey, participants)}
+              ${renderScoring(matrix, participants)}
+              ${renderIWKConsensus(iwk)}
+              ${renderFinancialSummary(financialDetail)}
+            `
+          }
         </div>
       `;
+
+      attachModuleTabListeners();
+    }
+
+    function renderModuleTabs() {
+      const m1Class = currentModule === 'm1'
+        ? 'bg-primary text-on-primary'
+        : 'bg-surface-container text-on-surface hover:bg-surface-container-high';
+      const m2Class = currentModule === 'm2'
+        ? 'bg-primary text-on-primary'
+        : 'bg-surface-container text-on-surface hover:bg-surface-container-high';
+      return `
+        <div class="flex gap-2 mb-2">
+          <button id="tab-m1" class="flex-1 md:flex-none px-5 py-2.5 rounded-lg font-ui font-bold transition-colors min-h-[44px] ${m1Class}">
+            Module 1
+          </button>
+          <button id="tab-m2" class="flex-1 md:flex-none px-5 py-2.5 rounded-lg font-ui font-bold transition-colors min-h-[44px] ${m2Class}">
+            Module 2
+          </button>
+        </div>
+      `;
+    }
+
+    function attachModuleTabListeners() {
+      const m1Btn = document.getElementById('tab-m1');
+      const m2Btn = document.getElementById('tab-m2');
+      if (m1Btn) {
+        m1Btn.addEventListener('click', () => {
+          currentModule = 'm1';
+          loadDashboard();
+        });
+      }
+      if (m2Btn) {
+        m2Btn.addEventListener('click', () => {
+          currentModule = 'm2';
+          loadDashboard();
+        });
+      }
     }
 
     function renderOverview(session, participants, completion, activityIds, activityLabels, totalP, now) {
@@ -685,6 +733,317 @@
           </div>
         </div>
       `;
+    }
+
+    // ─── Module 2 Dashboard ───
+
+    const M2_UNIT_IDS = [
+      'u1_sfpc', 'u2_inventory', 'u3_brand', 'u4_spinoff',
+      'u5_2axis', 'u6_90day', 'u7_lean', 'u8_mvp',
+      'u9_kill', 'u10_pricing', 'u11_convergence',
+    ];
+
+    const M2_UNIT_LABELS = {
+      u1_sfpc: 'U1 — SFPC',
+      u2_inventory: 'U2 — Portfolio Inventory',
+      u3_brand: 'U3 — Brand Architecture',
+      u4_spinoff: 'U4 — Spin-off Scoring',
+      u5_2axis: 'U5 — 2-Axis Testing',
+      u6_90day: 'U6 — 90-Day Plan',
+      u7_lean: 'U7 — Lean Ideation',
+      u8_mvp: 'U8 — MVP Scoping',
+      u9_kill: 'U9 — Kill Decision',
+      u10_pricing: 'U10 — Pricing Model',
+      u11_convergence: 'U11 — Convergence',
+    };
+
+    function renderModule2Dashboard(data) {
+      const session = data.session || {};
+      const participants = data.participants || [];
+      const unitCompletion = data.unit_completion || {};
+      const quizScores = data.quiz_scores || {};
+      const spinoffMatrix = data.spinoff_matrix || {};
+
+      return `
+        <div class="space-y-6">
+          ${renderModule2Overview(session, participants, unitCompletion)}
+          ${renderModule2QuizScores(quizScores)}
+          ${renderModule2SpinoffMatrix(spinoffMatrix)}
+          ${renderModule2PracticeViewer()}
+        </div>
+      `;
+    }
+
+    function renderModule2Overview(session, participants, unitCompletion) {
+      const totalP = participants.length || 0;
+      const stepLabels = { lecture: 'Bài giảng', quiz: 'Quiz', practice: 'Thực hành' };
+
+      let rows = '';
+      M2_UNIT_IDS.forEach((uid) => {
+        const steps = unitCompletion[uid] || { lecture: 0, quiz: 0, practice: 0 };
+        let cells = '';
+        ['lecture', 'quiz', 'practice'].forEach((step) => {
+          const count = steps[step] || 0;
+          const pct = totalP > 0 ? count / totalP : 0;
+          const colorClass = pct === 0 ? 'bg-outline-variant/30 text-on-surface-variant' : pct >= 1 ? 'bg-success-emerald/20 text-success-emerald font-bold' : 'bg-amber-400/20 text-amber-700 font-bold';
+          cells += `
+            <td class="px-3 py-3 text-center text-body-md ${colorClass}">
+              ${count}/${totalP}
+            </td>
+          `;
+        });
+        rows += `
+          <tr class="border-b border-outline-variant">
+            <td class="px-3 py-3 text-body-md font-ui font-semibold text-on-surface">${escapeHtml(M2_UNIT_LABELS[uid] || uid)}</td>
+            ${cells}
+          </tr>
+        `;
+      });
+
+      return `
+        <div class="card-elite p-6 md:p-8">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-primary">grid_view</span>
+            <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Unit Completion</h3>
+            <span class="text-label-sm text-on-surface-variant ml-auto">${totalP} participants</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b-2 border-outline-variant">
+                  <th class="px-3 py-3 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Unit</th>
+                  <th class="px-3 py-3 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-center">Bài giảng</th>
+                  <th class="px-3 py-3 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-center">Quiz</th>
+                  <th class="px-3 py-3 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-center">Thực hành</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderModule2QuizScores(quizScores) {
+      const unitIds = Object.keys(quizScores);
+      if (unitIds.length === 0) {
+        return `
+          <div class="card-elite p-6 md:p-8">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="material-symbols-outlined text-primary">quiz</span>
+              <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Quiz Scores</h3>
+            </div>
+            <p class="text-body-md text-on-surface-variant">Chưa có dữ liệu quiz.</p>
+          </div>
+        `;
+      }
+
+      let cards = '';
+      unitIds.forEach((uid) => {
+        const qs = quizScores[uid];
+        const avg = qs.avg || 0;
+        const responses = qs.responses || [];
+        const isGap = avg < 3;
+        const gapBadge = isGap
+          ? `<span class="ml-2 px-2 py-0.5 rounded-full bg-error/10 text-error text-label-sm font-ui font-bold">Gap</span>`
+          : '';
+
+        let participantRows = '';
+        responses.forEach((r) => {
+          const p = r.participant || {};
+          participantRows += `
+            <li class="flex items-center justify-between py-2 border-b border-outline-variant/30 last:border-0">
+              <span class="text-body-md text-on-surface">${escapeHtml(p.name || 'Unknown')}</span>
+              <span class="text-body-md font-ui font-bold ${r.score >= 3 ? 'text-success-emerald' : 'text-error'}">${r.score}/${r.total}</span>
+            </li>
+          `;
+        });
+
+        cards += `
+          <div class="card-elite p-5 md:p-6 ${isGap ? 'border border-error/30' : ''}">
+            <div class="flex items-center gap-2 mb-3">
+              <h4 class="font-headline font-bold text-headline-sm text-on-surface">${escapeHtml(M2_UNIT_LABELS[uid] || uid)}</h4>
+              ${gapBadge}
+              <span class="ml-auto text-body-md font-ui font-bold ${isGap ? 'text-error' : 'text-primary'}">TB: ${avg}/5</span>
+            </div>
+            <ul>${participantRows}</ul>
+          </div>
+        `;
+      });
+
+      return `
+        <div class="card-elite p-6 md:p-8">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-primary">quiz</span>
+            <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Quiz Scores</h3>
+            <span class="text-label-sm text-on-surface-variant ml-auto">${unitIds.length} units</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${cards}</div>
+        </div>
+      `;
+    }
+
+    function renderModule2SpinoffMatrix(spinoffMatrix) {
+      const participants = spinoffMatrix.participants || [];
+      const averages = spinoffMatrix.averages || {};
+      const productIds = Object.keys(averages);
+
+      if (productIds.length === 0) {
+        return '';
+      }
+
+      // Map backend product IDs to display names
+      const productNames = {
+        'VB Điện tử': 'VB Điện tử',
+        'IPTV Khách sạn': 'IPTV Khách sạn',
+        'Event/Ticket': 'Event/Ticket',
+        'CMS/Tòa soạn': 'CMS/Tòa soạn',
+      };
+
+      let rows = '';
+      productIds.forEach((pid) => {
+        const avg = averages[pid];
+        let participantCells = '';
+        participants.forEach((entry) => {
+          const score = entry.scores?.[pid];
+          participantCells += `<td class="px-3 py-2 text-right text-body-md font-ui ${score === undefined ? 'text-on-surface-variant' : 'text-on-surface'}">${score !== undefined ? score.toFixed(1) : '—'}</td>`;
+        });
+
+        let band = 'Chưa đủ dữ liệu';
+        if (avg >= 4) band = 'Sẵn sàng';
+        else if (avg >= 3) band = 'Có tiềm năng';
+        else if (avg > 0) band = 'Cần làm rõ';
+
+        const consensus = participants.length > 1
+          ? `<span class="text-label-sm text-on-surface-variant">Đồng thuận/divergence sẽ được phân tích ở v2</span>`
+          : '';
+
+        rows += `
+          <tr class="border-b border-outline-variant">
+            <td class="px-3 py-2 text-body-md font-ui font-semibold text-on-surface whitespace-nowrap">${escapeHtml(productNames[pid] || pid)}</td>
+            ${participantCells}
+            <td class="px-3 py-2 text-right text-body-md font-ui font-bold text-primary">${avg.toFixed(1)}</td>
+            <td class="px-3 py-2 text-right text-body-md font-ui text-on-surface-variant">${escapeHtml(band)} ${consensus}</td>
+          </tr>
+        `;
+      });
+
+      let headerCols = participants.map((entry, i) => {
+        const p = entry.participant || {};
+        return `<th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-right">P${i + 1}</th>`;
+      }).join('');
+
+      return `
+        <div class="card-elite p-6 md:p-8 overflow-hidden">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-primary">table</span>
+            <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Spin-off Scoring Matrix (U4)</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b-2 border-outline-variant">
+                  <th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Sản phẩm</th>
+                  ${headerCols}
+                  <th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-right">TB</th>
+                  <th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-right">Readiness</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderModule2PracticeViewer() {
+      const unitsWithPractice = M2_UNIT_IDS.filter((uid) => !['u1_sfpc', 'u4_spinoff'].includes(uid));
+      let list = '';
+      unitsWithPractice.forEach((uid) => {
+        list += `
+          <div class="border border-outline-variant/50 rounded-lg overflow-hidden">
+            <button class="w-full flex items-center justify-between px-4 py-3 bg-surface-container-low hover:bg-surface-container transition-colors" data-m2-toggle="${uid}">
+              <span class="text-body-md font-ui font-semibold text-on-surface">${escapeHtml(M2_UNIT_LABELS[uid] || uid)}</span>
+              <span class="material-symbols-outlined text-on-surface-variant" data-m2-icon="${uid}">expand_more</span>
+            </button>
+            <div class="hidden px-4 py-4 bg-surface" data-m2-panel="${uid}">
+              <p class="text-body-md text-on-surface-variant mb-3">Đang tải chi tiết...</p>
+            </div>
+          </div>
+        `;
+      });
+
+      setTimeout(() => attachPracticePanelListeners(), 0);
+
+      return `
+        <div class="card-elite p-6 md:p-8">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-primary">assignment</span>
+            <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Practice Form Viewer</h3>
+          </div>
+          <div class="space-y-3">${list}</div>
+        </div>
+      `;
+    }
+
+    function attachPracticePanelListeners() {
+      document.querySelectorAll('[data-m2-toggle]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const uid = btn.dataset.m2Toggle;
+          const panel = document.querySelector(`[data-m2-panel="${uid}"]`);
+          const icon = document.querySelector(`[data-m2-icon="${uid}"]`);
+          if (!panel || !icon) return;
+
+          const isHidden = panel.classList.contains('hidden');
+          if (isHidden) {
+            panel.classList.remove('hidden');
+            icon.textContent = 'expand_less';
+            if (!panel.dataset.loaded) {
+              panel.innerHTML = '<p class="text-body-md text-on-surface-variant">Đang tải chi tiết...</p>';
+              const detail = await apiFetch(`/facilitator/${currentSessionId}/module2/unit/${uid}`);
+              panel.innerHTML = renderPracticeDetail(detail, uid);
+              panel.dataset.loaded = 'true';
+            }
+          } else {
+            panel.classList.add('hidden');
+            icon.textContent = 'expand_more';
+          }
+        });
+      });
+    }
+
+    function renderPracticeDetail(detail, uid) {
+      const responses = detail?.responses || [];
+      if (responses.length === 0) {
+        return '<p class="text-body-md text-on-surface-variant">Chưa có dữ liệu practice.</p>';
+      }
+
+      let rows = '';
+      responses.forEach((r) => {
+        const p = r.participant || {};
+        const practice = r.practice || {};
+        const fields = practice.fields || practice;
+        let fieldList = '';
+        if (fields && typeof fields === 'object') {
+          Object.entries(fields).forEach(([key, value]) => {
+            if (typeof value === 'object') return;
+            fieldList += `
+              <div class="flex justify-between gap-3 py-1 border-b border-outline-variant/30 last:border-0">
+                <span class="text-label-sm font-ui text-on-surface-variant">${escapeHtml(key)}</span>
+                <span class="text-body-md text-on-surface text-right">${escapeHtml(String(value))}</span>
+              </div>
+            `;
+          });
+        }
+        rows += `
+          <div class="card-elite p-4 mb-3">
+            <h4 class="font-headline font-bold text-headline-sm text-on-surface mb-2">${escapeHtml(p.name || 'Unknown')}</h4>
+            <div class="space-y-1">${fieldList || '<p class="text-body-md text-on-surface-variant">Không có dữ liệu text</p>'}</div>
+          </div>
+        `;
+      });
+
+      return `<div class="space-y-3">${rows}</div>`;
     }
 
     boot();
