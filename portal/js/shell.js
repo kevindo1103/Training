@@ -384,7 +384,7 @@ function renderActivity() {
     }
     const unit = units[appState.currentIndex];
     import('./components/unit-stepper.js').then(({ UnitStepper }) => {
-      const stepper = new UnitStepper(unit, content, () => goNext());
+      const stepper = new UnitStepper(unit, content, () => goNext(), config);
       stepper.render();
     });
     return;

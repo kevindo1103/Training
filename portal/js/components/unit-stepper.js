@@ -28,10 +28,11 @@ const STEP_LABELS = {
 };
 
 export class UnitStepper {
-  constructor(unit, container, onUnitComplete) {
+  constructor(unit, container, onUnitComplete, moduleConfig) {
     this.unit = unit;
     this.container = container;
     this.onUnitComplete = onUnitComplete;
+    this.moduleConfig = moduleConfig || null;
     this.currentStep = 0;
     this.steps = unit?.practice ? STEPS : STEPS.slice(0, 2);
   }
@@ -146,7 +147,7 @@ export class UnitStepper {
       const mod = await import(`../renderers/${step}.js`);
       if (typeof mod.render === 'function') {
         // Renderers receive: container, unit, onComplete callback
-        mod.render(this.container, this.unit, () => this.goNext());
+        mod.render(this.container, this.unit, () => this.goNext(), this.moduleConfig);
       } else {
         throw new Error(`Renderer ${step}.js has no render export`);
       }
