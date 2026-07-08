@@ -108,15 +108,15 @@ jobs:
             echo "PWD=$(pwd)"
             echo "DATABASE_URL length: ${#DATABASE_URL}"
             echo "DATABASE_URL prefix: ${DATABASE_URL:0:15}"
-            DB_PATH=$(python3 -c "from urllib.parse import urlparse; import sys; print(urlparse(sys.argv[1]).path)" "$DATABASE_URL")
-            echo "DATABASE_URL path: $DB_PATH"
+            DB_PATH="${DATABASE_URL#sqlite:///}"
+            echo "DATABASE_URL path basename: $(basename "$DB_PATH")"
             ls -la /opt/dolphin-training/ || true
             ls -la /opt/dolphin-training/data/ || true
             echo "--- .env (redacted) ---"
             sed 's/=.*$/=***/' .env
             echo "--- end diagnostics ---"
 
-            DB_DIR=$(python3 -c "from urllib.parse import urlparse; import os, sys; url=sys.argv[1]; print(os.path.dirname(urlparse(url).path))" "$DATABASE_URL")
+            DB_DIR=$(dirname "$DB_PATH")
             echo "Ensuring DB directory: $DB_DIR"
             sudo mkdir -p "$DB_DIR"
             sudo chown -R deploy:deploy "$DB_DIR"
