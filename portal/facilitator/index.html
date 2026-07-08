@@ -229,7 +229,10 @@
       if (indicator) { indicator.classList.remove('hidden'); indicator.classList.add('flex'); }
       isRefreshing = true;
 
-      const summary = await apiFetch(`/facilitator/${currentSessionId}/summary`);
+      const [summary, financialDetail] = await Promise.all([
+        apiFetch(`/facilitator/${currentSessionId}/summary`),
+        apiFetch(`/facilitator/${currentSessionId}/activity/activity_6`),
+      ]);
 
       if (indicator) { indicator.classList.add('hidden'); indicator.classList.remove('flex'); }
       isRefreshing = false;
@@ -246,7 +249,7 @@
         return;
       }
 
-      renderDashboard(summary);
+      renderDashboard(summary, financialDetail);
       scheduleRefresh();
     }
 
@@ -255,7 +258,7 @@
       refreshTimer = setInterval(() => loadDashboard(), REFRESH_MS);
     }
 
-    function renderDashboard(data) {
+    function renderDashboard(data, financialDetail) {
       const content = document.getElementById('dashboard-content');
       const session = data.session || {};
       const participants = data.participants || [];
@@ -275,7 +278,7 @@
           ${renderDiagnostic(survey, participants)}
           ${renderScoring(matrix, participants)}
           ${renderIWKConsensus(iwk)}
-          ${renderFinancialSummary(participants)}
+          ${renderFinancialSummary(financialDetail)}
         </div>
       `;
     }
@@ -566,15 +569,110 @@
       `;
     }
 
-    function renderFinancialSummary(participants) {
+    function renderFinancialSummary(financialDetail) {
+      const responses = (financialDetail && financialDetail.responses) || [];
+      const filled = responses.filter(r => r.data && r.data.fields && Object.keys(r.data.fields).length > 0);
+
+      if (filled.length === 0) {
+        return `
+          <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
+            <div class="p-5 md:p-6">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-primary">account_balance</span>
+                <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 6 — Financial Summary</h3>
+              </div>
+              <p class="text-body-md text-on-surface-variant italic">Chưa có dữ liệu tài chính từ participants.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      const fieldDefs = [
+        { id: 'current_revenue', label: 'Doanh thu hiện tại', unit: 'tỷ VNĐ/năm' },
+        { id: 'current_team_size', label: 'Quy mô team', unit: 'người' },
+        { id: 'current_revenue_per_head', label: 'Revenue/head/tháng', unit: 'triệu', computed: true },
+        { id: 'y1_team_product', label: 'Team product (Y1)', unit: 'người' },
+        { id: 'y1_avg_salary', label: 'Lương TB (Y1)', unit: 'triệu' },
+        { id: 'y1_burn_rate', label: 'Burn rate (Y1)', unit: 'triệu/tháng', computed: true },
+        { id: 'y1_service_profit_needed', label: 'Service profit needed (Y1)', unit: 'triệu/tháng', computed: true },
+        { id: 'y3_cash_reserves', label: 'Cash reserves (Y3)', unit: 'tỷ' },
+        { id: 'y3_projected_monthly_profit', label: 'Monthly profit (Y3)', unit: 'triệu' },
+        { id: 'y3_runway', label: 'Runway (Y3)', unit: 'tháng', computed: true, highlight: true },
+      ];
+
+      const participantNames = filled.map(r => r.participant ? r.participant.name : 'Unknown');
+
+      let headerCols = participantNames.map(n =>
+        `<th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-right whitespace-nowrap">${escapeHtml(n)}</th>`
+      ).join('');
+
+      // Add average column
+      headerCols += `<th class="px-3 py-2 text-label-caps font-ui font-bold text-primary uppercase tracking-widest text-right whitespace-nowrap border-l-2 border-outline-variant">TB</th>`;
+
+      let rows = '';
+      fieldDefs.forEach(fd => {
+        const values = filled.map(r => {
+          const v = r.data.fields[fd.id];
+          return v !== undefined && v !== '' ? parseFloat(v) : null;
+        });
+
+        const validValues = values.filter(v => v !== null);
+        const avg = validValues.length > 0 ? validValues.reduce((a, b) => a + b, 0) / validValues.length : null;
+
+        let cells = values.map(v => {
+          if (v === null) return `<td class="px-3 py-2 text-right text-on-surface-variant">—</td>`;
+          let colorClass = '';
+          if (fd.highlight && fd.id === 'y3_runway') {
+            if (v < 6) colorClass = 'text-error font-bold';
+            else if (v <= 12) colorClass = 'text-amber-600 font-bold';
+            else colorClass = 'text-success-emerald font-bold';
+          }
+          return `<td class="px-3 py-2 text-right text-body-md font-ui ${colorClass || 'text-on-surface'}">${typeof v === 'number' ? (Number.isInteger(v) ? v : v.toFixed(1)) : v}</td>`;
+        }).join('');
+
+        let avgCell;
+        if (avg === null) {
+          avgCell = `<td class="px-3 py-2 text-right text-on-surface-variant border-l-2 border-outline-variant">—</td>`;
+        } else {
+          let avgColor = '';
+          if (fd.highlight && fd.id === 'y3_runway') {
+            if (avg < 6) avgColor = 'text-error font-bold';
+            else if (avg <= 12) avgColor = 'text-amber-600 font-bold';
+            else avgColor = 'text-success-emerald font-bold';
+          }
+          avgCell = `<td class="px-3 py-2 text-right font-ui font-bold border-l-2 border-outline-variant ${avgColor || 'text-primary'}">${avg.toFixed(1)}</td>`;
+        }
+
+        rows += `
+          <tr class="border-b border-outline-variant ${fd.computed ? 'bg-surface-container-low/50' : ''}">
+            <td class="px-3 py-2 text-label-sm font-ui font-semibold text-on-surface whitespace-nowrap">
+              ${escapeHtml(fd.label)}
+              ${fd.unit ? `<span class="text-on-surface-variant font-normal"> (${escapeHtml(fd.unit)})</span>` : ''}
+            </td>
+            ${cells}${avgCell}
+          </tr>
+        `;
+      });
+
       return `
         <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
           <div class="p-5 md:p-6">
             <div class="flex items-center gap-2 mb-4">
               <span class="material-symbols-outlined text-primary">account_balance</span>
               <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 6 — Financial Summary</h3>
+              <span class="text-label-sm text-on-surface-variant ml-auto">${filled.length} responses</span>
             </div>
-            <p class="text-body-md text-on-surface-variant italic">Financial data sẽ được hiển thị khi có dữ liệu từ participants. Sử dụng endpoint <code>/facilitator/{sessionId}/activity/activity_6</code> để xem chi tiết.</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b-2 border-outline-variant">
+                    <th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Metric</th>
+                    ${headerCols}
+                  </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
           </div>
         </div>
       `;
