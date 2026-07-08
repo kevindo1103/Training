@@ -348,7 +348,7 @@ async function joinSession(name, role) {
   let token = null;
   try {
     const { api } = await import('./api.js');
-    const res = await api.post('/sessions/join', { moduleId: 'workshop', name, role });
+    const res = await api.post('/sessions/join', { name, role });
     if (res?.participant_id) {
       participantId = res.participant_id;
       sessionId = res.session_id;
