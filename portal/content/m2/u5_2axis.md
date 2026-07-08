@@ -1,98 +1,29 @@
 ## Mục đích
 
-- Hiểu ma trận 2 trục: Internal Readiness × Market Opportunity.
-- Plot 4 sản phẩm vào quadrant phù hợp.
-- Chọn chiến lược testing cho từng sản phẩm dựa trên vị trí quadrant.
+- Hiểu 4 hướng mở rộng sản phẩm (4 quadrants) và trade-offs của từng hướng.
+- Chọn 1 quadrant duy nhất để test trong 90 ngày đầu — không dàn trải.
+- Thiết kế kế hoạch test market cụ thể cho quadrant đã chọn.
 
-**Tại sao:** Scoring chỉ cho biết readiness tổng thể. 2-Axis testing tách riêng internal vs market để chọn chiến lược đúng.
-
-**Output:** Quadrant placement + testing strategy cho mỗi sản phẩm.
+**Output:** Ma trận 2×2 với quadrant đã chọn + kế hoạch test market.
 
 ---
 
-## Ma trận 2 trục
+## Ma Trận 2 Trục
 
-Spin-off scoring ở Unit 4 cho 1 con số tổng thể. Nhưng 2 sản phẩm cùng điểm 3.5 có thể có profile rất khác:
+### 2 trục quyết định
 
-- **SP A:** Internal Readiness cao (team sẵn sàng) nhưng Market thấp (chưa rõ demand)
-- **SP B:** Internal thấp (team chưa có) nhưng Market cao (demand rõ ràng)
+Khi mở rộng sản phẩm, có 2 trục lựa chọn độc lập:
 
-→ Chiến lược testing phải khác nhau.
+- **Trục dọc (Deep vs Wide):** Đào sâu 1 ngành (vertical) hay mở rộng nhiều ngành (horizontal)?
+- **Trục ngang (Product-led vs Customer-led):** Sản phẩm dẫn dắt (chuẩn hóa, 1 SP cho nhiều khách) hay khách hàng dẫn dắt (customize theo nhu cầu)?
 
----
+Giao nhau tạo 4 góc phần tư — mỗi góc là một chiến lược khác nhau:
 
-## 2 Trục đánh giá
+|  | **Product-led (SP dẫn dắt)** | **Customer-led (KH dẫn dắt)** |
+|---|---|---|
+| **Deep Vertical** | **Q1: Vertical Product** — Đào sâu 1 ngành, chuẩn hóa SP. VD: IPTV Khách sạn → hospitality suite toàn diện. Ưu: Expert, giá premium. Nhược: Thị trường có thể nhỏ. | **Q2: Vertical Customer** — Phục vụ mọi nhu cầu tech của 1 ngành. VD: Custom dev + IPTV + consulting cho ngành khách sạn. Ưu: LTV cao, stickiness. Nhược: Khó scale, gần service model. |
+| **Wide Horizontal** | **Q3: Horizontal Product** — 1 SP áp cho nhiều ngành. VD: CMS/Tòa soạn → newsroom, enterprise, gov. Ưu: TAM lớn, scale nhanh. Nhược: Cạnh tranh cao, dễ bị đè. | **Q4: Horizontal Customer** — Cross-sell nhiều SP cho nhiều ngành. VD: Bán VB Điện tử + CMS + Event/Ticket cho mọi DN. Ưu: Revenue diversification. Nhược: Dàn trải, khó differentiate. |
 
-### Trục 1: Internal Readiness (1-5)
+### Quy tắc vàng: Chọn 1, test 90 ngày
 
-Đánh giá năng lực nội bộ:
-- **Team:** Có product owner, developer, support chưa?
-- **Tech:** Stack ổn định, maintainable, scalable?
-- **Process:** Có CI/CD, QA, release process?
-- **Brand:** Đã có tên, positioning, nhận diện?
-
-### Trục 2: Market Opportunity (1-5)
-
-Đánh giá cơ hội thị trường:
-- **Demand:** Khách hàng có pain point thực sự?
-- **Market size:** Thị trường đủ lớn cho growth?
-- **Growth:** Thị trường đang tăng trưởng?
-- **Competitive gap:** Đối thủ chưa giải quyết tốt?
-
----
-
-## 4 Quadrants
-
-```
-    Market Opportunity (High)
-         │
-    BUILD│    AGGRESSIVE
-    CAPABILITY   SCALE
-    FIRST│
-    ─────┼────────────
-    DEPRI│    FIND
-    ORITIZE    MARKET
-         │
-    Market Opportunity (Low)
-
-    Internal Readiness →
-    (Low)            (High)
-```
-
-### Quadrant 1: Aggressive Scale (Internal cao + Market cao)
-
-Sản phẩm sẵn sàng cả nội bộ lẫn thị trường.
-
-**Chiến lược:** Đầu tư mạnh, scale nhanh, tăng team, marketing push.
-
-### Quadrant 2: Build Capability First (Internal thấp + Market cao)
-
-Thị trường hấp dẫn nhưng Dolphin chưa sẵn sàng.
-
-**Chiến lược:** Ưu tiên build team, upgrade tech stack, establish process — sau đó mới scale.
-
-### Quadrant 3: Find Market (Internal cao + Market thấp)
-
-Dolphin có năng lực nhưng chưa tìm được market fit.
-
-**Chiến lược:** Validate demand, thử segments khác nhau, pivot positioning. Dùng Lean Startup methods (Unit 7-9).
-
-### Quadrant 4: Deprioritize / Monitor (Internal thấp + Market thấp)
-
-Cả internal lẫn market đều yếu.
-
-**Chiến lược:** Không đầu tư thêm, monitor thị trường, đánh giá lại sau 6-12 tháng. Có thể sunset nếu không cải thiện.
-
----
-
-## Áp dụng cho Dolphin
-
-Với mỗi sản phẩm:
-
-1. Chấm Internal Readiness (1-5) dựa trên đánh giá team, tech, process, brand
-2. Chấm Market Opportunity (1-5) dựa trên demand, market size, growth, competitive gap
-3. Plot vào quadrant tương ứng
-4. Chọn chiến lược testing phù hợp
-5. Lập hành động cụ thể trong 90 ngày
-
-Kết quả 2-Axis bổ sung cho scoring Unit 4: giúp chọn **cách** test, không chỉ **nên** test hay không.
+Sai lầm phổ biến nhất: chọn Q4 (bán mọi thứ cho mọi người) vì cảm thấy "không bỏ lỡ cơ hội". Thực tế, dàn trải = không excelling ở đâu cả. Chọn 1 quadrant, test nghiêm túc 90 ngày, đo kết quả, rồi mới quyết định tiếp.

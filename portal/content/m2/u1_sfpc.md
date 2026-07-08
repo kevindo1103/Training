@@ -1,55 +1,46 @@
 ## Mục đích
 
-- Ôn lại mô hình SFPC đã học ở Module 1.
-- Nắm lại 3 giai đoạn Resource Allocation (85:15 → 70:30 → 50:50).
-- Chuẩn bị mindset cho Module 2: từ "sản phẩm nào đáng đầu tư" → "sản phẩm nào có thể thành business riêng".
+- Đảm bảo tất cả participant nắm vững mô hình Service-Funded Product Company trước khi bắt đầu Module 2.
+- Nhắc lại 7 kết quả quan trọng từ Module 1 sẽ được sử dụng trực tiếp trong Module 2.
+- Tạo baseline chung cho ban lãnh đạo — ai cũng xuất phát từ cùng hiểu biết.
 
-**Tại sao:** Module 2 build trên nền tảng Module 1. Participant cần nhớ rõ framework trước khi đi sâu.
-
-**Output:** Không có output — đây là unit ôn tập.
+**Output:** Participant confirm hiểu nền tảng Module 1. Nếu quiz cho thấy gaps, facilitator clarify trước khi tiếp tục.
 
 ---
 
-## Mô hình Service-Funded Product Company
+## Service-Funded Product Company là gì?
 
-Service-Funded Product Company (SFPC) là mô hình dùng dịch vụ (service) làm động cơ tiền mặt (cash engine) để tài trợ cho việc phát triển sản phẩm (product) — growth engine. Service tạo doanh thu ngay, product tạo giá trị dài hạn.
-
-Hai cánh tay của SFPC:
-
-- **Service Arm (Cash Engine):** Doanh thu từ custom development, staff augmentation, system integration. Tạo cash flow ổn định để nuôi product arm.
-- **Product Arm (Growth Engine):** Phát triển sản phẩm riêng có thể scale mà không cần tăng headcount tuyến tính. Tạo giá trị dài hạn và recurring revenue.
+Service-Funded Product Company (SFPC) là mô hình mà doanh nghiệp dịch vụ sử dụng doanh thu từ dịch vụ hiện tại làm "động cơ tiền mặt" (cash engine) để tài trợ cho việc phát triển sản phẩm riêng. Khác với startup (cần gọi vốn để build sản phẩm), SFPC có lợi thế lớn: dòng tiền ổn định từ dịch vụ cho phép đầu tư vào R&D mà không phụ thuộc nhà đầu tư.
 
 ---
 
-## Resource Allocation Roadmap
+## Tại sao công ty dịch vụ cần chuyển đổi?
 
-| Mốc | Service | Product | Focus |
-|------|---------|---------|-------|
-| Year 1 | 85% | 15% | 1 sản phẩm INVEST, team dedicated nhỏ |
-| Year 2 | 70% | 30% | Product bắt đầu tạo revenue, thêm team |
-| Year 3 | 50% | 50% | Product tự lực, 2 engines ngang nhau |
-
-Lộ trình này đảm bảo service arm vẫn khỏe mạnh trong khi product arm được nuôi dưỡng từ từ. Không nên nhảy từ 85:15 sang 50:50 ngay — sẽ ảnh hưởng cash flow.
+- **Trần biên lợi nhuận (margin ceiling):** Dịch vụ T&M margin 20-30%, SaaS margin 60-80%.
+- **Phụ thuộc headcount:** Doanh thu dịch vụ tỷ lệ thuận với số người — muốn tăng 2x doanh thu phải tăng gần 2x nhân sự.
+- **Rủi ro tập trung:** Mất 1 khách hàng lớn = mất 20-30% doanh thu.
+- **Không có IP:** Khi kết thúc dự án, IP thuộc về khách hàng — công ty dịch vụ không tích lũy được tài sản.
 
 ---
 
-## Module 1 → Module 2 Connection
+## Lộ trình phân bổ nguồn lực
 
-| | Module 1 | Module 2 |
-|---|----------|----------|
-| Góc nhìn | Product-level: sản phẩm nào đáng đầu tư? | Business-level: sản phẩm nào có thể thành business riêng? |
-| Tiêu chí | 7 tiêu chí product (market size, recurring potential...) | 7 tiêu chí business (standalone revenue, scalability...) |
-| Output | INVEST 1 sản phẩm | Spin-off candidate + sản phẩm mới + pricing + roadmap |
-
-Module 1 đã giúp Dolphin chọn 1 sản phẩm INVEST. Module 2 đi xa hơn: đánh giá toàn bộ portfolio (cả service lẫn product), thiết kế brand, kiểm tra readiness spin-off, thử nghiệm ý tưởng mới, và xây lộ trình 3 năm.
+| Mốc | Dịch vụ | Sản phẩm | Ý nghĩa |
+|------|---------|----------|---------|
+| Year 1 | 85% | 15% | Bắt đầu nhỏ, 1 product bet, dịch vụ vẫn là trụ cột |
+| Year 2 | 70% | 30% | Product bắt đầu tạo revenue, team mở rộng |
+| Year 3 | 50% | 50% | Cân bằng — product trở thành growth engine |
 
 ---
 
-## 4 Sản phẩm Dolphin
+## 7 Kết quả Module 1 cần có trước Module 2
 
-1. **VB Điện tử (Vietlot)** — Hệ thống quản lý văn bản điện tử
-2. **IPTV Khách sạn** — Hệ thống giải trí cho khách sạn
-3. **Event/Ticket** — Nền tảng quản lý sự kiện
-4. **CMS/Tòa soạn** — Hệ thống quản lý nội dung cho tòa soạn báo chí
-
-Cả 4 sản phẩm sẽ được đánh giá lại ở Module 2 với góc nhìn business-level: không chỉ "sản phẩm tốt" mà phải là "business khả thi".
+> **Tiền đề bắt buộc**
+>
+> 1. Chẩn đoán 10 câu — mức độ cấp thiết chuyển đổi (0-15 / 16-30 / 31-50)
+> 2. BMC hiện tại — thực trạng 9 thành phần mô hình kinh doanh
+> 3. BMC mục tiêu Year 3 — mô hình SFPC
+> 4. Product Scoring Matrix — xếp hạng 4 SP theo 7 tiêu chí có trọng số
+> 5. Quyết định Invest / Watch / Kill — chỉ 1 sản phẩm INVEST duy nhất
+> 6. Mô hình tài chính — runway, milestones Go/No-Go
+> 7. Lộ trình phân bổ: 85:15 (Y1) → 70:30 (Y2) → 50:50 (Y3)

@@ -1,91 +1,34 @@
 ## Mục đích
 
-- Hiểu MVP scoping: build ít nhất có thể để validate core hypothesis.
-- Nắm Experiment Canvas: hypothesis → experiment → metric → timeline.
-- Thiết kế MVP cho 1-2 ý tưởng đã pass screening.
+- Thiết kế MVP scope: chọn 3 core features, loại bỏ mọi thứ khác.
+- Thiết kế experiment: hypothesis → riskiest assumption → cohort → metrics → pass/fail criteria.
+- Đặt brand ngay cho MVP — team cần identity để pitch và communicate.
 
-**Tại sao:** MVP không phải "version 1" — mà là artifact nhỏ nhất để test hypothesis. Scoping đúng tiết kiệm hàng tháng effort.
-
-**Output:** MVP Scope + Brand Name + Experiment Canvas.
+**Output:** MVP Scope + Experiment Canvas + Brand tạm cho sản phẩm mới.
 
 ---
 
-## MVP không phải "Version 1 thiếu tính năng"
+## MVP Scope & Experiment Design
 
-Hiểu sai phổ biến:
+### MVP = Minimum VIABLE Product, không phải Minimum Product
 
-| Hiểu sai | Hiểu đúng |
-|----------|-----------|
-| MVP = v1 với ít features | MVP = artifact nhỏ nhất để test hypothesis |
-| MVP phải là phần mềm | MVP có thể là landing page, demo, concierge |
-| MVP phải hoàn chỉnh UX | MVP chỉ cần đủ để khách hiểu và phản hồi |
-| MVP build xong thì xong | MVP là bước đầu của loop — iterate dựa trên data |
+"Minimum" không có nghĩa là "cắt bỏ quality". MVP là phiên bản nhỏ nhất có thể DELIVER GIÁ TRỊ THỰC cho user. Nếu user không thấy giá trị, bạn không learn được gì — đó là Minimum Unusable Product.
 
----
+### Quy tắc MVP Scope
 
-## MVP Scoping Rules
+- **Tối đa 3 core features** — nếu cần nhiều hơn, bạn chưa hiểu core value đủ rõ.
+- **Explicitly NOT in MVP:** list rõ những gì KHÔNG làm — ngăn scope creep.
+- **Timebox:** 4 tuần build / 6 tuần max — nếu mất lâu hơn, scope quá lớn.
 
-### Rule 1: Tối đa 3 core features
+### Experiment Design: Test Riskiest Assumption First
 
-Nhiều hơn 3 features → quá lâu để build, khó xác định feature nào tạo giá trị thật.
+Mỗi sản phẩm dựa trên nhiều assumptions. Không phải assumption nào cũng quan trọng như nhau. Tìm riskiest assumption — assumption nào nếu sai thì cả idea sập — và test nó TRƯỚC:
 
-**Ví dụ HotelOps:**
-1. Booking management (core)
-2. Digital check-in (differentiator)
-3. Revenue dashboard (value proof)
+- "Khách hàng có vấn đề này" → Problem interviews, landing page test.
+- "Khách sẵn sàng trả tiền" → LOI, prepay discount offer.
+- "Team có thể build trong 4 tuần" → Technical spike, prototype.
+- "Khách tìm được sản phẩm" → Channel experiment, paid ads test.
 
-**KHÔNG bao gồm trong MVP:**
-- Multi-property support
-- AI pricing optimization
-- Integration với 10 PMS khác
-→ Build sau nếu hypothesis validated.
+### Tại sao brand MVP ngay?
 
-### Rule 2: Timeline ≤ 6 tuần
-
-Nếu mất hơn 6 tuần để build MVP → scope quá lớn, cắt thêm.
-
-### Rule 3: Budget rõ ràng
-
-Biết trước tốn bao nhiêu → dễ commit/kill. Không có budget rõ = scope creep.
-
----
-
-## Experiment Canvas
-
-Cho mỗi MVP, thiết kế experiment:
-
-| Phần | Câu hỏi | Ví dụ |
-|------|---------|-------|
-| **Hypothesis** | Tin gì? | "Khách sạn 3-4 sao sẵn sàng trả 2M/tháng cho hệ thống quản lý tích hợp" |
-| **Experiment type** | Test thế nào? | Pilot with real customer |
-| **Success metric** | Đo bằng gì? | ≥3 khách sạn dùng thử, ≥1 trả tiền |
-| **Timeline** | Bao lâu? | 4 tuần pilot |
-| **Budget** | Tốn bao nhiêu? | 50 triệu VND |
-
-### Các loại experiment
-
-| Loại | Mô tả | Phù hợp khi |
-|------|--------|------------|
-| Landing page test | Trang web + đo sign-ups | Validate demand tổng quát |
-| Concierge MVP | Phục vụ bằng tay | Validate workflow + willingness to pay |
-| Wizard of Oz | UI tự động, backend manual | Validate UX + adoption |
-| Prototype + user test | Demo interactable | Validate usability + feature fit |
-| Pilot with real customer | MVP thật với khách thật | Validate full hypothesis |
-
----
-
-## Brand cho sản phẩm mới
-
-Áp dụng brand architecture đã chọn ở Unit 3:
-
-**Endorsed format:** `[Tên sản phẩm] by Dolphin Technology`
-
-Cần xác định:
-- **Brand name:** Ngắn gọn, gợi chức năng
-- **Tagline:** 1 câu mô tả giá trị
-- **Positioning statement:** "Cho [target], [product] là [category] giúp [benefit] khác biệt bởi [differentiator]"
-
-Naming từ sớm quan trọng vì:
-1. Khách hàng pilot cần gọi tên sản phẩm
-2. Quá trình đặt tên buộc team rõ ràng about positioning
-3. Brand consistency từ đầu → dễ build recognition sau
+Sai lầm phổ biến: gọi sản phẩm mới là "Dự án X" hoặc "Internal Product" — không tạo cảm giác real product cho cả team lẫn khách hàng. Đặt tên ngay (có thể rebrand sau) giúp team có identity, pitch deck có brand, và khách hàng cảm thấy sản phẩm nghiêm túc.
