@@ -296,7 +296,7 @@ function dispatchRenderer(activity, data, container) {
     .then((mod) => {
       if (typeof mod.render === 'function') {
         mod.render(container, activity, data, (newData) => {
-          mergeResponse(activity.id, newData);
+          mergeResponse(activity.id, newData, activity.type);
         });
       } else {
         showPlaceholder(container, activity);
