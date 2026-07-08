@@ -3,7 +3,7 @@
  * Boot sequence, layout, navigation, entry form, renderer dispatch
  */
 
-import { MODULE_STUB } from './modules/stub.config.js';
+import { MODULE_CONFIG } from './modules/module1.config.js';
 import {
   initStore,
   setParticipant,
@@ -19,8 +19,7 @@ import { renderSideBar } from './components/sidebar.js';
 import { renderBottomBar } from './components/bottombar.js';
 import { showToast } from './components/toast.js';
 
-// TODO: swap to real module1.config.js khi issue #3 deliver
-const config = MODULE_STUB;
+const config = MODULE_CONFIG;
 
 const THEME_KEY = 'dolphin_theme';
 
@@ -264,7 +263,7 @@ function renderIntro(activity, container) {
     <div class="max-w-3xl mx-auto p-4 md:p-12">
       <div class="bg-surface-container-lowest rounded-2xl p-6 md:p-12 shadow-card border border-outline-variant">
         <span class="material-symbols-outlined text-5xl text-primary mb-4">${escapeHtml(activity.icon)}</span>
-        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">${escapeHtml(activity.name)}</h2>
+        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">${escapeHtml(activity.title)}</h2>
         ${estimatedTime ? `<p class="text-label-sm font-ui font-semibold text-primary mb-4">⏱ ${escapeHtml(estimatedTime)}</p>` : ''}
         <div class="text-body-md text-on-surface-variant mb-8 space-y-2">
           <p><strong>Mục đích:</strong> ${escapeHtml(purpose)}</p>

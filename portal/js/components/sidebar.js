@@ -30,7 +30,7 @@ export function renderSideBar(config, currentIndex, completedIds, onNavigate, is
     btn.setAttribute('aria-current', isActive ? 'page' : 'false');
     btn.innerHTML = `
       <span class="material-symbols-outlined ${isActive ? 'font-bold' : ''}">${activity.icon}</span>
-      <span class="flex-1 text-body-md font-ui">${activity.name}</span>
+      <span class="flex-1 text-body-md font-ui">${activity.title || activity.name}</span>
       ${isCompleted ? `<span class="material-symbols-outlined ${isActive ? 'text-on-primary' : 'text-success-emerald'}">check_circle</span>` : ''}
     `;
     btn.addEventListener('click', () => onNavigate(index));
