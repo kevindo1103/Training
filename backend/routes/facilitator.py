@@ -10,6 +10,22 @@ from models import Session as SessionModel, Participant, Response
 
 router = APIRouter(prefix="/api/facilitator", tags=["facilitator"])
 
+M2_UNIT_IDS = [
+    "u1_sfpc", "u2_inventory", "u3_brand", "u4_spinoff",
+    "u5_2axis", "u6_90day", "u7_lean", "u8_mvp",
+    "u9_kill", "u10_pricing", "u11_convergence",
+]
+
+SPINOFF_WEIGHTS = {
+    "standalone_revenue": 0.20,
+    "scalability": 0.15,
+    "operational_independence": 0.15,
+    "customer_acquisition": 0.15,
+    "team_readiness": 0.15,
+    "brand_positioning": 0.10,
+    "financial_sustainability": 0.10,
+}
+
 
 @router.get("/{session_id}/summary")
 def get_summary(session_id: str, _=Depends(require_facilitator), db: Session = Depends(get_db)):
@@ -75,6 +91,141 @@ def get_activity_detail(
         })
 
     return {"session_id": session_id, "activity_id": activity_id, "responses": results}
+
+
+@router.get("/{session_id}/module2/summary")
+def get_module2_summary(session_id: str, _=Depends(require_facilitator), db: Session = Depends(get_db)):
+    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    participants = db.query(Participant).filter(
+        Participant.session_id == session_id, Participant.role != "facilitator"
+    ).all()
+
+    responses = (
+        db.query(Response)
+        .filter(Response.session_id == session_id, Response.activity_id.in_(M2_UNIT_IDS))
+        .options(joinedload(Response.participant))
+        .all()
+    )
+
+    unit_completion = {uid: {"lecture": 0, "quiz": 0, "practice": 0} for uid in M2_UNIT_IDS}
+    quiz_data = defaultdict(list)
+    spinoff_scores = []
+
+    for r in responses:
+        uid = r.activity_id
+        p = r.participant
+        if p and p.role == "facilitator":
+            continue
+        p_info = {"id": p.id, "name": p.name, "role": p.role} if p else None
+        try:
+            data = json.loads(r.data) if r.data else {}
+        except (json.JSONDecodeError, TypeError):
+            continue
+
+        if "lecture" in data:
+            unit_completion[uid]["lecture"] += 1
+        if "quiz" in data:
+            unit_completion[uid]["quiz"] += 1
+            q = data["quiz"]
+            quiz_data[uid].append({
+                "participant": p_info,
+                "score": q.get("score", 0),
+                "total": q.get("total", 5),
+            })
+        if "practice" in data:
+            unit_completion[uid]["practice"] += 1
+
+        if uid == "u4_spinoff" and "practice" in data:
+            practice = data["practice"]
+            matrix = practice.get("scores") or practice.get("matrix") or {}
+            if isinstance(matrix, dict):
+                product_scores = {}
+                for product_id, criteria in matrix.items():
+                    if not isinstance(criteria, dict):
+                        continue
+                    weighted = sum(
+                        _safe_float(criteria.get(c, 0)) * w
+                        for c, w in SPINOFF_WEIGHTS.items()
+                    )
+                    product_scores[product_id] = round(weighted, 2)
+                if product_scores:
+                    spinoff_scores.append({"participant": p_info, "scores": product_scores})
+
+    quiz_scores = {
+        uid: {
+            "avg": round(sum(r["score"] for r in rs) / len(rs), 2),
+            "responses": rs,
+        }
+        for uid, rs in quiz_data.items()
+        if rs
+    }
+
+    product_totals = defaultdict(list)
+    for entry in spinoff_scores:
+        for product_id, score in entry["scores"].items():
+            product_totals[product_id].append(score)
+
+    return {
+        "session": {"id": session.id, "name": session.name},
+        "participants": [
+            {"id": p.id, "name": p.name, "role": p.role} for p in participants
+        ],
+        "unit_completion": unit_completion,
+        "quiz_scores": quiz_scores,
+        "spinoff_matrix": {
+            "participants": spinoff_scores,
+            "averages": {
+                pid: round(sum(scores) / len(scores), 2)
+                for pid, scores in product_totals.items()
+            },
+        },
+    }
+
+
+@router.get("/{session_id}/module2/unit/{unit_id}")
+def get_module2_unit(
+    session_id: str, unit_id: str, _=Depends(require_facilitator), db: Session = Depends(get_db),
+):
+    if unit_id not in M2_UNIT_IDS:
+        raise HTTPException(status_code=404, detail="Unit not found")
+
+    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    responses = (
+        db.query(Response)
+        .filter(Response.session_id == session_id, Response.activity_id == unit_id)
+        .options(joinedload(Response.participant))
+        .all()
+    )
+
+    results = []
+    for r in responses:
+        p = r.participant
+        if p and p.role == "facilitator":
+            continue
+        try:
+            data = json.loads(r.data) if r.data else {}
+        except (json.JSONDecodeError, TypeError):
+            continue
+        results.append({
+            "participant": {"id": p.id, "name": p.name, "role": p.role} if p else None,
+            "quiz": data.get("quiz"),
+            "practice": data.get("practice"),
+        })
+
+    return {"unit_id": unit_id, "responses": results}
+
+
+def _safe_float(val, default: float = 0.0) -> float:
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return default
 
 
 def _aggregate_survey(responses: list[Response]) -> dict:
