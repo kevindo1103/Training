@@ -109,8 +109,8 @@ jobs:
             echo "DATABASE_URL length: ${#DATABASE_URL}"
             echo "DATABASE_URL prefix: ${DATABASE_URL:0:15}"
             # Strip sqlite:/// prefix for SQLite absolute-path URLs.
-            DB_PATH="${DATABASE_URL#sqlite:///}"
-            echo "DATABASE_URL path basename: $(basename "$DB_PATH")"
+            DB_PATH="${DATABASE_URL#sqlite://}"
+            echo "DATABASE_URL path length: ${#DB_PATH}"
             ls -la /opt/dolphin-training/ || true
             ls -la /opt/dolphin-training/data-staging/ || true
             echo "--- .env (redacted) ---"
