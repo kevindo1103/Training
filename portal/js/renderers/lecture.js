@@ -16,6 +16,12 @@
 
 import { escapeHtml } from '../utils/dom.js';
 
+function inlineMarkdown(text) {
+  return escapeHtml(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-on-surface">$1</strong>')
+    .replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+}
+
 export async function render(container, unit, onComplete) {
   const config = unit?.lecture || unit || {};
 
@@ -126,7 +132,7 @@ function renderPurpose(container, section) {
   wrapper.innerHTML = `
     <h2 class="font-headline font-bold text-headline-sm text-on-surface mb-4">${escapeHtml(section.title)}</h2>
     <ul class="list-disc pl-5 space-y-2">
-      ${items.map((item) => `<li class="text-body-md text-on-surface-variant">${escapeHtml(item)}</li>`).join('')}
+      ${items.map((item) => `<li class="text-body-md text-on-surface-variant">${inlineMarkdown(item)}</li>`).join('')}
     </ul>
   `;
   container.appendChild(wrapper);
@@ -149,7 +155,7 @@ function renderBody(container, section) {
     if (!text) return;
     const p = document.createElement('p');
     p.className = 'text-body-md text-on-surface-variant mb-4 leading-relaxed';
-    p.innerHTML = escapeHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong class="text-on-surface">$1</strong>');
+    p.innerHTML = inlineMarkdown(text);
     wrapper.appendChild(p);
   });
 
@@ -164,7 +170,7 @@ function renderDefinition(container, section) {
   wrapper.innerHTML = `
     <div class="card-elite border-l-4 border-l-primary p-6 md:p-8">
       <h3 class="font-headline font-bold text-headline-sm text-on-surface mb-3">${escapeHtml(section.title)}</h3>
-      <p class="text-body-md text-on-surface-variant leading-relaxed">${escapeHtml(bodyText)}</p>
+      <p class="text-body-md text-on-surface-variant leading-relaxed">${inlineMarkdown(bodyText)}</p>
     </div>
   `;
   container.appendChild(wrapper);
@@ -205,7 +211,7 @@ function renderTable(container, section) {
   tableData.rows.forEach((row, i) => {
     const tr = document.createElement('tr');
     tr.className = i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface';
-    tr.innerHTML = row.map((cell) => `<td class="py-3 pr-4 text-body-md text-on-surface-variant">${escapeHtml(cell)}</td>`).join('');
+    tr.innerHTML = row.map((cell) => `<td class="py-3 pr-4 text-body-md text-on-surface-variant">${inlineMarkdown(cell)}</td>`).join('');
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
@@ -221,7 +227,7 @@ function renderTable(container, section) {
     card.innerHTML = tableData.headers.map((h, i) => `
       <div class="flex justify-between gap-3 py-2 border-b border-outline-variant/30 last:border-0">
         <span class="text-label-sm font-ui font-bold text-on-surface-variant">${escapeHtml(h)}</span>
-        <span class="text-body-md text-on-surface text-right">${escapeHtml(row[i] || '')}</span>
+        <span class="text-body-md text-on-surface text-right">${inlineMarkdown(row[i] || '')}</span>
       </div>
     `).join('');
     cardsWrap.appendChild(card);
@@ -292,14 +298,14 @@ function renderComparison(container, section) {
     <div class="card-elite border-l-4 border-l-primary p-5 md:p-6">
       <h4 class="text-label-caps font-ui font-bold text-primary uppercase tracking-widest mb-3">Branch A</h4>
       <ul class="list-disc pl-5 space-y-2">
-        ${left.map((item) => `<li class="text-body-md text-on-surface-variant">${escapeHtml(item)}</li>`).join('')}
+        ${left.map((item) => `<li class="text-body-md text-on-surface-variant">${inlineMarkdown(item)}</li>`).join('')}
       </ul>
     </div>
     <div class="card-elite border-l-4 p-5 md:p-6" style="border-left-color: #6B7280;">
       <!-- TODO: replace #6B7280 with Branch B design token when Designer confirms -->
       <h4 class="text-label-caps font-ui font-bold uppercase tracking-widest mb-3" style="color: #6B7280;">Branch B</h4>
       <ul class="list-disc pl-5 space-y-2">
-        ${right.map((item) => `<li class="text-body-md text-on-surface-variant">${escapeHtml(item)}</li>`).join('')}
+        ${right.map((item) => `<li class="text-body-md text-on-surface-variant">${inlineMarkdown(item)}</li>`).join('')}
       </ul>
     </div>
   `;
@@ -318,7 +324,7 @@ function renderBullets(container, section) {
   wrapper.innerHTML = `
     <h3 class="font-headline font-bold text-headline-sm text-on-surface mb-4">${escapeHtml(section.title)}</h3>
     <ul class="list-disc pl-5 space-y-2">
-      ${items.map((item) => `<li class="text-body-md text-on-surface-variant">${escapeHtml(item)}</li>`).join('')}
+      ${items.map((item) => `<li class="text-body-md text-on-surface-variant">${inlineMarkdown(item)}</li>`).join('')}
     </ul>
   `;
   container.appendChild(wrapper);
