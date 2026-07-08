@@ -20,7 +20,7 @@ export function renderTopBar(config, onToggleSidebar, onToggleTheme, isDark) {
       </div>
     </div>
     <div class="flex items-center gap-2 md:gap-4">
-      <h1 class="hidden md:block text-headline-sm font-headline font-bold text-on-surface">${config.moduleTitle} — ${config.moduleSubtitle}</h1>
+      <h1 class="hidden md:block text-headline-sm font-headline font-bold text-on-surface">${config.title || config.moduleTitle} — ${config.subtitle || config.moduleSubtitle}</h1>
       <button id="theme-toggle" class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant" aria-label="Chuyển chủ đề sáng/tối">
         <span class="material-symbols-outlined">${isDark ? 'light_mode' : 'dark_mode'}</span>
       </button>

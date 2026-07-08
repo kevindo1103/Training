@@ -143,3 +143,22 @@ html.dark .bg-inverse-surface {
 html.dark .text-inverse-on-surface {
   color: #1c1b1b !important;
 }
+
+html.dark .active-pill {
+  background-color: #6bd8cb !important;
+  color: #00201d !important;
+}
+
+html.dark .bg-green-50,
+html.dark .bg-amber-50,
+html.dark .bg-red-50 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .bg-accent-teal-soft {
+  background-color: rgba(107, 216, 203, 0.15) !important;
+}
+
+html.dark .bg-primary\/10 {
+  background-color: rgba(107, 216, 203, 0.15) !important;
+}
