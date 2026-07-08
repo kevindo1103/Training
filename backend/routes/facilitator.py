@@ -17,7 +17,9 @@ def get_summary(session_id: str, _=Depends(require_facilitator), db: Session = D
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    participants = db.query(Participant).filter(Participant.session_id == session_id).all()
+    participants = db.query(Participant).filter(
+        Participant.session_id == session_id, Participant.role != "facilitator"
+    ).all()
     responses = db.query(Response).filter(Response.session_id == session_id).all()
 
     completion = defaultdict(int)
