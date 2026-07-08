@@ -67,7 +67,7 @@ export const MODULE_CONFIG = {
         "Mức độ hiểu biết chuyên sâu của Dolphin trong lĩnh vực này",
     },
     {
-      id: "sales_channel",
+      id: "sales_without_ceo",
       label: "Sales không qua CEO",
       weight: 0.1,
       description: "Khả năng bán hàng mà không phụ thuộc vào CEO",
@@ -170,7 +170,7 @@ export const MODULE_CONFIG = {
         },
       ],
       scoring: {
-        totalMin: 0,
+        totalMin: 10,
         totalMax: 50,
         thresholds: [
           {
