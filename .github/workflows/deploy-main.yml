@@ -101,16 +101,22 @@ jobs:
 
             echo "--- diagnostics ---"
             echo "PWD=$(pwd)"
+            DB_PATH=$(python3 -c "from urllib.parse import urlparse; import os; print(urlparse(os.environ['DATABASE_URL']).path)")
+            echo "DATABASE_URL path: $DB_PATH"
             ls -la /opt/dolphin-training/ || true
             ls -la /opt/dolphin-training/data/ || true
             echo "--- .env (redacted) ---"
             sed 's/=.*$/=***/' .env
             echo "--- end diagnostics ---"
 
-            sudo mkdir -p /opt/dolphin-training/data
-            sudo chown -R deploy:deploy /opt/dolphin-training
+            DB_DIR=$(python3 -c "from urllib.parse import urlparse; import os; url=os.environ['DATABASE_URL']; print(os.path.dirname(urlparse(url).path))")
+            echo "Ensuring DB directory: $DB_DIR"
+            sudo mkdir -p "$DB_DIR"
+            sudo chown -R deploy:deploy "$DB_DIR"
+            sudo chmod 775 "$DB_DIR"
+
             alembic upgrade head
-            sudo chown -R deploy:deploy /opt/dolphin-training/data
+            sudo chown -R deploy:deploy "$DB_DIR"
             sudo systemctl restart dolphin-training-backend
           EOF
 
