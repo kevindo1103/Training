@@ -7,7 +7,8 @@
 import { api, setAuthToken } from './api.js';
 
 const STORAGE_KEY = 'dolphin_training_module1';
-const DEBOUNCE_MS = 300;
+const TOKEN_KEY = 'dolphin_auth_token';
+const DEBOUNCE_MS = 500;
 
 let state = null;
 let persistTimer = null;
@@ -32,9 +33,17 @@ export async function initStore() {
   const raw = localStorage.getItem(STORAGE_KEY);
   state = raw ? JSON.parse(raw) : createEmptyState();
 
-  // Restore auth token if participant already has one
+  // Migrate: remove token from localStorage state if present from older versions
   if (state.participant?.token) {
-    setAuthToken(state.participant.token);
+    sessionStorage.setItem(TOKEN_KEY, state.participant.token);
+    delete state.participant.token;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // Restore auth token from sessionStorage (memory-safe, not persisted to localStorage)
+  const savedToken = sessionStorage.getItem(TOKEN_KEY);
+  if (savedToken) {
+    setAuthToken(savedToken);
   }
 
   // Nếu có participant + participantId, thử fetch responses từ API và dùng newest
@@ -72,7 +81,10 @@ export async function initStore() {
 }
 
 export function setParticipant(name, role, participantId = null, sessionId = null, token = null) {
-  state.participant = { name, role, participantId, sessionId, token, joinedAt: Date.now() };
+  state.participant = { name, role, participantId, sessionId, joinedAt: Date.now() };
+  if (token) {
+    sessionStorage.setItem(TOKEN_KEY, token);
+  }
   setAuthToken(token);
   persist();
 }
@@ -83,6 +95,7 @@ export function clearParticipant() {
   state.responseTypes = {};
   state.introsSeen = {};
   state.lastSynced = null;
+  sessionStorage.removeItem(TOKEN_KEY);
   setAuthToken(null);
   persist();
 }
