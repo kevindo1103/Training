@@ -35,7 +35,7 @@ export async function render(container, unit, onComplete) {
   const config = unit?.lecture || unit || {};
 
   const contentEl = document.createElement('div');
-  contentEl.className = 'max-w-reading mx-auto px-5 py-8 md:py-section';
+  contentEl.className = 'w-full px-5 py-8 md:py-section';
   container.appendChild(contentEl);
 
   try {
@@ -51,7 +51,7 @@ export async function render(container, unit, onComplete) {
   }
 
   const footer = document.createElement('div');
-  footer.className = 'max-w-reading mx-auto px-5 pb-12 md:pb-section';
+  footer.className = 'w-full px-5 pb-12 md:pb-section';
   footer.innerHTML = `
     <button id="lecture-continue" class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container transition-colors min-h-[44px]">
       Tiếp tục
