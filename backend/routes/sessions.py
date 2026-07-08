@@ -55,14 +55,13 @@ def join_session(session_id: str, body: JoinSession, db: Session = Depends(get_d
 
 @router.post("/join", response_model=JoinResponse, status_code=201)
 def join_by_module(body: JoinByModule, db: Session = Depends(get_db)):
-    session = (
-        db.query(SessionModel)
-        .filter(SessionModel.module_id == body.module_id, SessionModel.status == "active")
-        .order_by(SessionModel.created_at.desc())
-        .first()
-    )
+    query = db.query(SessionModel).filter(SessionModel.status == "active")
+    if body.module_id:
+        query = query.filter(SessionModel.module_id == body.module_id)
+    session = query.order_by(SessionModel.created_at.desc()).first()
     if not session:
-        session = SessionModel(module_id=body.module_id, name=f"Auto session for {body.module_id}")
+        name = f"Auto session for {body.module_id}" if body.module_id else "Workshop session"
+        session = SessionModel(module_id=body.module_id, name=name)
         db.add(session)
         db.commit()
         db.refresh(session)

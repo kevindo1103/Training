@@ -19,7 +19,7 @@ class Session(Base):
     __tablename__ = "sessions"
 
     id = Column(Text, primary_key=True, default=gen_uuid)
-    module_id = Column(Text, nullable=False)
+    module_id = Column(Text, nullable=True)
     name = Column(Text)
     created_at = Column(Text, default=lambda: utcnow().isoformat())
     status = Column(Text, default="active")
