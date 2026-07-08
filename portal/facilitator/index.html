@@ -48,7 +48,11 @@
             'label-sm': ['13px', { lineHeight: '1.4', fontWeight: '500' }],
             'display-sm': ['36px', { lineHeight: '1.1', fontWeight: '800' }],
           },
-          boxShadow: { card: '0 4px 20px rgba(0, 0, 0, 0.04)', overlay: '0 12px 40px rgba(0, 0, 0, 0.08)' },
+          boxShadow: {
+            card: '0 4px 20px rgba(0, 0, 0, 0.04)',
+            'card-hover': '0 8px 30px rgba(0, 0, 0, 0.06)',
+            overlay: '0 12px 40px rgba(0, 0, 0, 0.08)',
+          },
         },
       },
     };
@@ -124,21 +128,21 @@
     function renderApp() {
       const app = document.getElementById('app');
       app.innerHTML = `
-        <header class="fixed top-0 left-0 right-0 h-20 z-40 bg-surface/95 backdrop-blur border-b border-outline-variant flex items-center justify-between px-4 md:px-8">
+        <header class="fixed top-0 left-0 right-0 h-16 z-40 bg-surface/95 backdrop-blur-md border-b border-outline-variant/50 flex items-center justify-between px-5 md:px-8">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline font-bold">D</div>
-            <span class="font-headline font-bold text-on-surface text-headline-sm">Dolphin Training</span>
+            <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline font-bold text-body-md">D</div>
+            <span class="font-headline font-bold text-on-surface text-headline-sm tracking-tight">Dolphin Training</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-headline-sm font-headline font-bold text-on-surface hidden md:block">Facilitator Dashboard</span>
+            <span class="text-label-caps font-ui text-on-surface-variant uppercase tracking-widest hidden md:block">Facilitator Dashboard</span>
             <div id="refresh-indicator" class="hidden text-label-sm text-on-surface-variant items-center gap-1">
               <span class="material-symbols-outlined text-[16px] animate-spin">sync</span>
               Đang cập nhật...
             </div>
-            ${currentSessionId ? `<button id="change-session" class="px-3 py-2 rounded-lg border border-outline text-on-surface text-label-sm font-ui font-semibold hover:bg-surface-container-high min-h-[44px]">Đổi session</button>` : ''}
+            ${currentSessionId ? `<button id="change-session" class="px-3 py-2 rounded-lg border-[1.5px] border-outline-variant text-on-surface-variant text-label-sm font-ui font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors min-h-[40px]">Đổi session</button>` : ''}
           </div>
         </header>
-        <main id="dashboard-content" class="pt-24 pb-8 px-4 md:px-8 max-w-[1200px] mx-auto"></main>
+        <main id="dashboard-content" class="pt-20 pb-8 px-5 md:px-8 max-w-[1200px] mx-auto"></main>
       `;
 
       const changeBtn = document.getElementById('change-session');
@@ -160,22 +164,27 @@
       const content = document.getElementById('dashboard-content');
       content.innerHTML = `
         <div class="max-w-md mx-auto mt-12">
-          <div class="bg-surface-container-lowest rounded-2xl p-6 md:p-8 shadow-card border border-outline-variant">
-            <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">Chọn Session</h2>
-            <p class="text-body-md text-on-surface-variant mb-6">Nhập mã facilitator và chọn workshop session.</p>
-            <div class="space-y-4">
+          <div class="card-elite p-8 md:p-10">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="material-symbols-outlined text-primary text-[28px]">admin_panel_settings</span>
               <div>
-                <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1">Facilitator Secret</label>
-                <input id="fac-secret" type="password" class="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline text-on-surface placeholder-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" placeholder="Nhập mã truy cập facilitator">
+                <h2 class="text-headline-md font-headline font-bold text-on-surface">Chọn Session</h2>
+                <p class="text-label-sm text-on-surface-variant">Nhập mã facilitator và chọn workshop session</p>
+              </div>
+            </div>
+            <div class="space-y-5">
+              <div>
+                <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Facilitator Secret</label>
+                <input id="fac-secret" type="password" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface placeholder-on-surface-variant/60" placeholder="Nhập mã truy cập facilitator">
               </div>
               <div>
-                <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1">Session</label>
-                <select id="session-select" class="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Session</label>
+                <select id="session-select" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface">
                   <option value="">Đang tải sessions...</option>
                 </select>
               </div>
               <div id="auth-error" class="hidden text-error text-label-sm font-ui"></div>
-              <button id="join-btn" class="w-full px-5 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container min-h-[44px]">Truy cập Dashboard</button>
+              <button id="join-btn" class="w-full px-5 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container transition-colors min-h-[44px]">Truy cập Dashboard</button>
             </div>
           </div>
         </div>
@@ -314,8 +323,8 @@
       });
 
       return `
-        <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-          <div class="p-5 md:p-6">
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">dashboard</span>
@@ -422,8 +431,8 @@
       }
 
       return `
-        <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-          <div class="p-5 md:p-6">
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
             <div class="flex items-center gap-2 mb-4">
               <span class="material-symbols-outlined text-primary">analytics</span>
               <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 1 — Diagnostic Gap Analysis</h3>
@@ -470,8 +479,8 @@
       });
 
       return `
-        <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-          <div class="p-5 md:p-6">
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
             <div class="flex items-center gap-2 mb-4">
               <span class="material-symbols-outlined text-primary">leaderboard</span>
               <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 4 — Product Scoring Comparison</h3>
@@ -532,8 +541,8 @@
       const multipleInvest = investProducts.length > 1;
 
       return `
-        <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-          <div class="p-5 md:p-6">
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
             <div class="flex items-center gap-2 mb-4">
               <span class="material-symbols-outlined text-primary">rule</span>
               <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 5 — I/W/K Consensus</h3>
@@ -575,8 +584,8 @@
 
       if (filled.length === 0) {
         return `
-          <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-            <div class="p-5 md:p-6">
+          <div class="card-elite overflow-hidden">
+            <div class="p-6 md:p-8">
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-symbols-outlined text-primary">account_balance</span>
                 <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 6 — Financial Summary</h3>
@@ -655,8 +664,8 @@
       });
 
       return `
-        <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-          <div class="p-5 md:p-6">
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
             <div class="flex items-center gap-2 mb-4">
               <span class="material-symbols-outlined text-primary">account_balance</span>
               <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 6 — Financial Summary</h3>

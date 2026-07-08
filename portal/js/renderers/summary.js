@@ -13,18 +13,18 @@ export function render(container, responses, moduleConfig) {
   const financialData = responses['activity_6'] || {};
 
   container.innerHTML = `
-    <div class="max-w-[720px] mx-auto p-4 md:p-8 space-y-6">
-      <div class="text-center mb-2">
-        <span class="material-symbols-outlined text-5xl text-primary mb-2">summarize</span>
-        <h2 class="text-headline-md font-headline font-bold text-on-surface">Tổng kết Module 1</h2>
+    <div class="max-w-reading mx-auto px-5 py-8 md:py-section space-y-6">
+      <div class="text-center mb-4">
+        <span class="material-symbols-outlined text-5xl text-primary mb-3">summarize</span>
+        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-1">Tổng kết Module 1</h2>
         <p class="text-body-md text-on-surface-variant">Kết quả chẩn đoán và quyết định chiến lược của bạn</p>
       </div>
       <div id="summary-diagnostic"></div>
       <div id="summary-ranking"></div>
       <div id="summary-iwk"></div>
       <div id="summary-financial"></div>
-      <div class="flex justify-center">
-        <button id="export-btn" class="px-6 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container min-h-[44px] flex items-center gap-2">
+      <div class="flex justify-center pt-4">
+        <button id="export-btn" class="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container transition-colors min-h-[44px]">
           <span class="material-symbols-outlined text-[20px]">download</span>
           Xuất kết quả (.json)
         </button>
@@ -69,25 +69,25 @@ function renderDiagnostic(el, data) {
   }
 
   el.innerHTML = `
-    <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-      <div class="p-5 md:p-6">
-        <div class="flex items-center gap-2 mb-4">
+    <div class="card-elite overflow-hidden context-stripe">
+      <div class="p-6 md:p-8">
+        <div class="flex items-center gap-2 mb-5">
           <span class="material-symbols-outlined text-primary">analytics</span>
           <h3 class="text-headline-sm font-headline font-bold text-on-surface">Chẩn đoán mô hình</h3>
         </div>
-        <div class="flex items-center gap-4 mb-4">
+        <div class="flex items-center gap-5 mb-5">
           <div class="text-center">
-            <p class="text-display-sm font-headline font-bold ${textClass}">${total}</p>
-            <p class="text-label-sm text-on-surface-variant">/50 điểm</p>
+            <p class="text-[36px] font-headline font-bold leading-none ${textClass}">${total}</p>
+            <p class="text-label-sm text-on-surface-variant mt-1">/50 điểm</p>
           </div>
           <div class="flex-1">
-            <div class="h-3 w-full rounded-full bg-surface-container overflow-hidden">
-              <div class="h-full rounded-full transition-all ${level === 'success' ? 'bg-success-emerald' : level === 'warning' ? 'bg-amber-500' : 'bg-error'}" style="width: ${(total / 50) * 100}%"></div>
+            <div class="progress-track h-[6px]">
+              <div class="progress-fill h-full ${level === 'success' ? '!bg-success-emerald' : level === 'warning' ? '!bg-amber-500' : '!bg-error'}" style="width: ${(total / 50) * 100}%"></div>
             </div>
-            <p class="text-label-sm text-on-surface-variant mt-1">${answered}/10 câu đã trả lời</p>
+            <p class="text-label-sm text-on-surface-variant mt-1.5">${answered}/10 câu đã trả lời</p>
           </div>
         </div>
-        <div class="${bgClass} rounded-xl p-4">
+        <div class="${bgClass} rounded-lg p-4">
           <p class="${textClass} font-ui font-bold text-body-md">${escapeHtml(label)}</p>
           <p class="text-label-sm text-on-surface-variant mt-1">${escapeHtml(description)}</p>
         </div>
@@ -120,22 +120,22 @@ function renderRanking(el, data, products, criteria) {
   ranking.forEach((item, index) => {
     const isTop = index === 0 && item.score > 0;
     itemsHtml += `
-      <div class="flex items-center gap-3 p-3 rounded-xl ${isTop ? 'bg-accent-teal-soft border border-primary/20' : 'bg-surface border border-outline-variant'}">
-        <span class="w-8 h-8 rounded-full flex items-center justify-center text-label-sm font-bold ${isTop ? 'bg-primary text-on-primary' : 'bg-outline-variant text-on-surface'}">${index + 1}</span>
-        <span class="material-symbols-outlined ${isTop ? 'text-primary' : 'text-on-surface-variant'}">${escapeHtml(item.icon)}</span>
+      <div class="flex items-center gap-3 p-3 rounded-lg ${isTop ? 'bg-accent-teal-soft' : ''}">
+        <span class="w-7 h-7 rounded-full flex items-center justify-center text-label-sm font-bold ${isTop ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant'}">${index + 1}</span>
+        <span class="material-symbols-outlined text-[20px] ${isTop ? 'text-primary' : 'text-on-surface-variant'}">${escapeHtml(item.icon)}</span>
         <span class="flex-1 text-body-md font-ui ${isTop ? 'font-bold text-on-surface' : 'text-on-surface'}">${escapeHtml(item.name)}</span>
         <span class="text-headline-sm font-headline font-bold ${isTop ? 'text-primary' : 'text-on-surface-variant'}">${item.score}</span>
       </div>`;
   });
 
   el.innerHTML = `
-    <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-      <div class="p-5 md:p-6">
-        <div class="flex items-center gap-2 mb-4">
+    <div class="card-elite overflow-hidden context-stripe">
+      <div class="p-6 md:p-8">
+        <div class="flex items-center gap-2 mb-5">
           <span class="material-symbols-outlined text-primary">leaderboard</span>
           <h3 class="text-headline-sm font-headline font-bold text-on-surface">Xếp hạng sản phẩm</h3>
         </div>
-        <div class="space-y-3">${itemsHtml}</div>
+        <div class="space-y-2">${itemsHtml}</div>
       </div>
     </div>
   `;
@@ -154,23 +154,23 @@ function renderIWK(el, data, products) {
     const decision = decisions[p.id];
     const badge = decision && colorMap[decision]
       ? `<span class="px-3 py-1 rounded-full text-label-sm font-bold ${colorMap[decision].bg} ${colorMap[decision].text}">${colorMap[decision].label}</span>`
-      : `<span class="px-3 py-1 rounded-full text-label-sm font-bold bg-outline-variant text-on-surface">Chưa chọn</span>`;
+      : `<span class="px-3 py-1 rounded-full text-label-sm font-bold bg-surface-container-high text-on-surface-variant">Chưa chọn</span>`;
     cardsHtml += `
-      <div class="flex items-center gap-3 p-3 rounded-xl bg-surface border border-outline-variant">
-        <span class="material-symbols-outlined text-on-surface-variant">${escapeHtml(p.icon)}</span>
+      <div class="flex items-center gap-3 p-3 rounded-lg">
+        <span class="material-symbols-outlined text-[20px] text-on-surface-variant">${escapeHtml(p.icon)}</span>
         <span class="flex-1 text-body-md font-ui text-on-surface">${escapeHtml(p.name)}</span>
         ${badge}
       </div>`;
   });
 
   el.innerHTML = `
-    <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-      <div class="p-5 md:p-6">
-        <div class="flex items-center gap-2 mb-4">
+    <div class="card-elite overflow-hidden context-stripe">
+      <div class="p-6 md:p-8">
+        <div class="flex items-center gap-2 mb-5">
           <span class="material-symbols-outlined text-primary">rule</span>
           <h3 class="text-headline-sm font-headline font-bold text-on-surface">Quyết định Invest / Watch / Kill</h3>
         </div>
-        <div class="space-y-3">${cardsHtml}</div>
+        <div class="space-y-1">${cardsHtml}</div>
       </div>
     </div>
   `;
@@ -200,20 +200,20 @@ function renderFinancial(el, data) {
       else runwayClass = 'text-success-emerald';
     }
     rowsHtml += `
-      <div class="flex items-center justify-between py-2 border-b border-outline-variant last:border-b-0">
+      <div class="flex items-center justify-between py-3 border-b border-outline-variant/30 last:border-b-0">
         <span class="text-body-md text-on-surface-variant">${escapeHtml(item.label)}</span>
         <span class="text-body-md font-ui font-bold ${runwayClass || 'text-on-surface'}">${val} ${item.unit ? `<span class="text-label-sm font-normal text-on-surface-variant">${escapeHtml(item.unit)}</span>` : ''}</span>
       </div>`;
   });
 
   el.innerHTML = `
-    <div class="bg-surface-container-lowest rounded-2xl shadow-card border border-outline-variant overflow-hidden">
-      <div class="p-5 md:p-6">
-        <div class="flex items-center gap-2 mb-4">
+    <div class="card-elite overflow-hidden context-stripe">
+      <div class="p-6 md:p-8">
+        <div class="flex items-center gap-2 mb-5">
           <span class="material-symbols-outlined text-primary">account_balance</span>
           <h3 class="text-headline-sm font-headline font-bold text-on-surface">Tài chính</h3>
         </div>
-        ${hasData ? rowsHtml : '<p class="text-body-md text-on-surface-variant italic">Chưa có dữ liệu tài chính.</p>'}
+        ${hasData ? rowsHtml : '<p class="text-body-md text-on-surface-variant">Chưa có dữ liệu tài chính.</p>'}
       </div>
     </div>
   `;

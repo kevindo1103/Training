@@ -23,13 +23,13 @@ export function render(container, activity, data, onChange) {
   }
 
   container.innerHTML = `
-    <div class="max-w-3xl mx-auto p-4 md:p-8">
-      <div class="mb-6">
-        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-1">${escapeHtml(activity.title)}</h2>
+    <div class="max-w-reading mx-auto px-5 py-8 md:py-12">
+      <div class="mb-8">
+        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">${escapeHtml(activity.title)}</h2>
         <p class="text-body-md text-on-surface-variant">Chấm điểm từ ${scale.min} (${escapeHtml(scale.minLabel)}) đến ${scale.max} (${escapeHtml(scale.maxLabel)})</p>
       </div>
       <div id="survey-questions" class="space-y-4"></div>
-      <div id="score-box" class="sticky bottom-24 md:bottom-20 mt-6 bg-surface-container-lowest rounded-2xl p-4 shadow-card border border-outline-variant z-10"></div>
+      <div id="score-box" class="sticky bottom-20 md:bottom-16 mt-8 card-elite p-5 z-10 context-stripe"></div>
     </div>
   `;
 
@@ -39,7 +39,7 @@ export function render(container, activity, data, onChange) {
 
   function buildQuestionCard(q, index) {
     const card = document.createElement('div');
-    card.className = 'bg-surface-container-lowest rounded-2xl p-5 md:p-6 shadow-card border border-outline-variant';
+    card.className = 'card-elite p-6 md:p-8';
     const selected = answers[q.id] || 0;
     const pillCount = scale.max - scale.min + 1;
 
@@ -49,11 +49,11 @@ export function render(container, activity, data, onChange) {
           <p class="text-body-md font-ui font-semibold text-on-surface mb-1">
             <span class="text-on-surface-variant mr-2">${index + 1}.</span>${escapeHtml(q.text)}
           </p>
-          ${q.helper ? `<p class="text-label-sm text-on-surface-variant italic">${escapeHtml(q.helper)}</p>` : ''}
+          ${q.helper ? `<p class="text-label-sm text-on-surface-variant">${escapeHtml(q.helper)}</p>` : ''}
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <span class="text-label-sm text-on-surface-variant hidden md:inline">${escapeHtml(scale.minLabel)}</span>
-          <div class="flex gap-2 pills-row"></div>
+          <div class="flex gap-1.5 pills-row"></div>
           <span class="text-label-sm text-on-surface-variant hidden md:inline">${escapeHtml(scale.maxLabel)}</span>
         </div>
       </div>
@@ -75,7 +75,7 @@ export function render(container, activity, data, onChange) {
   }
 
   function applyPillStyle(btn, active) {
-    btn.className = `scoring-pill w-11 h-11 rounded-full border text-body-md font-ui font-semibold cursor-pointer focus-ring ${active ? 'active-pill' : 'bg-surface border-outline-variant text-on-surface-variant hover:border-primary'}`;
+    btn.className = `scoring-pill w-11 h-11 rounded-full border-[1.5px] text-body-md font-ui font-semibold cursor-pointer focus-ring ${active ? 'active-pill' : 'bg-surface-container-lowest border-outline-variant text-on-surface-variant hover:border-primary'}`;
   }
 
   function onPillClick(questionId, value, card) {
@@ -104,7 +104,7 @@ export function render(container, activity, data, onChange) {
       };
       const colors = colorMap[threshold.level] || colorMap.success;
       thresholdHtml = `
-        <div class="${colors.bg} rounded-lg p-3 dark-threshold-${threshold.level}">
+        <div class="${colors.bg} rounded-lg p-4 mt-3">
           <p class="${colors.text} font-ui font-bold text-body-md">${escapeHtml(threshold.label)}</p>
           <p class="text-label-sm text-on-surface-variant mt-1">${escapeHtml(threshold.description)}</p>
         </div>`;
@@ -115,8 +115,8 @@ export function render(container, activity, data, onChange) {
         <span class="text-label-sm font-ui font-semibold text-on-surface-variant">${answered}/${questions.length} đã trả lời</span>
         <span class="text-headline-sm font-headline font-bold text-on-surface">Tổng: ${total}</span>
       </div>
-      <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden mb-3">
-        <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+      <div class="progress-track mb-1">
+        <div class="progress-fill" style="width: ${progress}%"></div>
       </div>
       ${thresholdHtml}`;
   }

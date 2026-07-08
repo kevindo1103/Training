@@ -42,12 +42,21 @@ function renderBMC(container, activity, data, onChange) {
   const roadmap = activity.roadmap || null;
   const values = { ...(data?.fields || {}) };
 
+  const hasRoadmap = roadmap && roadmap.items && roadmap.items.length > 0;
+
   container.innerHTML = `
-    <div class="max-w-[1100px] mx-auto p-4 md:p-8">
-      <h2 class="text-headline-md font-headline font-bold text-on-surface mb-1">${escapeHtml(activity.title)}</h2>
-      <p class="text-body-md text-on-surface-variant mb-6">${escapeHtml(activity.estimatedTime || '')}</p>
-      <div id="bmc-grid" class="grid gap-3" style="grid-template-columns: repeat(10, 1fr)"></div>
-      <div id="bmc-extra" class="mt-8"></div>
+    <div class="max-w-learning mx-auto px-5 py-8 md:py-12">
+      <div class="mb-8">
+        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">${escapeHtml(activity.title)}</h2>
+        <p class="text-body-md text-on-surface-variant">${escapeHtml(activity.estimatedTime || '')}</p>
+      </div>
+      <div class="${hasRoadmap ? 'flex flex-col lg:flex-row gap-6' : ''}">
+        <div class="${hasRoadmap ? 'flex-1 min-w-0' : ''}">
+          <div id="bmc-grid" class="grid gap-3" style="grid-template-columns: repeat(10, 1fr)"></div>
+        </div>
+        ${hasRoadmap ? '<div class="w-full lg:w-80 shrink-0" id="roadmap-panel"></div>' : ''}
+      </div>
+      <div id="bmc-extra" class="mt-section"></div>
     </div>
   `;
 
@@ -55,7 +64,7 @@ function renderBMC(container, activity, data, onChange) {
   fields.forEach(field => {
     const pos = BMC_GRID_MAP[field.id];
     const cell = document.createElement('div');
-    cell.className = 'bg-surface-container-lowest rounded-xl p-4 shadow-card border border-outline-variant flex flex-col';
+    cell.className = 'card-elite p-4 flex flex-col';
     if (pos) {
       cell.style.gridColumn = pos.col;
       cell.style.gridRow = pos.row;
@@ -63,8 +72,8 @@ function renderBMC(container, activity, data, onChange) {
     cell.innerHTML = `
       <label class="text-label-caps font-ui font-bold text-primary uppercase tracking-widest mb-1">${escapeHtml(field.label)}</label>
       <p class="text-label-sm text-on-surface-variant mb-2">${escapeHtml(field.explanation)}</p>
-      <textarea class="flex-1 min-h-[80px] w-full px-3 py-2 rounded-lg bg-surface-container border border-outline text-on-surface text-body-md font-ui placeholder-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y" placeholder="${escapeHtml(field.placeholder)}" data-field-id="${field.id}">${escapeHtml(values[field.id] || '')}</textarea>
-      ${field.helper ? `<p class="text-label-sm text-on-surface-variant italic mt-1">${escapeHtml(field.helper)}</p>` : ''}
+      <textarea class="flex-1 min-h-[80px] w-full px-3 py-2.5 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface text-body-md font-ui placeholder-on-surface-variant/60 resize-y" placeholder="${escapeHtml(field.placeholder)}" data-field-id="${field.id}">${escapeHtml(values[field.id] || '')}</textarea>
+      ${field.helper ? `<p class="text-label-sm text-on-surface-variant mt-1">${escapeHtml(field.helper)}</p>` : ''}
     `;
     cell.querySelector('textarea').addEventListener('input', (e) => {
       values[field.id] = e.target.value;
@@ -78,6 +87,30 @@ function renderBMC(container, activity, data, onChange) {
   mobileStyle.textContent = `@media (max-width: 767px) { #bmc-grid { grid-template-columns: 1fr !important; } #bmc-grid > div { grid-column: auto !important; grid-row: auto !important; } }`;
   container.appendChild(mobileStyle);
 
+  if (hasRoadmap) {
+    const panel = container.querySelector('#roadmap-panel');
+    const rm = document.createElement('div');
+    rm.className = 'lg:sticky lg:top-20 card-elite p-6 context-stripe';
+    rm.innerHTML = `
+      <h3 class="text-headline-sm font-headline font-bold text-on-surface mb-2">${escapeHtml(roadmap.title)}</h3>
+      <p class="text-body-md text-on-surface-variant mb-5">${escapeHtml(roadmap.description)}</p>
+      <div class="space-y-4" id="roadmap-bars"></div>
+    `;
+    const barsContainer = rm.querySelector('#roadmap-bars');
+    (roadmap.items || []).forEach(item => {
+      const bar = document.createElement('div');
+      bar.innerHTML = `
+        <p class="text-label-sm font-ui font-bold text-on-surface mb-1.5">${escapeHtml(item.label)}</p>
+        <div class="flex h-9 rounded-lg overflow-hidden">
+          <div class="bg-primary flex items-center justify-center text-on-primary text-label-sm font-bold" style="width: ${item.service}%">Dịch vụ ${item.service}%</div>
+          <div class="bg-secondary flex items-center justify-center text-on-secondary text-label-sm font-bold" style="width: ${item.product}%">Sản phẩm ${item.product}%</div>
+        </div>
+      `;
+      barsContainer.appendChild(bar);
+    });
+    panel.appendChild(rm);
+  }
+
   const extra = container.querySelector('#bmc-extra');
 
   if (discussions.length > 0) {
@@ -85,11 +118,11 @@ function renderBMC(container, activity, data, onChange) {
     section.innerHTML = `<h3 class="text-headline-sm font-headline font-bold text-on-surface mb-4">Câu hỏi thảo luận</h3>`;
     discussions.forEach(dq => {
       const card = document.createElement('div');
-      card.className = 'bg-surface-container-lowest rounded-xl p-5 shadow-card border border-outline-variant mb-4';
+      card.className = 'card-elite p-6 md:p-8 mb-4';
       card.innerHTML = `
-        <p class="text-body-md font-ui font-semibold text-on-surface mb-2">${escapeHtml(dq.text)}</p>
-        <textarea class="w-full min-h-[80px] px-3 py-2 rounded-lg bg-surface-container border border-outline text-on-surface text-body-md font-ui placeholder-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y" placeholder="${escapeHtml(dq.placeholder || '')}" data-field-id="${dq.id}">${escapeHtml(values[dq.id] || '')}</textarea>
-        ${dq.helper ? `<p class="text-label-sm text-on-surface-variant italic mt-1">${escapeHtml(dq.helper)}</p>` : ''}
+        <p class="text-body-md font-ui font-semibold text-on-surface mb-3">${escapeHtml(dq.text)}</p>
+        <textarea class="w-full min-h-[80px] px-3 py-2.5 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface text-body-md font-ui placeholder-on-surface-variant/60 resize-y" placeholder="${escapeHtml(dq.placeholder || '')}" data-field-id="${dq.id}">${escapeHtml(values[dq.id] || '')}</textarea>
+        ${dq.helper ? `<p class="text-label-sm text-on-surface-variant mt-1">${escapeHtml(dq.helper)}</p>` : ''}
       `;
       card.querySelector('textarea').addEventListener('input', (e) => {
         values[dq.id] = e.target.value;
@@ -100,20 +133,20 @@ function renderBMC(container, activity, data, onChange) {
     extra.appendChild(section);
   }
 
-  if (roadmap) {
+  if (!hasRoadmap && roadmap) {
     const rm = document.createElement('div');
-    rm.className = 'bg-surface-container-lowest rounded-2xl p-6 shadow-card border border-outline-variant';
+    rm.className = 'card-elite p-6 md:p-8 context-stripe';
     rm.innerHTML = `
       <h3 class="text-headline-sm font-headline font-bold text-on-surface mb-2">${escapeHtml(roadmap.title)}</h3>
-      <p class="text-body-md text-on-surface-variant mb-4">${escapeHtml(roadmap.description)}</p>
-      <div class="space-y-3" id="roadmap-bars"></div>
+      <p class="text-body-md text-on-surface-variant mb-5">${escapeHtml(roadmap.description)}</p>
+      <div class="space-y-4" id="roadmap-bars-fallback"></div>
     `;
-    const barsContainer = rm.querySelector('#roadmap-bars');
+    const barsContainer = rm.querySelector('#roadmap-bars-fallback');
     (roadmap.items || []).forEach(item => {
       const bar = document.createElement('div');
       bar.innerHTML = `
-        <p class="text-label-sm font-ui font-semibold text-on-surface mb-1">${escapeHtml(item.label)}</p>
-        <div class="flex h-8 rounded-lg overflow-hidden border border-outline-variant">
+        <p class="text-label-sm font-ui font-bold text-on-surface mb-1.5">${escapeHtml(item.label)}</p>
+        <div class="flex h-9 rounded-lg overflow-hidden">
           <div class="bg-primary flex items-center justify-center text-on-primary text-label-sm font-bold" style="width: ${item.service}%">Dịch vụ ${item.service}%</div>
           <div class="bg-secondary flex items-center justify-center text-on-secondary text-label-sm font-bold" style="width: ${item.product}%">Sản phẩm ${item.product}%</div>
         </div>
@@ -141,10 +174,12 @@ function renderIWK(container, activity, data, onChange, moduleConfig) {
     const hasError = investCount > 1;
 
     container.innerHTML = `
-      <div class="max-w-3xl mx-auto p-4 md:p-8">
-        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-1">${escapeHtml(activity.title)}</h2>
-        <p class="text-body-md text-on-surface-variant mb-6">Chọn hành động cho mỗi sản phẩm. Chỉ được chọn đúng 1 sản phẩm INVEST.</p>
-        <div id="iwk-warning" class="${hasError ? '' : 'hidden'} mb-4 p-4 bg-red-50 border border-error rounded-xl animate-pulse">
+      <div class="max-w-reading mx-auto px-5 py-8 md:py-12">
+        <div class="mb-8">
+          <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">${escapeHtml(activity.title)}</h2>
+          <p class="text-body-md text-on-surface-variant">Chọn hành động cho mỗi sản phẩm. Chỉ được chọn đúng 1 sản phẩm INVEST.</p>
+        </div>
+        <div id="iwk-warning" class="${hasError ? '' : 'hidden'} mb-6 card-elite p-5 border-l-4 border-l-error">
           <p class="text-error font-ui font-bold">${escapeHtml(validation.errorMessage || 'Chỉ được chọn đúng 1 sản phẩm INVEST')}</p>
         </div>
         <div id="iwk-cards" class="space-y-4"></div>
@@ -159,11 +194,12 @@ function renderIWK(container, activity, data, onChange, moduleConfig) {
 
   function buildProductCard(product) {
     const card = document.createElement('div');
-    card.className = 'bg-surface-container-lowest rounded-2xl p-5 shadow-card border border-outline-variant';
     const currentDecision = values[product.id] || null;
+    const stripeClass = currentDecision === 'INVEST' ? 'context-stripe' : currentDecision === 'KILL' ? 'border-l-4 border-l-error' : currentDecision === 'WATCH' ? 'border-l-4 border-l-amber-500' : '';
+    card.className = `card-elite p-6 md:p-8 ${stripeClass}`;
 
     card.innerHTML = `
-      <div class="flex items-center gap-3 mb-4">
+      <div class="flex items-center gap-3 mb-5">
         <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
           <span class="material-symbols-outlined text-primary">${escapeHtml(product.icon)}</span>
         </div>
@@ -181,12 +217,12 @@ function renderIWK(container, activity, data, onChange, moduleConfig) {
       btn.type = 'button';
       const isSelected = currentDecision === d.value;
       const colorMap = {
-        success: { active: 'bg-success-emerald text-white border-success-emerald', idle: 'border-outline-variant text-on-surface hover:border-success-emerald' },
-        warning: { active: 'bg-amber-500 text-white border-amber-500', idle: 'border-outline-variant text-on-surface hover:border-amber-500' },
-        error: { active: 'bg-error text-white border-error', idle: 'border-outline-variant text-on-surface hover:border-error' },
+        success: { active: 'bg-success-emerald text-white border-success-emerald', idle: 'border-[1.5px] border-outline-variant text-on-surface hover:border-success-emerald hover:bg-green-50' },
+        warning: { active: 'bg-amber-500 text-white border-amber-500', idle: 'border-[1.5px] border-outline-variant text-on-surface hover:border-amber-500 hover:bg-amber-50' },
+        error: { active: 'bg-error text-white border-error', idle: 'border-[1.5px] border-outline-variant text-on-surface hover:border-error hover:bg-red-50' },
       };
       const colors = colorMap[d.color] || colorMap.success;
-      btn.className = `w-full px-4 py-3 rounded-xl border-2 font-ui font-bold text-left min-h-[44px] transition-colors ${isSelected ? colors.active : colors.idle}`;
+      btn.className = `w-full px-4 py-3 rounded-lg font-ui font-bold text-left min-h-[44px] transition-all ${isSelected ? colors.active + ' border-2' : colors.idle}`;
       btn.innerHTML = `
         <span class="text-body-md font-bold">${escapeHtml(d.label)}</span>
         <span class="block text-label-sm font-normal ${isSelected ? 'text-white/80' : 'text-on-surface-variant'}">${escapeHtml(d.description)}</span>
@@ -252,9 +288,11 @@ function renderFinancial(container, activity, data, onChange) {
     runComputedFields();
 
     container.innerHTML = `
-      <div class="max-w-3xl mx-auto p-4 md:p-8">
-        <h2 class="text-headline-md font-headline font-bold text-on-surface mb-1">${escapeHtml(activity.title)}</h2>
-        <p class="text-body-md text-on-surface-variant mb-6">${escapeHtml(activity.estimatedTime || '')}</p>
+      <div class="max-w-reading mx-auto px-5 py-8 md:py-12">
+        <div class="mb-8">
+          <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">${escapeHtml(activity.title)}</h2>
+          <p class="text-body-md text-on-surface-variant">${escapeHtml(activity.estimatedTime || '')}</p>
+        </div>
         <div id="financial-sections" class="space-y-6"></div>
       </div>
     `;
@@ -265,15 +303,15 @@ function renderFinancial(container, activity, data, onChange) {
 
   function buildSection(section) {
     const div = document.createElement('div');
-    div.className = 'bg-surface-container-lowest rounded-2xl p-5 md:p-6 shadow-card border border-outline-variant';
-    div.innerHTML = `<h3 class="text-headline-sm font-headline font-bold text-on-surface mb-4">${escapeHtml(section.title)}</h3>`;
+    div.className = 'card-elite p-6 md:p-8 context-stripe';
+    div.innerHTML = `<h3 class="text-headline-sm font-headline font-bold text-on-surface mb-5">${escapeHtml(section.title)}</h3>`;
 
     const fieldsContainer = document.createElement('div');
-    fieldsContainer.className = 'space-y-4';
+    fieldsContainer.className = 'space-y-5';
 
     section.fields.forEach(field => {
       const row = document.createElement('div');
-      row.className = 'space-y-1';
+      row.className = 'space-y-1.5';
 
       const isComputed = field.readonly && field.computed;
       const currentValue = values[field.id] ?? '';
@@ -286,18 +324,18 @@ function renderFinancial(container, activity, data, onChange) {
       }
 
       row.innerHTML = `
-        <label class="text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">${escapeHtml(field.label)}</label>
+        <label class="text-label-sm font-ui font-bold text-on-surface">${escapeHtml(field.label)}</label>
         <p class="text-label-sm text-on-surface-variant">${escapeHtml(field.explanation)}</p>
         <div class="flex items-center gap-2">
           <input type="number" step="any"
-            class="flex-1 px-4 py-3 rounded-lg border text-body-md font-ui focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary ${isComputed ? 'bg-surface-container-high border-outline-variant text-on-surface font-bold cursor-default ' + runwayColor : 'bg-surface-container border-outline text-on-surface placeholder-on-surface-variant/60'}"
+            class="flex-1 px-4 py-3 rounded-lg border-[1.5px] text-body-md font-ui ${isComputed ? 'bg-surface-container-high border-outline-variant text-on-surface font-bold cursor-default ' + runwayColor : 'bg-surface-container-low border-outline-variant text-on-surface placeholder-on-surface-variant/60'}"
             ${isComputed ? 'readonly tabindex="-1"' : ''}
             value="${currentValue}"
             placeholder="${escapeHtml(field.placeholder || '')}"
             data-field-id="${field.id}">
           ${field.unit ? `<span class="text-label-sm text-on-surface-variant whitespace-nowrap">${escapeHtml(field.unit)}</span>` : ''}
         </div>
-        ${field.helper ? `<p class="text-label-sm text-on-surface-variant italic">${escapeHtml(field.helper)}</p>` : ''}
+        ${field.helper ? `<p class="text-label-sm text-on-surface-variant">${escapeHtml(field.helper)}</p>` : ''}
       `;
 
       if (!isComputed) {
