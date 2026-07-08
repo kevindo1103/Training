@@ -100,6 +100,7 @@ jobs:
             chmod 600 .env
 
             echo "--- diagnostics ---"
+            echo "PWD=$(pwd)"
             ls -la /opt/dolphin-training/ || true
             ls -la /opt/dolphin-training/data-staging/ || true
             echo "--- .env (redacted) ---"
@@ -108,7 +109,8 @@ jobs:
 
             sudo mkdir -p /opt/dolphin-training/data-staging
             sudo chown -R deploy:deploy /opt/dolphin-training
-            sudo -u deploy alembic upgrade head
+            alembic upgrade head
+            sudo chown -R deploy:deploy /opt/dolphin-training/data-staging
             sudo systemctl restart dolphin-training-backend-staging
           EOF
 
