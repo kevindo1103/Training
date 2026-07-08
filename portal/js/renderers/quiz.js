@@ -85,7 +85,8 @@ function createQuestionFieldset(question, index, state) {
   const optionsWrap = document.createElement('div');
   optionsWrap.className = 'space-y-3';
 
-  question.options.forEach((option, optIndex) => {
+  const options = Array.isArray(question.options) ? question.options : [];
+  options.forEach((option, optIndex) => {
     const optionId = `q-${index}-opt-${optIndex}`;
     const label = document.createElement('label');
     label.className = 'flex items-start gap-3 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer min-h-[44px]';
@@ -186,13 +187,18 @@ function handleSubmit(questions, state, form, footer, submitBtn, onComplete, uni
 
   // Persist
   const moduleId = unit?.moduleId || 'module2';
-  const unitId = unit?.id || 'unknown';
-  setUnitResponse(moduleId, unitId, 'quiz', {
-    score,
-    total: questions.length,
-    answers: state.answers,
-    completedAt: Date.now(),
-  });
+  const unitId = unit?.id;
+  if (!unitId) {
+    console.warn('quiz.js: unit.id missing, cannot persist quiz response reliably');
+  }
+  if (unitId) {
+    setUnitResponse(moduleId, unitId, 'quiz', {
+      score,
+      total: questions.length,
+      answers: state.answers,
+      completedAt: Date.now(),
+    });
+  }
 
   // Callback
   if (typeof onComplete === 'function') {
@@ -215,7 +221,7 @@ function renderContinueButton(container, onComplete, score, answers) {
 
   const continueBtn = footer.querySelector('#quiz-continue');
   if (continueBtn && typeof onComplete === 'function') {
-    continueBtn.addEventListener('click', () => onComplete(score, answers));
+    continueBtn.addEventListener('click', () => onComplete(score ?? 0, answers ?? []));
   }
 }
 
