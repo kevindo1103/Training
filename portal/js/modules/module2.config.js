@@ -1252,7 +1252,7 @@ const MODULE2_CONFIG = {
             fields: [
               { id: "y1_product_goals", label: "Product goals", type: "textarea", placeholder: "Vd: 1 SP profitable, 1 MVP validated" },
               { id: "y1_service_goals", label: "Service goals", type: "textarea", placeholder: "Vd: Tăng margin service 5%, launch 1 value-add service" },
-              { id: "y1_resource", label: "Resource split", type: "text", placeholder: "70 : 30" },
+              { id: "y1_resource", label: "Resource split", type: "text", placeholder: "85 : 15" },
             ],
           },
           {

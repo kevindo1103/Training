@@ -91,7 +91,7 @@ Tổng hợp MỌI quyết định từ Unit 1-10:
 
 - Product goals: 1 SP profitable, 1 MVP validated
 - Service goals: tăng margin 5%, launch 1 value-add service
-- Resource split: **70 : 30** nhưng phải **earn** bằng kết quả 90-day sprint
+- Resource split: **85 : 15** (Year 1 vẫn giữ tỷ lệ này — chuyển sang 70:30 khi product đã validated)
 
 ### Year 3 Vision
 
