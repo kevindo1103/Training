@@ -79,6 +79,12 @@ jobs:
       - name: Install dependencies and write env
         if: steps.detect.outputs.exists == 'true'
         run: |
+          # Normalize sqlite:///path → sqlite:////path on the runner before writing .env,
+          # so the app (uvicorn) also gets the correct absolute SQLite URL.
+          _DB_URL="${DATABASE_URL}"
+          if [[ "$_DB_URL" =~ ^sqlite:///[^/] ]]; then
+            _DB_URL="sqlite:////${_DB_URL#sqlite:///}"
+          fi
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "${VPS_USER}@${VPS_HOST}" << EOF
             set -e
             cd /opt/dolphin-training/backend-staging
@@ -91,7 +97,7 @@ jobs:
               printf '%s\n' \
                 "JWT_SECRET=${JWT_SECRET}" \
                 "FACILITATOR_SECRET=${FACILITATOR_SECRET}" \
-                "DATABASE_URL=${DATABASE_URL}" \
+                "DATABASE_URL=${_DB_URL}" \
                 "CORS_ORIGINS=${CORS_ORIGINS}" \
                 "ENV=staging"
               [[ -n "${JWT_ALGORITHM}" ]] && printf 'JWT_ALGORITHM=%s\n' "${JWT_ALGORITHM}"
