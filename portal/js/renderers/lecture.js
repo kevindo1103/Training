@@ -1,9 +1,9 @@
 /**
  * lecture.js — Renderer cho Module 2 lecture step
  *
- * Đọc markdown từ `contentPath` trong unit config, parse các section marker,
+ * Đọc markdown từ `unit.lecture.contentPath`, parse các section marker,
  * và render ra DOM tương ứng:
- *   - ## Mục tiêu        → purpose header + objective bullets
+ *   - ## Mục đích        → purpose header + objective bullets
  *   - ## Nội dung        → lecture body paragraphs
  *   - ### Definition: X  → term + definition box
  *   - ### Table: X       → responsive table → mobile stacked cards
@@ -17,7 +17,7 @@
 import { escapeHtml } from '../utils/dom.js';
 
 export async function render(container, unit, onComplete) {
-  const config = unit;
+  const config = unit?.lecture || unit || {};
 
   const contentEl = document.createElement('div');
   contentEl.className = 'max-w-reading mx-auto px-5 py-8 md:py-section';
@@ -45,10 +45,7 @@ export async function render(container, unit, onComplete) {
   `;
   container.appendChild(footer);
 
-  const continueBtn = footer.querySelector('#lecture-continue');
-  if (continueBtn && typeof onComplete === 'function') {
-    continueBtn.addEventListener('click', onComplete);
-  }
+  footer.querySelector('#lecture-continue').addEventListener('click', onComplete);
 }
 
 function parseMarkdown(markdown) {
@@ -59,13 +56,13 @@ function parseMarkdown(markdown) {
   for (const rawLine of lines) {
     const line = rawLine.trimEnd();
 
-    const purposeMatch = line.match(/^##\s+Mục tiêu\s*$/i);
+    const purposeMatch = line.match(/^##\s+Mục đích\s*$/i);
     const bodyMatch = line.match(/^##\s+Nội dung\s*$/i);
     const subMatch = line.match(/^###\s*(Definition|Table|Comparison|Bullets):\s*(.*)$/i);
 
     if (purposeMatch) {
       if (current) sections.push(current);
-      current = { type: 'purpose', title: 'Mục tiêu', lines: [] };
+      current = { type: 'purpose', title: 'Mục đích', lines: [] };
       continue;
     }
 
@@ -354,7 +351,7 @@ function renderSkeleton(container, config) {
     <div class="card-elite p-8 md:p-12 context-stripe text-center">
       <span class="material-symbols-outlined text-5xl text-primary/40 mb-4">menu_book</span>
       <h2 class="text-headline-md font-headline font-bold text-on-surface mb-2">${escapeHtml(config.title || config.id || 'Bài giảng')}</h2>
-      <p class="text-body-md text-on-surface-variant mb-2">${escapeHtml(config.duration || '')}</p>
+      <p class="text-body-md text-on-surface-variant mb-2">${escapeHtml(config.estimatedTime || '')}</p>
       <p class="text-body-md text-on-surface-variant mb-8">
         Nội dung bài giảng chưa sẵn sàng (${escapeHtml(config.contentPath || 'content/m2/...md')}).
         Skeleton sẽ tự động thay thế khi file markdown được thêm vào.
