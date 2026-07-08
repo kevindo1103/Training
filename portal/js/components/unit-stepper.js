@@ -64,41 +64,34 @@ export class UnitStepper {
    */
   renderStepBar() {
     const wrapper = document.createElement('div');
-    wrapper.className = 'mb-8';
+    wrapper.className = 'sticky top-16 z-30 bg-surface/95 backdrop-blur-md border-b border-outline-variant/50 flex';
 
-    const progressPercent = this.steps.length > 1
-      ? (this.currentStep / (this.steps.length - 1)) * 100
-      : 0;
+    this.steps.forEach((step, index) => {
+      const isActive = index === this.currentStep;
+      const isCompleted = index < this.currentStep;
 
-    wrapper.innerHTML = `
-      <div class="relative flex items-center justify-between h-6 px-1">
-        <!-- Track -->
-        <div class="absolute left-0 right-0 top-1/2 h-[3px] -translate-y-1/2 bg-outline-variant rounded-full"></div>
-        <!-- Fill -->
-        <div class="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 bg-primary rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
-        <!-- Steps -->
-        ${this.steps.map((step, index) => {
-          const isCompleted = index <= this.currentStep;
-          const isActive = index === this.currentStep;
-          const dotClass = isActive
-            ? 'bg-primary ring-4 ring-primary/20'
-            : isCompleted
-              ? 'bg-primary'
-              : 'bg-outline-variant';
-          const labelClass = isActive
-            ? 'text-primary font-bold'
-            : isCompleted
-              ? 'text-on-surface font-semibold'
-              : 'text-on-surface-variant';
-          return `
-            <div class="relative z-10 flex flex-col items-center gap-2">
-              <div class="w-3 h-3 rounded-full transition-all duration-300 ${dotClass}"></div>
-              <span class="text-label-sm ${labelClass}">${STEP_LABELS[step]}</span>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
+      const tab = document.createElement('div');
+      tab.className = `flex-1 flex items-center justify-center gap-2 h-12 border-b-2 transition-all ${
+        isActive
+          ? 'border-primary text-primary'
+          : isCompleted
+            ? 'border-transparent text-on-surface'
+            : 'border-transparent text-on-surface-variant'
+      }`;
+
+      const icon = isCompleted
+        ? `<span class="material-symbols-outlined text-[16px] text-success-emerald">check_circle</span>`
+        : isActive
+          ? `<span class="w-2 h-2 rounded-full bg-primary shrink-0"></span>`
+          : `<span class="w-2 h-2 rounded-full bg-outline-variant shrink-0"></span>`;
+
+      tab.innerHTML = `
+        ${icon}
+        <span class="text-label-sm font-ui ${isActive ? 'font-bold' : isCompleted ? 'font-semibold' : ''}">${STEP_LABELS[step]}</span>
+      `;
+
+      wrapper.appendChild(tab);
+    });
 
     return wrapper;
   }
