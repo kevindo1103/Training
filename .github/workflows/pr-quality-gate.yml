@@ -75,7 +75,7 @@ jobs:
           # Determine allowed file patterns based on branch prefix
           if [[ "$HEAD_REF" =~ ^(claude|windsurf)/infra- ]] || \
              [[ "$HEAD_REF" =~ ^(claude|windsurf)/chore-infra- ]]; then
-            ALLOWED='^\.github/workflows/|^vercel\.json$|^netlify\.toml$'
+            ALLOWED='^\.github/workflows/|^vercel\.json$|^netlify\.toml$|^nginx/'
           elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-backend- ]]; then
             ALLOWED='^backend/|^docs/openapi\.json$|^scripts/'
           elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/[a-z]+-[a-z]+-backend-[a-z0-9-]+$ ]]; then

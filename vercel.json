@@ -6,7 +6,7 @@
   "outputDirectory": "portal",
   "installCommand": null,
   "github": {
-    "enabled": true,
-    "silent": false
+    "enabled": false,
+    "silent": true
   }
 }
