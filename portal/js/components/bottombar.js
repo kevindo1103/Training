@@ -43,10 +43,14 @@ export function renderBottomBar(currentIndex, total, onBack, onNext) {
   backBtn.addEventListener('click', onBack);
 
   const nextBtn = document.createElement('button');
-  nextBtn.className =
-    'px-5 py-2.5 rounded-lg font-ui font-semibold bg-primary text-on-primary hover:bg-primary-container disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]';
-  nextBtn.textContent = isLast ? 'Hoàn thành' : 'Tiếp theo';
-  nextBtn.addEventListener('click', onNext);
+  if (onNext) {
+    nextBtn.className =
+      'px-5 py-2.5 rounded-lg font-ui font-semibold bg-primary text-on-primary hover:bg-primary-container disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]';
+    nextBtn.textContent = isLast ? 'Tổng kết' : 'Tiếp theo';
+    nextBtn.addEventListener('click', onNext);
+  } else {
+    nextBtn.className = 'invisible min-h-[44px]';
+  }
 
   bar.appendChild(progress);
   bar.appendChild(mobileProgress);

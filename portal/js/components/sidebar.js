@@ -7,7 +7,7 @@
  * Desktop: fixed left w-80; Mobile: hidden by default, hamburger toggle
  */
 
-export function renderSideBar(config, currentIndex, completedIds, onNavigate, isOpen) {
+export function renderSideBar(config, currentIndex, completedIds, onNavigate, isOpen, onSummary) {
   const aside = document.createElement('aside');
   aside.className = `fixed top-20 left-0 bottom-0 md:bottom-20 w-80 bg-surface-container-low border-r border-outline-variant z-50 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`;
 
@@ -19,6 +19,8 @@ export function renderSideBar(config, currentIndex, completedIds, onNavigate, is
   const nav = document.createElement('nav');
   nav.className = 'p-4 space-y-2 overflow-y-auto custom-scrollbar';
   nav.setAttribute('aria-label', 'Activities');
+
+  const summaryIndex = config.activities.length;
 
   config.activities.forEach((activity, index) => {
     const isActive = index === currentIndex;
@@ -36,6 +38,20 @@ export function renderSideBar(config, currentIndex, completedIds, onNavigate, is
     btn.addEventListener('click', () => onNavigate(index));
     nav.appendChild(btn);
   });
+
+  if (typeof onSummary === 'function') {
+    const isSummaryActive = currentIndex === summaryIndex;
+    const summaryBtn = document.createElement('button');
+    summaryBtn.className = `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors min-h-[48px] mt-2 border-t border-outline-variant pt-4 ${
+      isSummaryActive ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface hover:bg-surface-container-high'
+    }`;
+    summaryBtn.innerHTML = `
+      <span class="material-symbols-outlined ${isSummaryActive ? 'font-bold' : ''}">summarize</span>
+      <span class="flex-1 text-body-md font-ui">Tổng kết</span>
+    `;
+    summaryBtn.addEventListener('click', onSummary);
+    nav.appendChild(summaryBtn);
+  }
 
   aside.appendChild(nav);
   return aside;
