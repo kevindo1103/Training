@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Facilitator Dashboard — Dolphin Training</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              DEFAULT: '#fcf9f8', dim: '#dcd9d9', bright: '#fcf9f8',
+              'container-lowest': '#ffffff', 'container-low': '#f6f3f2',
+              container: '#f0eded', 'container-high': '#eae7e7',
+              'container-highest': '#e5e2e1',
+            },
+            'on-surface': { DEFAULT: '#1c1b1b', variant: '#3d4947' },
+            'inverse-surface': '#313030',
+            'inverse-on-surface': '#f3f0ef',
+            outline: { DEFAULT: '#6d7a77', variant: '#bcc9c6' },
+            primary: { DEFAULT: '#00685f', container: '#008378', fixed: '#89f5e7', 'fixed-dim': '#6bd8cb' },
+            'on-primary': { DEFAULT: '#ffffff', container: '#f4fffc' },
+            secondary: { DEFAULT: '#316763', container: '#b5ede7' },
+            'on-secondary': { DEFAULT: '#ffffff', container: '#376d69' },
+            error: { DEFAULT: '#ba1a1a', container: '#ffdad6' },
+            'on-error': { DEFAULT: '#ffffff', container: '#93000a' },
+            'surface-taupe': '#F5F5F4',
+            'success-emerald': '#16A34A',
+            'accent-teal-soft': '#CCFBF1',
+          },
+          fontFamily: { headline: ['Manrope', 'sans-serif'], ui: ['Hanken Grotesk', 'sans-serif'] },
+          fontSize: {
+            'headline-lg': ['40px', { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '800' }],
+            'headline-md': ['24px', { lineHeight: '1.3', fontWeight: '700' }],
+            'headline-sm': ['18px', { lineHeight: '1.4', fontWeight: '600' }],
+            'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '400' }],
+            'body-md': ['16px', { lineHeight: '1.6', fontWeight: '400' }],
+            'label-caps': ['12px', { lineHeight: '1', letterSpacing: '0.1em', fontWeight: '700' }],
+            'label-sm': ['13px', { lineHeight: '1.4', fontWeight: '500' }],
+            'display-sm': ['36px', { lineHeight: '1.1', fontWeight: '800' }],
+          },
+          boxShadow: {
+            card: '0 4px 20px rgba(0, 0, 0, 0.04)',
+            'card-hover': '0 8px 30px rgba(0, 0, 0, 0.06)',
+            overlay: '0 12px 40px rgba(0, 0, 0, 0.08)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body class="bg-surface-taupe text-on-surface antialiased font-ui">
+  <div id="app" class="min-h-screen"></div>
+  <script type="module">
+    import { setAuthToken, getAuthToken } from '../js/api.js';
+
+    const BASE_URL = '/api';
+    const REFRESH_MS = 30000;
+    const SESSION_KEY = 'dolphin_facilitator_session';
+    const TOKEN_KEY = 'dolphin_facilitator_token';
+
+    let currentSessionId = null;
+    let refreshTimer = null;
+    let isRefreshing = false;
+    let currentModule = 'm1';
+    let m2SummaryCache = null;
+
+    async function apiFetch(path) {
+      const token = getAuthToken();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      try {
+        const res = await fetch(`${BASE_URL}${path}`, { headers });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (err) {
+        console.log('API error:', path, err.message);
+        return null;
+      }
+    }
+
+    async function apiPost(path, data) {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = getAuthToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      try {
+        const res = await fetch(`${BASE_URL}${path}`, {
+          method: 'POST', headers, body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (err) {
+        console.log('API error:', path, err.message);
+        return null;
+      }
+    }
+
+    function escapeHtml(text) {
+      if (text == null) return '';
+      return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ─── Boot ───
+    async function boot() {
+      const savedToken = sessionStorage.getItem(TOKEN_KEY);
+      if (savedToken) setAuthToken(savedToken);
+
+      const savedSession = localStorage.getItem(SESSION_KEY);
+      if (savedSession && savedToken) {
+        currentSessionId = savedSession;
+        renderApp();
+        loadDashboard();
+      } else {
+        renderApp();
+        showSessionSelector();
+      }
+    }
+
+    // ─── Top Bar ───
+    function renderApp() {
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <header class="fixed top-0 left-0 right-0 h-16 z-40 bg-surface/95 backdrop-blur-md border-b border-outline-variant/50 flex items-center justify-between px-5 md:px-8">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline font-bold text-body-md">D</div>
+            <span class="font-headline font-bold text-on-surface text-headline-sm tracking-tight">Dolphin Training</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-label-caps font-ui text-on-surface-variant uppercase tracking-widest hidden md:block">Facilitator Dashboard</span>
+            <div id="refresh-indicator" class="hidden text-label-sm text-on-surface-variant items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] animate-spin">sync</span>
+              Đang cập nhật...
+            </div>
+            ${currentSessionId ? `<button id="change-session" class="px-3 py-2 rounded-lg border-[1.5px] border-outline-variant text-on-surface-variant text-label-sm font-ui font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors min-h-[40px]">Đổi session</button>` : ''}
+            ${currentSessionId ? `<button id="logout-btn" class="px-3 py-2 rounded-lg border-[1.5px] border-error/40 text-error text-label-sm font-ui font-semibold hover:bg-error/5 transition-colors min-h-[40px]">Đăng xuất</button>` : ''}
+          </div>
+        </header>
+        <main id="dashboard-content" class="pt-20 pb-8 px-5 md:px-8 max-w-[1200px] mx-auto"></main>
+      `;
+
+      const changeBtn = document.getElementById('change-session');
+      if (changeBtn) {
+        changeBtn.addEventListener('click', () => {
+          clearInterval(refreshTimer);
+          currentSessionId = null;
+          localStorage.removeItem(SESSION_KEY);
+          // Keep token — session list requires auth, so we reuse the existing token
+          renderApp();
+          showSessionSelector();
+        });
+      }
+
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          clearInterval(refreshTimer);
+          currentSessionId = null;
+          localStorage.removeItem(SESSION_KEY);
+          sessionStorage.removeItem(TOKEN_KEY);
+          setAuthToken(null);
+          renderApp();
+          showSessionSelector();
+        });
+      }
+    }
+
+    // ─── Session Selector ───
+    // GET /sessions now requires a facilitator token (PR #109).
+    // Flow: if token exists → load session dropdown (auth-first / "Đổi session" path).
+    //       if no token     → show session ID text input + secret (fresh login path).
+    async function showSessionSelector() {
+      const content = document.getElementById('dashboard-content');
+      content.innerHTML = '<div class="flex justify-center mt-20"><span class="material-symbols-outlined animate-spin text-primary text-[32px]">sync</span></div>';
+
+      // Try loading sessions with the current token (may be null → apiFetch sends no header → 401 → null)
+      const sessions = getAuthToken() ? await apiFetch('/sessions') : null;
+      const hasSessions = Array.isArray(sessions) && sessions.length > 0;
+
+      // ── Render form ──
+      const sessionField = hasSessions
+        ? `<div>
+            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Session</label>
+            <select id="session-input" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface">
+              ${sessions.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name || s.module_id)} (${escapeHtml(s.status || 'active')})</option>`).join('')}
+            </select>
+           </div>`
+        : `<div>
+            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Session ID</label>
+            <input id="session-input" type="text" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface placeholder-on-surface-variant/60 font-mono text-body-sm" placeholder="UUID của session">
+            <p class="text-label-sm text-on-surface-variant mt-1">Lấy từ admin console hoặc email khởi động session.</p>
+           </div>`;
+
+      const secretField = hasSessions
+        ? ''
+        : `<div>
+            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Facilitator Secret</label>
+            <input id="fac-secret" type="password" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface placeholder-on-surface-variant/60" placeholder="Nhập mã truy cập facilitator">
+           </div>`;
+
+      content.innerHTML = `
+        <div class="max-w-md mx-auto mt-12">
+          <div class="card-elite p-8 md:p-10">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="material-symbols-outlined text-primary text-[28px]">admin_panel_settings</span>
+              <div>
+                <h2 class="text-headline-md font-headline font-bold text-on-surface">${hasSessions ? 'Chọn Session' : 'Truy cập Dashboard'}</h2>
+                <p class="text-label-sm text-on-surface-variant">${hasSessions ? 'Chọn workshop session để tiếp tục' : 'Nhập Session ID và mã facilitator'}</p>
+              </div>
+            </div>
+            <div class="space-y-5">
+              ${sessionField}
+              ${secretField}
+              <div id="auth-error" class="hidden text-error text-label-sm font-ui"></div>
+              <button id="join-btn" class="w-full px-5 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container transition-colors min-h-[44px]">Truy cập Dashboard</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('join-btn').addEventListener('click', async () => {
+        const sessionId = document.getElementById('session-input')?.value?.trim();
+        const errorEl = document.getElementById('auth-error');
+        errorEl.classList.add('hidden');
+
+        if (!sessionId) {
+          errorEl.textContent = 'Vui lòng nhập hoặc chọn session.';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        if (hasSessions) {
+          // Already authenticated — just switch to the selected session
+          localStorage.setItem(SESSION_KEY, sessionId);
+          currentSessionId = sessionId;
+          m2SummaryCache = null;
+          renderApp();
+          loadDashboard();
+          return;
+        }
+
+        // Fresh login — authenticate first
+        const secret = document.getElementById('fac-secret')?.value?.trim();
+        if (!secret) {
+          errorEl.textContent = 'Vui lòng nhập facilitator secret.';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        const authRes = await apiPost(`/sessions/${sessionId}/facilitator-auth`, { secret });
+        if (authRes && authRes.token) {
+          setAuthToken(authRes.token);
+          sessionStorage.setItem(TOKEN_KEY, authRes.token);
+          localStorage.setItem(SESSION_KEY, sessionId);
+          currentSessionId = sessionId;
+          m2SummaryCache = null;
+          renderApp();
+          loadDashboard();
+        } else {
+          errorEl.textContent = 'Mã facilitator không đúng hoặc Session ID không tồn tại.';
+          errorEl.classList.remove('hidden');
+        }
+      });
+    }
+
+    // ─── Dashboard ───
+    async function loadDashboard() {
+      const indicator = document.getElementById('refresh-indicator');
+      if (indicator) { indicator.classList.remove('hidden'); indicator.classList.add('flex'); }
+      isRefreshing = true;
+
+      const [summary, financialDetail, m2Summary] = await Promise.all([
+        apiFetch(`/facilitator/${currentSessionId}/summary`),
+        apiFetch(`/facilitator/${currentSessionId}/activity/activity_6`),
+        apiFetch(`/facilitator/${currentSessionId}/module2/summary`),
+      ]);
+
+      if (indicator) { indicator.classList.add('hidden'); indicator.classList.remove('flex'); }
+      isRefreshing = false;
+
+      if (!summary) {
+        const content = document.getElementById('dashboard-content');
+        content.innerHTML = `
+          <div class="text-center py-12">
+            <span class="material-symbols-outlined text-5xl text-on-surface-variant mb-4">cloud_off</span>
+            <p class="text-body-md text-on-surface-variant">Không thể tải dữ liệu. Đang thử lại trong 30 giây...</p>
+          </div>
+        `;
+        scheduleRefresh();
+        return;
+      }
+
+      m2SummaryCache = m2Summary;
+      renderDashboard(summary, financialDetail, m2Summary);
+      scheduleRefresh();
+    }
+
+    function scheduleRefresh() {
+      clearInterval(refreshTimer);
+      refreshTimer = setInterval(() => loadDashboard(), REFRESH_MS);
+    }
+
+    function renderDashboard(data, financialDetail, m2Summary) {
+      const content = document.getElementById('dashboard-content');
+      const session = data.session || {};
+      const participants = data.participants || [];
+      const completion = data.completion || {};
+      const survey = data.survey || {};
+      const matrix = data.matrix || {};
+      const iwk = data.iwk || {};
+
+      const now = new Date().toLocaleTimeString('vi-VN');
+      const activityIds = ['activity_1', 'activity_2', 'activity_3', 'activity_4', 'activity_5', 'activity_6'];
+      const activityLabels = ['Chẩn đoán', 'BMC Hiện tại', 'BMC Mục tiêu', 'Product Scoring', 'I/W/K', 'Financial'];
+      const totalP = participants.length;
+
+      content.innerHTML = `
+        <div class="space-y-6">
+          ${renderModuleTabs()}
+          ${currentModule === 'm2'
+            ? renderModule2Dashboard(m2Summary || { session, participants })
+            : `
+              ${renderOverview(session, participants, completion, activityIds, activityLabels, totalP, now)}
+              ${renderDiagnostic(survey, participants)}
+              ${renderScoring(matrix, participants)}
+              ${renderIWKConsensus(iwk)}
+              ${renderFinancialSummary(financialDetail)}
+            `
+          }
+        </div>
+      `;
+
+      attachModuleTabListeners();
+    }
+
+    function renderModuleTabs() {
+      const m1Class = currentModule === 'm1'
+        ? 'bg-primary text-on-primary'
+        : 'bg-surface-container text-on-surface hover:bg-surface-container-high';
+      const m2Class = currentModule === 'm2'
+        ? 'bg-primary text-on-primary'
+        : 'bg-surface-container text-on-surface hover:bg-surface-container-high';
+      return `
+        <div class="flex gap-2 mb-2">
+          <button id="tab-m1" class="flex-1 md:flex-none px-5 py-2.5 rounded-lg font-ui font-bold transition-colors min-h-[44px] ${m1Class}">
+            Module 1
+          </button>
+          <button id="tab-m2" class="flex-1 md:flex-none px-5 py-2.5 rounded-lg font-ui font-bold transition-colors min-h-[44px] ${m2Class}">
+            Module 2
+          </button>
+        </div>
+      `;
+    }
+
+    function attachModuleTabListeners() {
+      const m1Btn = document.getElementById('tab-m1');
+      const m2Btn = document.getElementById('tab-m2');
+      if (m1Btn) {
+        m1Btn.addEventListener('click', () => {
+          currentModule = 'm1';
+          loadDashboard();
+        });
+      }
+      if (m2Btn) {
+        m2Btn.addEventListener('click', () => {
+          currentModule = 'm2';
+          loadDashboard();
+        });
+      }
+    }
+
+    function renderOverview(session, participants, completion, activityIds, activityLabels, totalP, now) {
+      let participantRows = '';
+      if (participants.length === 0) {
+        participantRows = '<tr><td colspan="4" class="px-4 py-6 text-center text-on-surface-variant italic">Chưa có participant nào tham gia.</td></tr>';
+      } else {
+        participantRows = participants.map(p => `
+          <tr class="border-b border-outline-variant">
+            <td class="px-4 py-3 text-body-md font-ui font-semibold text-on-surface">${escapeHtml(p.name)}</td>
+            <td class="px-4 py-3 text-label-sm text-on-surface-variant">${escapeHtml(p.role || '—')}</td>
+            <td class="px-4 py-3 text-label-sm text-on-surface-variant">${escapeHtml(p.last_activity || '—')}</td>
+          </tr>
+        `).join('');
+      }
+
+      let completionBars = '';
+      activityIds.forEach((id, i) => {
+        const count = completion[id] || 0;
+        const pct = totalP > 0 ? Math.round((count / totalP) * 100) : 0;
+        completionBars += `
+          <div class="flex items-center gap-3">
+            <span class="text-label-sm text-on-surface-variant w-32 shrink-0">${activityLabels[i]}</span>
+            <div class="flex-1 h-6 bg-surface-container rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full transition-all flex items-center justify-end pr-2" style="width: ${Math.max(pct, 8)}%">
+                <span class="text-[11px] font-bold text-on-primary">${count}/${totalP}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      return `
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">dashboard</span>
+                <h3 class="text-headline-sm font-headline font-bold text-on-surface">Tổng quan</h3>
+              </div>
+              <span class="text-label-sm text-on-surface-variant">Cập nhật: ${escapeHtml(now)}</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div class="bg-accent-teal-soft rounded-xl p-4 text-center">
+                <p class="text-display-sm font-headline font-bold text-primary">${totalP}</p>
+                <p class="text-label-sm text-on-surface-variant">Participants</p>
+              </div>
+              <div class="bg-surface-container rounded-xl p-4 text-center">
+                <p class="text-headline-md font-headline font-bold text-on-surface">${escapeHtml(session.name || session.module_id || '—')}</p>
+                <p class="text-label-sm text-on-surface-variant">Session</p>
+              </div>
+              <div class="bg-surface-container rounded-xl p-4 text-center">
+                <p class="text-headline-md font-headline font-bold text-on-surface">${escapeHtml(session.status || 'active')}</p>
+                <p class="text-label-sm text-on-surface-variant">Status</p>
+              </div>
+            </div>
+
+            <h4 class="text-body-md font-ui font-bold text-on-surface mb-3">Tiến độ hoàn thành</h4>
+            <div class="space-y-2 mb-6">${completionBars}</div>
+
+            <h4 class="text-body-md font-ui font-bold text-on-surface mb-3">Danh sách Participants</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b-2 border-outline-variant">
+                    <th class="px-4 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Tên</th>
+                    <th class="px-4 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Vai trò</th>
+                    <th class="px-4 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Activity gần nhất</th>
+                  </tr>
+                </thead>
+                <tbody>${participantRows}</tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDiagnostic(survey, participants) {
+      const averages = survey.averages || {};
+      const thresholds = survey.thresholds || {};
+      const count = survey.count || 0;
+
+      const questionLabels = [
+        'Q1: Phụ thuộc CEO tìm thương vụ',
+        'Q2: Pipeline đình trệ khi CEO vắng',
+        'Q3: Bench time cao',
+        'Q4: Mỗi dự án lĩnh vực mới',
+        'Q5: Khó định giá',
+        'Q6: Không có recurring revenue',
+        'Q7: Khách ít quay lại',
+        'Q8: Khó tuyển dụng',
+        'Q9: Ít tài sản IP',
+        'Q10: Rủi ro mất khách hàng lớn',
+      ];
+
+      let barsHtml = '';
+      const questionKeys = Object.keys(averages).sort();
+      const avgValues = questionKeys.map(k => averages[k]);
+      const mean = avgValues.length > 0 ? avgValues.reduce((a, b) => a + b, 0) / avgValues.length : 0;
+      const variance = avgValues.length > 0 ? avgValues.map(v => (v - mean) ** 2).reduce((a, b) => a + b, 0) / avgValues.length : 0;
+      const highVarianceThreshold = variance > 0 ? mean + Math.sqrt(variance) : 999;
+
+      questionKeys.forEach((key, i) => {
+        const avg = averages[key] || 0;
+        const pct = (avg / 5) * 100;
+        const label = questionLabels[i] || key;
+        const isHighVariance = Math.abs(avg - mean) > Math.sqrt(variance) && variance > 0.5;
+        barsHtml += `
+          <div class="flex items-center gap-3 ${isHighVariance ? 'bg-amber-50 rounded-lg p-2 -mx-2' : ''}">
+            <span class="text-label-sm text-on-surface-variant w-56 shrink-0">${escapeHtml(label)}${isHighVariance ? ' <span class="text-amber-600 font-bold">⚠</span>' : ''}</span>
+            <div class="flex-1 h-5 bg-surface-container rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full" style="width: ${pct}%"></div>
+            </div>
+            <span class="text-label-sm font-bold text-on-surface w-8 text-right">${avg.toFixed(1)}</span>
+          </div>
+        `;
+      });
+
+      let thresholdHtml = '';
+      if (thresholds.safe !== undefined) {
+        thresholdHtml = `
+          <div class="grid grid-cols-3 gap-3 mt-4">
+            <div class="bg-green-50 rounded-xl p-3 text-center">
+              <p class="text-headline-sm font-headline font-bold text-success-emerald">${thresholds.safe}</p>
+              <p class="text-label-sm text-on-surface-variant">Ổn định (0–15)</p>
+            </div>
+            <div class="bg-amber-50 rounded-xl p-3 text-center">
+              <p class="text-headline-sm font-headline font-bold text-amber-600">${thresholds.warning}</p>
+              <p class="text-label-sm text-on-surface-variant">Cần chuyển đổi (16–30)</p>
+            </div>
+            <div class="bg-red-50 rounded-xl p-3 text-center">
+              <p class="text-headline-sm font-headline font-bold text-error">${thresholds.critical}</p>
+              <p class="text-label-sm text-on-surface-variant">Khẩn cấp (31–50)</p>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">analytics</span>
+              <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 1 — Diagnostic Gap Analysis</h3>
+              <span class="text-label-sm text-on-surface-variant ml-auto">${count} responses</span>
+            </div>
+            ${count === 0
+              ? '<p class="text-body-md text-on-surface-variant italic">Chưa có dữ liệu chẩn đoán.</p>'
+              : `<div class="space-y-2">${barsHtml}</div>${thresholdHtml}`
+            }
+          </div>
+        </div>
+      `;
+    }
+
+    function renderScoring(matrix, participants) {
+      const products = matrix.products || {};
+      const count = matrix.count || 0;
+      const productNames = {
+        vb_dien_tu: 'VB Điện tử (Vietlot)',
+        iptv_khach_san: 'IPTV Khách sạn',
+        event_ticket: 'Event/Ticket',
+        cms_toa_soan: 'CMS/Tòa soạn',
+      };
+
+      const sorted = Object.entries(products)
+        .map(([id, score]) => ({ id, name: productNames[id] || id, score }))
+        .sort((a, b) => b.score - a.score);
+
+      let rankingHtml = '';
+      sorted.forEach((item, i) => {
+        const maxScore = 5;
+        const pct = (item.score / maxScore) * 100;
+        const isTop = i === 0 && item.score > 0;
+        rankingHtml += `
+          <div class="flex items-center gap-3 p-3 rounded-xl ${isTop ? 'bg-accent-teal-soft border border-primary/20' : ''}">
+            <span class="w-8 h-8 rounded-full flex items-center justify-center text-label-sm font-bold ${isTop ? 'bg-primary text-on-primary' : 'bg-outline-variant text-on-surface'}">${i + 1}</span>
+            <span class="flex-1 text-body-md font-ui ${isTop ? 'font-bold' : ''} text-on-surface">${escapeHtml(item.name)}</span>
+            <div class="w-32 h-4 bg-surface-container rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full" style="width: ${pct}%"></div>
+            </div>
+            <span class="text-headline-sm font-headline font-bold ${isTop ? 'text-primary' : 'text-on-surface-variant'} w-12 text-right">${item.score.toFixed(2)}</span>
+          </div>
+        `;
+      });
+
+      return `
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">leaderboard</span>
+              <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 4 — Product Scoring Comparison</h3>
+              <span class="text-label-sm text-on-surface-variant ml-auto">${count} responses</span>
+            </div>
+            ${count === 0
+              ? '<p class="text-body-md text-on-surface-variant italic">Chưa có dữ liệu scoring.</p>'
+              : `<div class="space-y-2">${rankingHtml}</div>`
+            }
+          </div>
+        </div>
+      `;
+    }
+
+    function renderIWKConsensus(iwk) {
+      const tally = iwk.tally || {};
+      const count = iwk.count || 0;
+      const productNames = {
+        vb_dien_tu: 'VB Điện tử (Vietlot)',
+        iptv_khach_san: 'IPTV Khách sạn',
+        event_ticket: 'Event/Ticket',
+        cms_toa_soan: 'CMS/Tòa soạn',
+      };
+
+      const investProducts = [];
+      let rowsHtml = '';
+
+      Object.entries(tally).forEach(([productId, counts]) => {
+        const invest = counts.invest || 0;
+        const watch = counts.watch || 0;
+        const kill = counts.kill || 0;
+        const total = invest + watch + kill;
+        const allAgree = (invest === total || watch === total || kill === total) && total > 0;
+
+        if (invest > 0) investProducts.push(productNames[productId] || productId);
+
+        rowsHtml += `
+          <tr class="border-b border-outline-variant">
+            <td class="px-4 py-3 text-body-md font-ui font-semibold text-on-surface">${escapeHtml(productNames[productId] || productId)}</td>
+            <td class="px-4 py-3 text-center">
+              ${invest > 0 ? `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-success-emerald text-white text-label-sm font-bold">${invest}</span>` : '<span class="text-on-surface-variant">0</span>'}
+            </td>
+            <td class="px-4 py-3 text-center">
+              ${watch > 0 ? `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white text-label-sm font-bold">${watch}</span>` : '<span class="text-on-surface-variant">0</span>'}
+            </td>
+            <td class="px-4 py-3 text-center">
+              ${kill > 0 ? `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-error text-white text-label-sm font-bold">${kill}</span>` : '<span class="text-on-surface-variant">0</span>'}
+            </td>
+            <td class="px-4 py-3 text-center">
+              ${allAgree
+                ? '<span class="text-success-emerald font-bold">&#10003; Đồng thuận</span>'
+                : '<span class="text-amber-600 font-bold">&#9888; Chia rẽ</span>'}
+            </td>
+          </tr>
+        `;
+      });
+
+      const multipleInvest = investProducts.length > 1;
+
+      return `
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">rule</span>
+              <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 5 — I/W/K Consensus</h3>
+              <span class="text-label-sm text-on-surface-variant ml-auto">${count} responses</span>
+            </div>
+            ${count === 0
+              ? '<p class="text-body-md text-on-surface-variant italic">Chưa có dữ liệu quyết định I/W/K.</p>'
+              : `
+                ${multipleInvest ? `
+                  <div class="bg-amber-50 rounded-xl p-4 mb-4 border border-amber-500/30">
+                    <p class="text-amber-600 font-ui font-bold text-body-md">&#9888; Nhiều sản phẩm được chọn INVEST</p>
+                    <p class="text-label-sm text-on-surface-variant">Participants chọn INVEST cho các sản phẩm khác nhau: ${investProducts.map(n => escapeHtml(n)).join(', ')}. Cần thảo luận thêm.</p>
+                  </div>
+                ` : ''}
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left">
+                    <thead>
+                      <tr class="border-b-2 border-outline-variant">
+                        <th class="px-4 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Sản phẩm</th>
+                        <th class="px-4 py-2 text-label-caps font-ui font-bold text-success-emerald uppercase tracking-widest text-center">Invest</th>
+                        <th class="px-4 py-2 text-label-caps font-ui font-bold text-amber-600 uppercase tracking-widest text-center">Watch</th>
+                        <th class="px-4 py-2 text-label-caps font-ui font-bold text-error uppercase tracking-widest text-center">Kill</th>
+                        <th class="px-4 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-center">Consensus</th>
+                      </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                  </table>
+                </div>
+              `
+            }
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFinancialSummary(financialDetail) {
+      const responses = (financialDetail && financialDetail.responses) || [];
+      const filled = responses.filter(r => r.data && r.data.fields && Object.keys(r.data.fields).length > 0);
+
+      if (filled.length === 0) {
+        return `
+          <div class="card-elite overflow-hidden">
+            <div class="p-6 md:p-8">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-primary">account_balance</span>
+                <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 6 — Financial Summary</h3>
+              </div>
+              <p class="text-body-md text-on-surface-variant italic">Chưa có dữ liệu tài chính từ participants.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      const fieldDefs = [
+        { id: 'current_revenue', label: 'Doanh thu hiện tại', unit: 'tỷ VNĐ/năm' },
+        { id: 'current_team_size', label: 'Quy mô team', unit: 'người' },
+        { id: 'current_revenue_per_head', label: 'Revenue/head/tháng', unit: 'triệu', computed: true },
+        { id: 'y1_team_product', label: 'Team product (Y1)', unit: 'người' },
+        { id: 'y1_avg_salary', label: 'Lương TB (Y1)', unit: 'triệu' },
+        { id: 'y1_burn_rate', label: 'Burn rate (Y1)', unit: 'triệu/tháng', computed: true },
+        { id: 'y1_service_profit_needed', label: 'Service profit needed (Y1)', unit: 'triệu/tháng', computed: true },
+        { id: 'y3_cash_reserves', label: 'Cash reserves (Y3)', unit: 'tỷ' },
+        { id: 'y3_projected_monthly_profit', label: 'Monthly profit (Y3)', unit: 'triệu' },
+        { id: 'y3_runway', label: 'Runway (Y3)', unit: 'tháng', computed: true, highlight: true },
+      ];
+
+      const participantNames = filled.map(r => r.participant ? r.participant.name : 'Unknown');
+
+      let headerCols = participantNames.map(n =>
+        `<th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-right whitespace-nowrap">${escapeHtml(n)}</th>`
+      ).join('');
+
+      // Add average column
+      headerCols += `<th class="px-3 py-2 text-label-caps font-ui font-bold text-primary uppercase tracking-widest text-right whitespace-nowrap border-l-2 border-outline-variant">TB</th>`;
+
+      let rows = '';
+      fieldDefs.forEach(fd => {
+        const values = filled.map(r => {
+          const v = r.data.fields[fd.id];
+          return v !== undefined && v !== '' ? parseFloat(v) : null;
+        });
+
+        const validValues = values.filter(v => v !== null);
+        const avg = validValues.length > 0 ? validValues.reduce((a, b) => a + b, 0) / validValues.length : null;
+
+        let cells = values.map(v => {
+          if (v === null) return `<td class="px-3 py-2 text-right text-on-surface-variant">—</td>`;
+          let colorClass = '';
+          if (fd.highlight && fd.id === 'y3_runway') {
+            if (v < 6) colorClass = 'text-error font-bold';
+            else if (v <= 12) colorClass = 'text-amber-600 font-bold';
+            else colorClass = 'text-success-emerald font-bold';
+          }
+          return `<td class="px-3 py-2 text-right text-body-md font-ui ${colorClass || 'text-on-surface'}">${typeof v === 'number' ? (Number.isInteger(v) ? v : v.toFixed(1)) : v}</td>`;
+        }).join('');
+
+        let avgCell;
+        if (avg === null) {
+          avgCell = `<td class="px-3 py-2 text-right text-on-surface-variant border-l-2 border-outline-variant">—</td>`;
+        } else {
+          let avgColor = '';
+          if (fd.highlight && fd.id === 'y3_runway') {
+            if (avg < 6) avgColor = 'text-error font-bold';
+            else if (avg <= 12) avgColor = 'text-amber-600 font-bold';
+            else avgColor = 'text-success-emerald font-bold';
+          }
+          avgCell = `<td class="px-3 py-2 text-right font-ui font-bold border-l-2 border-outline-variant ${avgColor || 'text-primary'}">${avg.toFixed(1)}</td>`;
+        }
+
+        rows += `
+          <tr class="border-b border-outline-variant ${fd.computed ? 'bg-surface-container-low/50' : ''}">
+            <td class="px-3 py-2 text-label-sm font-ui font-semibold text-on-surface whitespace-nowrap">
+              ${escapeHtml(fd.label)}
+              ${fd.unit ? `<span class="text-on-surface-variant font-normal"> (${escapeHtml(fd.unit)})</span>` : ''}
+            </td>
+            ${cells}${avgCell}
+          </tr>
+        `;
+      });
+
+      return `
+        <div class="card-elite overflow-hidden">
+          <div class="p-6 md:p-8">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="material-symbols-outlined text-primary">account_balance</span>
+              <h3 class="text-headline-sm font-headline font-bold text-on-surface">Activity 6 — Financial Summary</h3>
+              <span class="text-label-sm text-on-surface-variant ml-auto">${filled.length} responses</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b-2 border-outline-variant">
+                    <th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Metric</th>
+                    ${headerCols}
+                  </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ─── Module 2 Dashboard ───
+
+    const M2_UNIT_IDS = [
+      'u1_sfpc', 'u2_inventory', 'u3_brand', 'u4_spinoff',
+      'u5_2axis', 'u6_90day', 'u7_lean', 'u8_mvp',
+      'u9_kill', 'u10_pricing', 'u11_convergence',
+    ];
+
+    const M2_UNIT_LABELS = {
+      u1_sfpc: 'U1 — SFPC',
+      u2_inventory: 'U2 — Portfolio Inventory',
+      u3_brand: 'U3 — Brand Architecture',
+      u4_spinoff: 'U4 — Spin-off Scoring',
+      u5_2axis: 'U5 — 2-Axis Testing',
+      u6_90day: 'U6 — 90-Day Plan',
+      u7_lean: 'U7 — Lean Ideation',
+      u8_mvp: 'U8 — MVP Scoping',
+      u9_kill: 'U9 — Kill Decision',
+      u10_pricing: 'U10 — Pricing Model',
+      u11_convergence: 'U11 — Convergence',
+    };
+
+    // Correct answer keys per unit, indexed by question position (0-based).
+    // Sourced from portal/js/modules/module2.config.js — update both if quiz changes.
+    const M2_QUIZ_CORRECT = {
+      u1_sfpc:        ['B', 'C', 'D', 'B', 'B'],
+      u2_inventory:   ['B', 'B', 'B', 'A', 'B'],
+      u3_brand:       ['B', 'B', 'B', 'B', 'B'],
+      u4_spinoff:     ['B', 'B', 'D', 'B', 'B'],
+      u5_2axis:       ['B', 'C', 'C', 'A', 'B'],
+      u6_90day:       ['B', 'B', 'B', 'B', 'B'],
+      u7_lean:        ['B', 'B', 'B', 'B', 'B'],
+      u8_mvp:         ['B', 'B', 'B', 'B', 'B'],
+      u9_kill:        ['B', 'A', 'C', 'B', 'B'],
+      u10_pricing:    ['B', 'C', 'B', 'B', 'B'],
+      u11_convergence:['B', 'B', 'B', 'C', 'B'],
+    };
+
+    function renderModule2Dashboard(data) {
+      const session = data.session || {};
+      const participants = data.participants || [];
+      const unitCompletion = data.unit_completion || {};
+      const quizScores = data.quiz_scores || {};
+      const spinoffMatrix = data.spinoff_matrix || {};
+
+      return `
+        <div class="space-y-6">
+          ${renderModule2Overview(session, participants, unitCompletion)}
+          ${renderModule2QuizScores(quizScores)}
+          ${renderModule2SpinoffMatrix(spinoffMatrix)}
+          ${renderModule2PracticeViewer()}
+        </div>
+      `;
+    }
+
+    function renderModule2Overview(session, participants, unitCompletion) {
+      const totalP = participants.length || 0;
+      const stepLabels = { lecture: 'Bài giảng', quiz: 'Quiz', practice: 'Thực hành' };
+
+      let rows = '';
+      M2_UNIT_IDS.forEach((uid) => {
+        const steps = unitCompletion[uid] || { lecture: 0, quiz: 0, practice: 0 };
+        let cells = '';
+        ['lecture', 'quiz', 'practice'].forEach((step) => {
+          const count = steps[step] || 0;
+          const pct = totalP > 0 ? count / totalP : 0;
+          const colorClass = pct === 0 ? 'bg-outline-variant/30 text-on-surface-variant' : pct >= 1 ? 'bg-success-emerald/20 text-success-emerald font-bold' : 'bg-amber-400/20 text-amber-700 font-bold';
+          cells += `
+            <td class="px-3 py-3 text-center text-body-md ${colorClass}">
+              ${count}/${totalP}
+            </td>
+          `;
+        });
+        rows += `
+          <tr class="border-b border-outline-variant">
+            <td class="px-3 py-3 text-body-md font-ui font-semibold text-on-surface">${escapeHtml(M2_UNIT_LABELS[uid] || uid)}</td>
+            ${cells}
+          </tr>
+        `;
+      });
+
+      return `
+        <div class="card-elite p-6 md:p-8">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-primary">grid_view</span>
+            <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Unit Completion</h3>
+            <span class="text-label-sm text-on-surface-variant ml-auto">${totalP} participants</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b-2 border-outline-variant">
+                  <th class="px-3 py-3 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Unit</th>
+                  <th class="px-3 py-3 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-center">Bài giảng</th>
+                  <th class="px-3 py-3 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-center">Quiz</th>
+                  <th class="px-3 py-3 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-center">Thực hành</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderModule2QuizScores(quizScores) {
+      const unitIds = Object.keys(quizScores);
+      if (unitIds.length === 0) {
+        return `
+          <div class="card-elite p-6 md:p-8">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="material-symbols-outlined text-primary">quiz</span>
+              <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Quiz Scores</h3>
+            </div>
+            <p class="text-body-md text-on-surface-variant">Chưa có dữ liệu quiz.</p>
+          </div>
+        `;
+      }
+
+      let cards = '';
+      unitIds.forEach((uid) => {
+        const qs = quizScores[uid];
+        const avg = qs.avg || 0;
+        const total = qs.total || 1;
+        const ratio = avg / total;
+        const responses = qs.responses || [];
+        const isGap = ratio < 0.6;
+        const gapBadge = isGap
+          ? `<span class="ml-2 px-2 py-0.5 rounded-full bg-error/10 text-error text-label-sm font-ui font-bold">Gap</span>`
+          : '';
+
+        const correctKeys = M2_QUIZ_CORRECT[uid] || [];
+        let participantRows = '';
+        responses.forEach((r) => {
+          const p = r.participant || {};
+          const pRatio = r.total ? r.score / r.total : 0;
+          const scoreColor = pRatio >= 0.6 ? 'text-success-emerald' : 'text-error';
+          const answers = Array.isArray(r.answers) ? r.answers : [];
+          let perQuestion = '';
+          if (answers.length > 0) {
+            answers.forEach((chosen, qi) => {
+              const correct = correctKeys[qi];
+              const isRight = chosen === correct;
+              perQuestion += `
+                <div class="flex items-center gap-2 py-0.5">
+                  <span class="material-symbols-outlined text-[14px] ${isRight ? 'text-success-emerald' : 'text-error'}">${isRight ? 'check_circle' : 'cancel'}</span>
+                  <span class="text-label-sm text-on-surface-variant">Q${qi + 1}:</span>
+                  <span class="text-label-sm font-ui font-bold ${isRight ? 'text-success-emerald' : 'text-error'}">${escapeHtml(String(chosen ?? '—'))}</span>
+                  ${!isRight && correct ? `<span class="text-label-sm text-on-surface-variant">(đúng: ${escapeHtml(correct)})</span>` : ''}
+                </div>
+              `;
+            });
+          }
+          participantRows += `
+            <li class="border-b border-outline-variant/30 last:border-0">
+              <details>
+                <summary class="flex items-center justify-between py-2 cursor-pointer list-none select-none">
+                  <span class="text-body-md text-on-surface">${escapeHtml(p.name || 'Unknown')}</span>
+                  <div class="flex items-center gap-1">
+                    <span class="text-body-md font-ui font-bold ${scoreColor}">${r.score}/${r.total}</span>
+                    ${answers.length > 0 ? '<span class="material-symbols-outlined text-[16px] text-on-surface-variant ml-1">expand_more</span>' : ''}
+                  </div>
+                </summary>
+                ${perQuestion ? `<div class="pb-2 pl-2 space-y-0.5">${perQuestion}</div>` : ''}
+              </details>
+            </li>
+          `;
+        });
+
+        cards += `
+          <div class="card-elite p-5 md:p-6 ${isGap ? 'border border-error/30' : ''}">
+            <div class="flex items-center gap-2 mb-3">
+              <h4 class="font-headline font-bold text-headline-sm text-on-surface">${escapeHtml(M2_UNIT_LABELS[uid] || uid)}</h4>
+              ${gapBadge}
+              <span class="ml-auto text-body-md font-ui font-bold ${isGap ? 'text-error' : 'text-primary'}">TB: ${avg}/${total} (${Math.round(ratio * 100)}%)</span>
+            </div>
+            <ul>${participantRows}</ul>
+          </div>
+        `;
+      });
+
+      return `
+        <div class="card-elite p-6 md:p-8">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-primary">quiz</span>
+            <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Quiz Scores</h3>
+            <span class="text-label-sm text-on-surface-variant ml-auto">${unitIds.length} units</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${cards}</div>
+        </div>
+      `;
+    }
+
+    function renderModule2SpinoffMatrix(spinoffMatrix) {
+      const participants = spinoffMatrix.participants || [];
+      const averages = spinoffMatrix.averages || {};
+      const productIds = Object.keys(averages);
+
+      if (productIds.length === 0) {
+        return '';
+      }
+
+      // Map backend product IDs to display names
+      const productNames = {
+        'VB Điện tử': 'VB Điện tử',
+        'IPTV Khách sạn': 'IPTV Khách sạn',
+        'Event/Ticket': 'Event/Ticket',
+        'CMS/Tòa soạn': 'CMS/Tòa soạn',
+      };
+
+      let rows = '';
+      productIds.forEach((pid) => {
+        const avg = averages[pid];
+        let participantCells = '';
+        participants.forEach((entry) => {
+          const score = entry.scores?.[pid];
+          participantCells += `<td class="px-3 py-2 text-right text-body-md font-ui ${score === undefined ? 'text-on-surface-variant' : 'text-on-surface'}">${score !== undefined ? score.toFixed(1) : '—'}</td>`;
+        });
+
+        let band = 'Chưa đủ dữ liệu';
+        if (avg >= 4) band = 'Sẵn sàng';
+        else if (avg >= 3) band = 'Có tiềm năng';
+        else if (avg > 0) band = 'Cần làm rõ';
+
+        const consensus = participants.length > 1
+          ? `<span class="text-label-sm text-on-surface-variant">Đồng thuận/divergence sẽ được phân tích ở v2</span>`
+          : '';
+
+        rows += `
+          <tr class="border-b border-outline-variant">
+            <td class="px-3 py-2 text-body-md font-ui font-semibold text-on-surface whitespace-nowrap">${escapeHtml(productNames[pid] || pid)}</td>
+            ${participantCells}
+            <td class="px-3 py-2 text-right text-body-md font-ui font-bold text-primary">${avg.toFixed(1)}</td>
+            <td class="px-3 py-2 text-right text-body-md font-ui text-on-surface-variant">${escapeHtml(band)} ${consensus}</td>
+          </tr>
+        `;
+      });
+
+      let headerCols = participants.map((entry, i) => {
+        const p = entry.participant || {};
+        return `<th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-right">P${i + 1}</th>`;
+      }).join('');
+
+      return `
+        <div class="card-elite p-6 md:p-8 overflow-hidden">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-primary">table</span>
+            <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Spin-off Scoring Matrix (U4)</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b-2 border-outline-variant">
+                  <th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest">Sản phẩm</th>
+                  ${headerCols}
+                  <th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-right">TB</th>
+                  <th class="px-3 py-2 text-label-caps font-ui font-bold text-on-surface-variant uppercase tracking-widest text-right">Readiness</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderModule2PracticeViewer() {
+      const unitsWithPractice = M2_UNIT_IDS.filter((uid) => !['u1_sfpc', 'u4_spinoff'].includes(uid));
+      let list = '';
+      unitsWithPractice.forEach((uid) => {
+        list += `
+          <div class="border border-outline-variant/50 rounded-lg overflow-hidden">
+            <button class="w-full flex items-center justify-between px-4 py-3 bg-surface-container-low hover:bg-surface-container transition-colors" data-m2-toggle="${uid}">
+              <span class="text-body-md font-ui font-semibold text-on-surface">${escapeHtml(M2_UNIT_LABELS[uid] || uid)}</span>
+              <span class="material-symbols-outlined text-on-surface-variant" data-m2-icon="${uid}">expand_more</span>
+            </button>
+            <div class="hidden px-4 py-4 bg-surface" data-m2-panel="${uid}">
+              <p class="text-body-md text-on-surface-variant mb-3">Đang tải chi tiết...</p>
+            </div>
+          </div>
+        `;
+      });
+
+      setTimeout(() => attachPracticePanelListeners(), 0);
+
+      return `
+        <div class="card-elite p-6 md:p-8">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-primary">assignment</span>
+            <h3 class="text-headline-sm font-headline font-bold text-on-surface">Module 2 — Practice Form Viewer</h3>
+          </div>
+          <div class="space-y-3">${list}</div>
+        </div>
+      `;
+    }
+
+    async function loadPracticePanel(uid, panel) {
+      panel.innerHTML = '<p class="text-body-md text-on-surface-variant">Đang tải chi tiết...</p>';
+      try {
+        const detail = await apiFetch(`/facilitator/${currentSessionId}/module2/unit/${uid}`);
+        panel.innerHTML = renderPracticeDetail(detail, uid);
+        panel.dataset.loaded = 'true';
+      } catch (err) {
+        panel.innerHTML = `
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-body-md text-error">Không tải được dữ liệu. <span class="text-on-surface-variant">(${escapeHtml(String(err?.message || err))})</span></p>
+            <button class="text-label-sm font-ui font-bold text-primary underline">Thử lại</button>
+          </div>
+        `;
+        panel.querySelector('button')?.addEventListener('click', () => loadPracticePanel(uid, panel));
+      }
+    }
+
+    function attachPracticePanelListeners() {
+      document.querySelectorAll('[data-m2-toggle]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const uid = btn.dataset.m2Toggle;
+          const panel = document.querySelector(`[data-m2-panel="${uid}"]`);
+          const icon = document.querySelector(`[data-m2-icon="${uid}"]`);
+          if (!panel || !icon) return;
+
+          const isHidden = panel.classList.contains('hidden');
+          if (isHidden) {
+            panel.classList.remove('hidden');
+            icon.textContent = 'expand_less';
+            if (!panel.dataset.loaded) {
+              await loadPracticePanel(uid, panel);
+            }
+          } else {
+            panel.classList.add('hidden');
+            icon.textContent = 'expand_more';
+          }
+        });
+      });
+    }
+
+    function renderPracticeDetail(detail, uid) {
+      const responses = detail?.responses || [];
+      if (responses.length === 0) {
+        return '<p class="text-body-md text-on-surface-variant">Chưa có dữ liệu practice.</p>';
+      }
+
+      let rows = '';
+      responses.forEach((r) => {
+        const p = r.participant || {};
+        const practice = r.practice || {};
+        rows += `
+          <div class="card-elite p-4 mb-3">
+            <h4 class="font-headline font-bold text-headline-sm text-on-surface mb-3">${escapeHtml(p.name || 'Unknown')}</h4>
+            ${renderPracticeData(practice)}
+          </div>
+        `;
+      });
+
+      return `<div class="space-y-3">${rows}</div>`;
+    }
+
+    function renderPracticeData(practice) {
+      if (!practice || typeof practice !== 'object') {
+        return '<p class="text-body-md text-on-surface-variant">Không có dữ liệu.</p>';
+      }
+
+      let html = '';
+
+      // Matrix scores: { productId: { criterionId: value } }
+      if (practice.scores && typeof practice.scores === 'object') {
+        html += '<div class="mb-3"><p class="text-label-sm font-ui font-bold text-on-surface-variant mb-2">Điểm đánh giá</p>';
+        Object.entries(practice.scores).forEach(([productId, criteria]) => {
+          if (!criteria || typeof criteria !== 'object') return;
+          const cells = Object.entries(criteria)
+            .map(([cId, val]) => `<span class="inline-flex items-center gap-1 text-body-md text-on-surface"><span class="text-on-surface-variant">${escapeHtml(cId)}:</span> <strong>${escapeHtml(String(val))}</strong></span>`)
+            .join(' · ');
+          html += `<div class="py-1 border-b border-outline-variant/30 last:border-0"><span class="text-label-sm font-ui text-on-surface-variant">${escapeHtml(productId)}</span><div class="mt-1 flex flex-wrap gap-2">${cells}</div></div>`;
+        });
+        html += '</div>';
+      }
+
+      // Form fields: { sectionId: { fieldId: value } }
+      if (practice.form && typeof practice.form === 'object') {
+        html += '<div class="mb-3"><p class="text-label-sm font-ui font-bold text-on-surface-variant mb-2">Câu trả lời</p>';
+        Object.entries(practice.form).forEach(([sectionId, fields]) => {
+          if (!fields || typeof fields !== 'object') return;
+          Object.entries(fields).forEach(([fieldId, value]) => {
+            if (value === null || value === undefined || value === '') return;
+            html += `
+              <div class="flex justify-between gap-3 py-1 border-b border-outline-variant/30 last:border-0">
+                <span class="text-label-sm font-ui text-on-surface-variant">${escapeHtml(fieldId)}</span>
+                <span class="text-body-md text-on-surface text-right max-w-[60%]">${escapeHtml(String(value))}</span>
+              </div>
+            `;
+          });
+        });
+        html += '</div>';
+      }
+
+      // Repeatable entries: { sectionId: [...] }
+      if (practice.repeatable && typeof practice.repeatable === 'object') {
+        html += '<div class="mb-3"><p class="text-label-sm font-ui font-bold text-on-surface-variant mb-2">Danh sách</p>';
+        Object.entries(practice.repeatable).forEach(([sectionId, entries]) => {
+          if (!Array.isArray(entries) || entries.length === 0) return;
+          html += `<p class="text-label-sm text-on-surface-variant mb-1">${escapeHtml(sectionId)}</p>`;
+          entries.forEach((entry, idx) => {
+            if (!entry || typeof entry !== 'object') return;
+            const fields = Object.entries(entry)
+              .filter(([, v]) => v !== null && v !== undefined && v !== '')
+              .map(([k, v]) => `<span class="text-on-surface-variant">${escapeHtml(k)}:</span> ${escapeHtml(String(v))}`)
+              .join(' · ');
+            html += `<div class="py-1 text-body-md text-on-surface border-b border-outline-variant/30 last:border-0">${idx + 1}. ${fields}</div>`;
+          });
+        });
+        html += '</div>';
+      }
+
+      // Flat fields (completedAt etc) — skip internal timestamps
+      const SKIP_KEYS = new Set(['completedAt', 'updatedAt']);
+      const flatEntries = Object.entries(practice).filter(
+        ([k, v]) => !SKIP_KEYS.has(k) && typeof v !== 'object'
+      );
+      if (flatEntries.length > 0) {
+        flatEntries.forEach(([key, value]) => {
+          html += `
+            <div class="flex justify-between gap-3 py-1 border-b border-outline-variant/30 last:border-0">
+              <span class="text-label-sm font-ui text-on-surface-variant">${escapeHtml(key)}</span>
+              <span class="text-body-md text-on-surface text-right">${escapeHtml(String(value))}</span>
+            </div>
+          `;
+        });
+      }
+
+      if (!html) {
+        return '<p class="text-body-md text-on-surface-variant">Không có dữ liệu practice.</p>';
+      }
+
+      return html;
+    }
+
+    boot();
+  </script>
+</body>
+</html>

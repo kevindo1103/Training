@@ -77,7 +77,10 @@ jobs:
              [[ "$HEAD_REF" =~ ^(claude|windsurf)/chore-infra- ]]; then
             ALLOWED='^\.github/workflows/|^vercel\.json$|^netlify\.toml$|^nginx/'
           elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-backend- ]]; then
-            ALLOWED='^backend/|^docs/openapi\.json$'
+            ALLOWED='^backend/|^docs/openapi\.json$|^scripts/'
+          elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/[a-z]+-[a-z]+-backend-[a-z0-9-]+$ ]]; then
+            # Legacy backend branch names (e.g. claude/claude-md-backend-*)
+            ALLOWED='^backend/|^docs/openapi\.json$|^scripts/'
           elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-frontend- ]]; then
             ALLOWED='^portal/'
           elif [[ "$HEAD_REF" =~ ^(claude|windsurf)/(feat|fix|hotfix)-content- ]]; then
