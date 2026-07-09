@@ -132,8 +132,8 @@ def get_module2_summary(session_id: str, _=Depends(require_facilitator), db: Ses
             q = data["quiz"]
             quiz_data[uid].append({
                 "participant": p_info,
-                "score": q.get("score", 0),
-                "total": q.get("total", 5),
+                "score": _safe_float(q.get("score", 0)),
+                "total": _safe_float(q.get("total", 5)),
                 "answers": q.get("answers", []),
             })
         if "practice" in data:
