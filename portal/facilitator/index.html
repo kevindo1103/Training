@@ -757,6 +757,22 @@
       u11_convergence: 'U11 — Convergence',
     };
 
+    // Correct answer keys per unit, indexed by question position (0-based).
+    // Sourced from portal/js/modules/module2.config.js — update both if quiz changes.
+    const M2_QUIZ_CORRECT = {
+      u1_sfpc:        ['B', 'C', 'D', 'B', 'B'],
+      u2_inventory:   ['B', 'B', 'B', 'A', 'B'],
+      u3_brand:       ['B', 'B', 'B', 'B', 'B'],
+      u4_spinoff:     ['B', 'B', 'D', 'B', 'B'],
+      u5_2axis:       ['B', 'C', 'C', 'A', 'B'],
+      u6_90day:       ['B', 'B', 'B', 'B', 'B'],
+      u7_lean:        ['B', 'B', 'B', 'B', 'B'],
+      u8_mvp:         ['B', 'B', 'B', 'B', 'B'],
+      u9_kill:        ['B', 'A', 'C', 'B', 'B'],
+      u10_pricing:    ['B', 'C', 'B', 'B', 'B'],
+      u11_convergence:['B', 'B', 'B', 'C', 'B'],
+    };
+
     function renderModule2Dashboard(data) {
       const session = data.session || {};
       const participants = data.participants || [];
@@ -850,13 +866,40 @@
           ? `<span class="ml-2 px-2 py-0.5 rounded-full bg-error/10 text-error text-label-sm font-ui font-bold">Gap</span>`
           : '';
 
+        const correctKeys = M2_QUIZ_CORRECT[uid] || [];
         let participantRows = '';
         responses.forEach((r) => {
           const p = r.participant || {};
+          const pRatio = r.total ? r.score / r.total : 0;
+          const scoreColor = pRatio >= 0.6 ? 'text-success-emerald' : 'text-error';
+          const answers = Array.isArray(r.answers) ? r.answers : [];
+          let perQuestion = '';
+          if (answers.length > 0) {
+            answers.forEach((chosen, qi) => {
+              const correct = correctKeys[qi];
+              const isRight = chosen === correct;
+              perQuestion += `
+                <div class="flex items-center gap-2 py-0.5">
+                  <span class="material-symbols-outlined text-[14px] ${isRight ? 'text-success-emerald' : 'text-error'}">${isRight ? 'check_circle' : 'cancel'}</span>
+                  <span class="text-label-sm text-on-surface-variant">Q${qi + 1}:</span>
+                  <span class="text-label-sm font-ui font-bold ${isRight ? 'text-success-emerald' : 'text-error'}">${escapeHtml(String(chosen ?? '—'))}</span>
+                  ${!isRight && correct ? `<span class="text-label-sm text-on-surface-variant">(đúng: ${escapeHtml(correct)})</span>` : ''}
+                </div>
+              `;
+            });
+          }
           participantRows += `
-            <li class="flex items-center justify-between py-2 border-b border-outline-variant/30 last:border-0">
-              <span class="text-body-md text-on-surface">${escapeHtml(p.name || 'Unknown')}</span>
-              <span class="text-body-md font-ui font-bold ${r.score >= 3 ? 'text-success-emerald' : 'text-error'}">${r.score}/${r.total}</span>
+            <li class="border-b border-outline-variant/30 last:border-0">
+              <details>
+                <summary class="flex items-center justify-between py-2 cursor-pointer list-none select-none">
+                  <span class="text-body-md text-on-surface">${escapeHtml(p.name || 'Unknown')}</span>
+                  <div class="flex items-center gap-1">
+                    <span class="text-body-md font-ui font-bold ${scoreColor}">${r.score}/${r.total}</span>
+                    ${answers.length > 0 ? '<span class="material-symbols-outlined text-[16px] text-on-surface-variant ml-1">expand_more</span>' : ''}
+                  </div>
+                </summary>
+                ${perQuestion ? `<div class="pb-2 pl-2 space-y-0.5">${perQuestion}</div>` : ''}
+              </details>
             </li>
           `;
         });
@@ -1038,28 +1081,94 @@
       responses.forEach((r) => {
         const p = r.participant || {};
         const practice = r.practice || {};
-        const fields = practice.fields || practice;
-        let fieldList = '';
-        if (fields && typeof fields === 'object') {
-          Object.entries(fields).forEach(([key, value]) => {
-            if (typeof value === 'object') return;
-            fieldList += `
-              <div class="flex justify-between gap-3 py-1 border-b border-outline-variant/30 last:border-0">
-                <span class="text-label-sm font-ui text-on-surface-variant">${escapeHtml(key)}</span>
-                <span class="text-body-md text-on-surface text-right">${escapeHtml(String(value))}</span>
-              </div>
-            `;
-          });
-        }
         rows += `
           <div class="card-elite p-4 mb-3">
-            <h4 class="font-headline font-bold text-headline-sm text-on-surface mb-2">${escapeHtml(p.name || 'Unknown')}</h4>
-            <div class="space-y-1">${fieldList || '<p class="text-body-md text-on-surface-variant">Không có dữ liệu text</p>'}</div>
+            <h4 class="font-headline font-bold text-headline-sm text-on-surface mb-3">${escapeHtml(p.name || 'Unknown')}</h4>
+            ${renderPracticeData(practice)}
           </div>
         `;
       });
 
       return `<div class="space-y-3">${rows}</div>`;
+    }
+
+    function renderPracticeData(practice) {
+      if (!practice || typeof practice !== 'object') {
+        return '<p class="text-body-md text-on-surface-variant">Không có dữ liệu.</p>';
+      }
+
+      let html = '';
+
+      // Matrix scores: { productId: { criterionId: value } }
+      if (practice.scores && typeof practice.scores === 'object') {
+        html += '<div class="mb-3"><p class="text-label-sm font-ui font-bold text-on-surface-variant mb-2">Điểm đánh giá</p>';
+        Object.entries(practice.scores).forEach(([productId, criteria]) => {
+          if (!criteria || typeof criteria !== 'object') return;
+          const cells = Object.entries(criteria)
+            .map(([cId, val]) => `<span class="inline-flex items-center gap-1 text-body-md text-on-surface"><span class="text-on-surface-variant">${escapeHtml(cId)}:</span> <strong>${escapeHtml(String(val))}</strong></span>`)
+            .join(' · ');
+          html += `<div class="py-1 border-b border-outline-variant/30 last:border-0"><span class="text-label-sm font-ui text-on-surface-variant">${escapeHtml(productId)}</span><div class="mt-1 flex flex-wrap gap-2">${cells}</div></div>`;
+        });
+        html += '</div>';
+      }
+
+      // Form fields: { sectionId: { fieldId: value } }
+      if (practice.form && typeof practice.form === 'object') {
+        html += '<div class="mb-3"><p class="text-label-sm font-ui font-bold text-on-surface-variant mb-2">Câu trả lời</p>';
+        Object.entries(practice.form).forEach(([sectionId, fields]) => {
+          if (!fields || typeof fields !== 'object') return;
+          Object.entries(fields).forEach(([fieldId, value]) => {
+            if (value === null || value === undefined || value === '') return;
+            html += `
+              <div class="flex justify-between gap-3 py-1 border-b border-outline-variant/30 last:border-0">
+                <span class="text-label-sm font-ui text-on-surface-variant">${escapeHtml(fieldId)}</span>
+                <span class="text-body-md text-on-surface text-right max-w-[60%]">${escapeHtml(String(value))}</span>
+              </div>
+            `;
+          });
+        });
+        html += '</div>';
+      }
+
+      // Repeatable entries: { sectionId: [...] }
+      if (practice.repeatable && typeof practice.repeatable === 'object') {
+        html += '<div class="mb-3"><p class="text-label-sm font-ui font-bold text-on-surface-variant mb-2">Danh sách</p>';
+        Object.entries(practice.repeatable).forEach(([sectionId, entries]) => {
+          if (!Array.isArray(entries) || entries.length === 0) return;
+          html += `<p class="text-label-sm text-on-surface-variant mb-1">${escapeHtml(sectionId)}</p>`;
+          entries.forEach((entry, idx) => {
+            if (!entry || typeof entry !== 'object') return;
+            const fields = Object.entries(entry)
+              .filter(([, v]) => v !== null && v !== undefined && v !== '')
+              .map(([k, v]) => `<span class="text-on-surface-variant">${escapeHtml(k)}:</span> ${escapeHtml(String(v))}`)
+              .join(' · ');
+            html += `<div class="py-1 text-body-md text-on-surface border-b border-outline-variant/30 last:border-0">${idx + 1}. ${fields}</div>`;
+          });
+        });
+        html += '</div>';
+      }
+
+      // Flat fields (completedAt etc) — skip internal timestamps
+      const SKIP_KEYS = new Set(['completedAt', 'updatedAt']);
+      const flatEntries = Object.entries(practice).filter(
+        ([k, v]) => !SKIP_KEYS.has(k) && typeof v !== 'object'
+      );
+      if (flatEntries.length > 0) {
+        flatEntries.forEach(([key, value]) => {
+          html += `
+            <div class="flex justify-between gap-3 py-1 border-b border-outline-variant/30 last:border-0">
+              <span class="text-label-sm font-ui text-on-surface-variant">${escapeHtml(key)}</span>
+              <span class="text-body-md text-on-surface text-right">${escapeHtml(String(value))}</span>
+            </div>
+          `;
+        });
+      }
+
+      if (!html) {
+        return '<p class="text-body-md text-on-surface-variant">Không có dữ liệu practice.</p>';
+      }
+
+      return html;
     }
 
     boot();

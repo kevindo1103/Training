@@ -24,6 +24,7 @@
  */
 
 import { escapeHtml } from '../utils/dom.js';
+import { setUnitResponse } from '../store.js';
 
 function inlineMarkdown(text) {
   return escapeHtml(text)
@@ -60,7 +61,12 @@ export async function render(container, unit, onComplete) {
   `;
   container.appendChild(footer);
 
-  footer.querySelector('#lecture-continue').addEventListener('click', onComplete);
+  footer.querySelector('#lecture-continue').addEventListener('click', () => {
+    setUnitResponse(unit?.moduleId || 'module2', unit.id, 'lecture', {
+      completedAt: Date.now(),
+    });
+    onComplete();
+  });
 }
 
 function parseMarkdown(markdown) {

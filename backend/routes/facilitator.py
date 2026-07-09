@@ -134,6 +134,7 @@ def get_module2_summary(session_id: str, _=Depends(require_facilitator), db: Ses
                 "participant": p_info,
                 "score": q.get("score", 0),
                 "total": q.get("total", 5),
+                "answers": q.get("answers", []),
             })
         if "practice" in data:
             unit_completion[uid]["practice"] += 1
@@ -157,6 +158,7 @@ def get_module2_summary(session_id: str, _=Depends(require_facilitator), db: Ses
     quiz_scores = {
         uid: {
             "avg": round(sum(r["score"] for r in rs) / len(rs), 2),
+            "total": rs[0]["total"] if rs else 5,
             "responses": rs,
         }
         for uid, rs in quiz_data.items()
