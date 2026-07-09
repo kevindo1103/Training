@@ -55,10 +55,24 @@ def join_session(session_id: str, body: JoinSession, db: Session = Depends(get_d
 
 @router.post("/join", response_model=JoinResponse, status_code=201)
 def join_by_module(body: JoinByModule, db: Session = Depends(get_db)):
-    query = db.query(SessionModel).filter(SessionModel.status == "active")
     if body.module_id:
-        query = query.filter(SessionModel.module_id == body.module_id)
-    session = query.order_by(SessionModel.created_at.desc()).first()
+        session = (
+            db.query(SessionModel)
+            .filter(SessionModel.status == "active", SessionModel.module_id == body.module_id)
+            .order_by(SessionModel.created_at.desc())
+            .first()
+        )
+    else:
+        # Prefer NULL module_id (generic workshop) sessions, then fall back to oldest active
+        session = (
+            db.query(SessionModel)
+            .filter(SessionModel.status == "active")
+            .order_by(
+                SessionModel.module_id.is_(None).desc(),
+                SessionModel.created_at.asc(),
+            )
+            .first()
+        )
     if not session:
         name = f"Auto session for {body.module_id}" if body.module_id else "Workshop session"
         session = SessionModel(module_id=body.module_id, name=name)
@@ -66,6 +80,17 @@ def join_by_module(body: JoinByModule, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(session)
     return _join(session.id, body.name, body.role, db)
+
+
+@router.post("/{session_id}/deactivate", response_model=SessionOut)
+def deactivate_session(session_id: str, _=Depends(require_facilitator), db: Session = Depends(get_db)):
+    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    session.status = "inactive"
+    db.commit()
+    db.refresh(session)
+    return session
 
 
 @router.post("/{session_id}/facilitator-auth", response_model=JoinResponse, status_code=201)
