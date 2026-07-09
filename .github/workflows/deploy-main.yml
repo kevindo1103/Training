@@ -170,6 +170,16 @@ jobs:
 
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "${VPS_USER}@${VPS_HOST}" << 'NGINX'
             set -e
+            # Obtain SSL cert on first deploy (certbot standalone needs port 80 free)
+            if [ ! -f /etc/letsencrypt/live/dolphin.iceflow.cloud/fullchain.pem ]; then
+              echo "SSL cert not found — obtaining via certbot standalone..."
+              sudo systemctl stop nginx || true
+              sudo certbot certonly --standalone \
+                -d dolphin.iceflow.cloud \
+                --non-interactive --agree-tos \
+                --register-unsafely-without-email
+              sudo systemctl start nginx || true
+            fi
             sudo mv /tmp/dolphin-nginx-production.conf /etc/nginx/sites-available/dolphin-production
             sudo ln -sf /etc/nginx/sites-available/dolphin-production /etc/nginx/sites-enabled/dolphin-production
             sudo nginx -t
