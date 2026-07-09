@@ -757,6 +757,22 @@
       u11_convergence: 'U11 — Convergence',
     };
 
+    // Correct answer keys per unit, indexed by question position (0-based).
+    // Sourced from portal/js/modules/module2.config.js — update both if quiz changes.
+    const M2_QUIZ_CORRECT = {
+      u1_sfpc:        ['B', 'C', 'D', 'B', 'B'],
+      u2_inventory:   ['B', 'B', 'B', 'A', 'B'],
+      u3_brand:       ['B', 'B', 'B', 'B', 'B'],
+      u4_spinoff:     ['B', 'B', 'D', 'B', 'B'],
+      u5_2axis:       ['B', 'C', 'C', 'A', 'B'],
+      u6_90day:       ['B', 'B', 'B', 'B', 'B'],
+      u7_lean:        ['B', 'B', 'B', 'B', 'B'],
+      u8_mvp:         ['B', 'B', 'B', 'B', 'B'],
+      u9_kill:        ['B', 'A', 'C', 'B', 'B'],
+      u10_pricing:    ['B', 'C', 'B', 'B', 'B'],
+      u11_convergence:['B', 'B', 'B', 'C', 'B'],
+    };
+
     function renderModule2Dashboard(data) {
       const session = data.session || {};
       const participants = data.participants || [];
@@ -850,13 +866,40 @@
           ? `<span class="ml-2 px-2 py-0.5 rounded-full bg-error/10 text-error text-label-sm font-ui font-bold">Gap</span>`
           : '';
 
+        const correctKeys = M2_QUIZ_CORRECT[uid] || [];
         let participantRows = '';
         responses.forEach((r) => {
           const p = r.participant || {};
+          const pRatio = r.total ? r.score / r.total : 0;
+          const scoreColor = pRatio >= 0.6 ? 'text-success-emerald' : 'text-error';
+          const answers = Array.isArray(r.answers) ? r.answers : [];
+          let perQuestion = '';
+          if (answers.length > 0) {
+            answers.forEach((chosen, qi) => {
+              const correct = correctKeys[qi];
+              const isRight = chosen === correct;
+              perQuestion += `
+                <div class="flex items-center gap-2 py-0.5">
+                  <span class="material-symbols-outlined text-[14px] ${isRight ? 'text-success-emerald' : 'text-error'}">${isRight ? 'check_circle' : 'cancel'}</span>
+                  <span class="text-label-sm text-on-surface-variant">Q${qi + 1}:</span>
+                  <span class="text-label-sm font-ui font-bold ${isRight ? 'text-success-emerald' : 'text-error'}">${escapeHtml(String(chosen ?? '—'))}</span>
+                  ${!isRight && correct ? `<span class="text-label-sm text-on-surface-variant">(đúng: ${escapeHtml(correct)})</span>` : ''}
+                </div>
+              `;
+            });
+          }
           participantRows += `
-            <li class="flex items-center justify-between py-2 border-b border-outline-variant/30 last:border-0">
-              <span class="text-body-md text-on-surface">${escapeHtml(p.name || 'Unknown')}</span>
-              <span class="text-body-md font-ui font-bold ${r.score >= 3 ? 'text-success-emerald' : 'text-error'}">${r.score}/${r.total}</span>
+            <li class="border-b border-outline-variant/30 last:border-0">
+              <details>
+                <summary class="flex items-center justify-between py-2 cursor-pointer list-none select-none">
+                  <span class="text-body-md text-on-surface">${escapeHtml(p.name || 'Unknown')}</span>
+                  <div class="flex items-center gap-1">
+                    <span class="text-body-md font-ui font-bold ${scoreColor}">${r.score}/${r.total}</span>
+                    ${answers.length > 0 ? '<span class="material-symbols-outlined text-[16px] text-on-surface-variant ml-1">expand_more</span>' : ''}
+                  </div>
+                </summary>
+                ${perQuestion ? `<div class="pb-2 pl-2 space-y-0.5">${perQuestion}</div>` : ''}
+              </details>
             </li>
           `;
         });
