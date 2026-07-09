@@ -1,3 +1,5 @@
+import secrets
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -36,7 +38,7 @@ def create_session(body: SessionCreate, _=Depends(require_facilitator), db: Sess
 
 
 @router.get("", response_model=list[SessionOut])
-def list_sessions(db: Session = Depends(get_db)):
+def list_sessions(_=Depends(require_facilitator), db: Session = Depends(get_db)):
     return db.query(SessionModel).all()
 
 
@@ -95,7 +97,7 @@ def deactivate_session(session_id: str, _=Depends(require_facilitator), db: Sess
 
 @router.post("/{session_id}/facilitator-auth", response_model=JoinResponse, status_code=201)
 def facilitator_auth(session_id: str, body: FacilitatorAuth, db: Session = Depends(get_db)):
-    if not FACILITATOR_SECRET or body.secret != FACILITATOR_SECRET:
+    if not FACILITATOR_SECRET or not secrets.compare_digest(body.secret, FACILITATOR_SECRET):
         raise HTTPException(status_code=403, detail="Invalid facilitator secret")
 
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
