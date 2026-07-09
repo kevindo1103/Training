@@ -176,13 +176,26 @@ export function persist() {
 async function syncToApi() {
   if (!state.participant || !state.participant.participantId) return;
 
+  const participantId = state.participant.participantId;
   const activityIds = Object.keys(state.responses);
-  if (activityIds.length === 0) return;
+
+  // Collect M2 unit responses: { unitId, steps }
+  const unitEntries = [];
+  if (state.unitResponses) {
+    Object.values(state.unitResponses).forEach((moduleUnits) => {
+      Object.entries(moduleUnits).forEach(([unitId, steps]) => {
+        if (steps && Object.keys(steps).length > 0) {
+          unitEntries.push({ unitId, steps });
+        }
+      });
+    });
+  }
+
+  if (activityIds.length === 0 && unitEntries.length === 0) return;
 
   try {
-    const participantId = state.participant.participantId;
-    await Promise.all(
-      activityIds.map((activityId) => {
+    await Promise.all([
+      ...activityIds.map((activityId) => {
         const stored = state.responses[activityId];
         const { updatedAt, ...data } = stored;
         const meta = state.responseTypes?.[activityId] || {};
@@ -192,8 +205,16 @@ async function syncToApi() {
           completed: !!meta.completed,
         };
         return api.put(`/participants/${participantId}/responses/${activityId}`, payload);
-      })
-    );
+      }),
+      ...unitEntries.map(({ unitId, steps }) => {
+        const payload = {
+          type: 'unit',
+          data: steps,
+          completed: !!(steps.lecture && steps.quiz),
+        };
+        return api.put(`/participants/${participantId}/responses/${unitId}`, payload);
+      }),
+    ]);
     state.lastSynced = Date.now();
   } catch (err) {
     console.log('API sync skipped', err);
