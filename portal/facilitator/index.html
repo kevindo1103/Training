@@ -142,6 +142,7 @@
               Đang cập nhật...
             </div>
             ${currentSessionId ? `<button id="change-session" class="px-3 py-2 rounded-lg border-[1.5px] border-outline-variant text-on-surface-variant text-label-sm font-ui font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors min-h-[40px]">Đổi session</button>` : ''}
+            ${currentSessionId ? `<button id="logout-btn" class="px-3 py-2 rounded-lg border-[1.5px] border-error/40 text-error text-label-sm font-ui font-semibold hover:bg-error/5 transition-colors min-h-[40px]">Đăng xuất</button>` : ''}
           </div>
         </header>
         <main id="dashboard-content" class="pt-20 pb-8 px-5 md:px-8 max-w-[1200px] mx-auto"></main>
@@ -150,6 +151,18 @@
       const changeBtn = document.getElementById('change-session');
       if (changeBtn) {
         changeBtn.addEventListener('click', () => {
+          clearInterval(refreshTimer);
+          currentSessionId = null;
+          localStorage.removeItem(SESSION_KEY);
+          // Keep token — session list requires auth, so we reuse the existing token
+          renderApp();
+          showSessionSelector();
+        });
+      }
+
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
           clearInterval(refreshTimer);
           currentSessionId = null;
           localStorage.removeItem(SESSION_KEY);
@@ -162,29 +175,51 @@
     }
 
     // ─── Session Selector ───
+    // GET /sessions now requires a facilitator token (PR #109).
+    // Flow: if token exists → load session dropdown (auth-first / "Đổi session" path).
+    //       if no token     → show session ID text input + secret (fresh login path).
     async function showSessionSelector() {
       const content = document.getElementById('dashboard-content');
+      content.innerHTML = '<div class="flex justify-center mt-20"><span class="material-symbols-outlined animate-spin text-primary text-[32px]">sync</span></div>';
+
+      // Try loading sessions with the current token (may be null → apiFetch sends no header → 401 → null)
+      const sessions = getAuthToken() ? await apiFetch('/sessions') : null;
+      const hasSessions = Array.isArray(sessions) && sessions.length > 0;
+
+      // ── Render form ──
+      const sessionField = hasSessions
+        ? `<div>
+            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Session</label>
+            <select id="session-input" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface">
+              ${sessions.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name || s.module_id)} (${escapeHtml(s.status || 'active')})</option>`).join('')}
+            </select>
+           </div>`
+        : `<div>
+            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Session ID</label>
+            <input id="session-input" type="text" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface placeholder-on-surface-variant/60 font-mono text-body-sm" placeholder="UUID của session">
+            <p class="text-label-sm text-on-surface-variant mt-1">Lấy từ admin console hoặc email khởi động session.</p>
+           </div>`;
+
+      const secretField = hasSessions
+        ? ''
+        : `<div>
+            <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Facilitator Secret</label>
+            <input id="fac-secret" type="password" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface placeholder-on-surface-variant/60" placeholder="Nhập mã truy cập facilitator">
+           </div>`;
+
       content.innerHTML = `
         <div class="max-w-md mx-auto mt-12">
           <div class="card-elite p-8 md:p-10">
             <div class="flex items-center gap-3 mb-6">
               <span class="material-symbols-outlined text-primary text-[28px]">admin_panel_settings</span>
               <div>
-                <h2 class="text-headline-md font-headline font-bold text-on-surface">Chọn Session</h2>
-                <p class="text-label-sm text-on-surface-variant">Nhập mã facilitator và chọn workshop session</p>
+                <h2 class="text-headline-md font-headline font-bold text-on-surface">${hasSessions ? 'Chọn Session' : 'Truy cập Dashboard'}</h2>
+                <p class="text-label-sm text-on-surface-variant">${hasSessions ? 'Chọn workshop session để tiếp tục' : 'Nhập Session ID và mã facilitator'}</p>
               </div>
             </div>
             <div class="space-y-5">
-              <div>
-                <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Facilitator Secret</label>
-                <input id="fac-secret" type="password" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface placeholder-on-surface-variant/60" placeholder="Nhập mã truy cập facilitator">
-              </div>
-              <div>
-                <label class="block text-label-sm font-ui font-semibold text-on-surface-variant mb-1.5">Session</label>
-                <select id="session-select" class="w-full px-4 py-3 rounded-lg bg-surface-container-low border-[1.5px] border-outline-variant text-on-surface">
-                  <option value="">Đang tải sessions...</option>
-                </select>
-              </div>
+              ${sessionField}
+              ${secretField}
               <div id="auth-error" class="hidden text-error text-label-sm font-ui"></div>
               <button id="join-btn" class="w-full px-5 py-3 rounded-lg bg-primary text-on-primary font-ui font-bold hover:bg-primary-container transition-colors min-h-[44px]">Truy cập Dashboard</button>
             </div>
@@ -192,27 +227,29 @@
         </div>
       `;
 
-      // Load sessions (try without auth first for the list)
-      const sessions = await apiFetch('/sessions');
-      const select = document.getElementById('session-select');
-      if (sessions && Array.isArray(sessions) && sessions.length > 0) {
-        select.innerHTML = sessions.map(s =>
-          `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name || s.module_id)} (${escapeHtml(s.status || 'active')})</option>`
-        ).join('');
-      } else {
-        select.innerHTML = '<option value="">Không có session nào</option>';
-      }
-
       document.getElementById('join-btn').addEventListener('click', async () => {
-        const secret = document.getElementById('fac-secret').value.trim();
-        const sessionId = document.getElementById('session-select').value;
+        const sessionId = document.getElementById('session-input')?.value?.trim();
         const errorEl = document.getElementById('auth-error');
+        errorEl.classList.add('hidden');
 
         if (!sessionId) {
-          errorEl.textContent = 'Vui lòng chọn session.';
+          errorEl.textContent = 'Vui lòng nhập hoặc chọn session.';
           errorEl.classList.remove('hidden');
           return;
         }
+
+        if (hasSessions) {
+          // Already authenticated — just switch to the selected session
+          localStorage.setItem(SESSION_KEY, sessionId);
+          currentSessionId = sessionId;
+          m2SummaryCache = null;
+          renderApp();
+          loadDashboard();
+          return;
+        }
+
+        // Fresh login — authenticate first
+        const secret = document.getElementById('fac-secret')?.value?.trim();
         if (!secret) {
           errorEl.textContent = 'Vui lòng nhập facilitator secret.';
           errorEl.classList.remove('hidden');
@@ -225,10 +262,11 @@
           sessionStorage.setItem(TOKEN_KEY, authRes.token);
           localStorage.setItem(SESSION_KEY, sessionId);
           currentSessionId = sessionId;
+          m2SummaryCache = null;
           renderApp();
           loadDashboard();
         } else {
-          errorEl.textContent = 'Mã facilitator không đúng hoặc session không tồn tại.';
+          errorEl.textContent = 'Mã facilitator không đúng hoặc Session ID không tồn tại.';
           errorEl.classList.remove('hidden');
         }
       });
